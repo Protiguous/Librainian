@@ -75,7 +75,11 @@ namespace LibrainianUnitTests.Parsing {
 		}
 
 		[Fact]
-		public void ConfirmStringLimitShorter() => ParsingConstants.English.Alphabet.Lowercase.Take( 6 ).ToString().Should().Be( "abcdef" );
+		public void ConfirmStringLimitShorter() {
+			var take = new String( ParsingConstants.English.Alphabet.Lowercase.Take( 6 ).ToArray() );
+			
+				take.Should().Be( "abcdef" );
+		}
 
 	}
 

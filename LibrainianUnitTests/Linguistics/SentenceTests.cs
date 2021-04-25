@@ -37,11 +37,12 @@ namespace LibrainianUnitTests.Linguistics {
 
 	public static class SentenceTests {
 
-		public const String Sample = "the quick brown fox jumped over the lazy dog";
+		public const String SampleSentence = "the quick brown fox jumped over the lazy dog";
 
+		[Fact]
 		[NotNull]
 		public static Sentence SampleLengthTest() {
-			var sentence = Sentence.Parse( Sample );
+			var sentence = Sentence.Parse( SampleSentence );
 
 			sentence.Count().Should()?.Be( 9 );
 
@@ -49,12 +50,16 @@ namespace LibrainianUnitTests.Linguistics {
 		}
 
 		[Fact]
-		public static void CombinationsTest() {
+		public static void SentencePowerSetTest() {
 			var sentence = SampleLengthTest();
+
+			if ( sentence is null ) {
+				throw new InvalidOperationException();
+			}
 
 			var seq = sentence.ToArray();
 
-			var bob = seq.FastPowerSet();
+			var bob = seq.PowerSet();
 
 			bob.SelectMany( words => words ).Count().Should()?.Be( 2304 ); //is 2304 correct?
 		}

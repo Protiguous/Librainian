@@ -37,18 +37,18 @@ namespace LibrainianUnitTests {
 
 		[Fact]
 		public static void TestBenchmarking_MethodA() {
-			Action a = () => Thread.Sleep( 10 );
-			Action b = () => Thread.Sleep( 20 );
-			var result = Benchmark.WhichIsFaster( a, b );
-			var _ = result.Should()!.Be( Benchmark.AorB.MethodA );
+			static void ActionA() => Thread.Sleep( 10 );
+			static void ActionB() => Thread.Sleep( 20 );
+			var result = Benchmark.WhichIsFaster( ActionA, ActionB );
+			result.Should().Be( Benchmark.AorB.MethodA );
 		}
 
 		[Fact]
 		public static void TestBenchmarking_Same() {
-			Action a = () => Thread.Sleep( 1 );
-			Action b = () => Thread.Sleep( 1 );
-			var result = Benchmark.WhichIsFaster( a, b );
-			var _ = result.Should()!.Be( Benchmark.AorB.Same );
+			static void ActionA() => Thread.Sleep( 1 );
+			static void ActionB() => Thread.Sleep( 1 );
+			var result = Benchmark.WhichIsFaster( ActionA, ActionB );
+			result.Should().Be( Benchmark.AorB.Same );
 		}
 
 		[Fact]
