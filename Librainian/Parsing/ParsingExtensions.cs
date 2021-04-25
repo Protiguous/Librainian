@@ -1443,7 +1443,7 @@ namespace Librainian.Parsing {
 			var sourceIntoUtf32Encoding = new UTF32Encoding( true, true, false ).GetBytes( source );
 
 			// ReSharper disable once UseCollectionCountProperty
-			votes.ForA( sourceIntoUtf32Encoding.Length );
+			votes.ForA( sourceIntoUtf32Encoding.Count() );
 
 			var compareIntoUtf32Encoding = new UTF32Encoding( true, true, false ).GetBytes( compare );
 			votes.ForB( compareIntoUtf32Encoding.Length );

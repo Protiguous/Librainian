@@ -46,7 +46,7 @@ namespace Librainian.Measurement.Time {
 		/// <param name="planckTimes"></param>
 		/// <returns></returns>
 		public static BigInteger PullPlancks( this Double constant, ref BigInteger planckTimes ) {
-			var right = new Rational ( new BigInteger( constant ));
+			var right = ( Rational ) constant;
 			var plancks = Rational.Divide( planckTimes, right );
 			planckTimes -= ( plancks * right ).WholePart;
 

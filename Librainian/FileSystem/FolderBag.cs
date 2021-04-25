@@ -122,11 +122,11 @@ namespace Librainian.FileSystem {
 				var nextNode = new FolderBagNode( pathPart, currentNode );
 				existingNode = currentNode?.SubFolders.Find( node => FolderBagNode.Equals( node, nextNode ) );
 
-				if ( FolderBagNode.Equals( existingNode, default( FolderBagNode? ) ) ) {
-					currentNode?.SubFolders.Add( nextNode ); // didn't find one, add it
+				if ( !FolderBagNode.Equals( existingNode, default( FolderBagNode? ) ) ) {
+					nextNode = existingNode; // already there? don't need to add it.
 				}
 				else {
-					nextNode = existingNode; // already there? don't need to add it.
+					currentNode?.SubFolders.Add( nextNode ); // didn't find one, add it
 				}
 
 				currentNode = nextNode;

@@ -66,12 +66,10 @@ namespace Librainian.Databases {
 		/// <param name="useDatabase">      </param>
 		/// <param name="cancellationToken"></param>
 		/// <exception cref="InvalidOperationException"></exception>
-		public DatabaseServer( String connectionString, [CanBeNull] String? useDatabase, CancellationToken? cancellationToken ) {
+		public DatabaseServer( String connectionString, [CanBeNull] String? useDatabase, CancellationToken cancellationToken ) {
 			$"New {nameof( DatabaseServer )} on thread {Thread.CurrentThread.ManagedThreadId}!".Verbose();
 
-			if ( cancellationToken != null ) {
-				this.CancellationToken = ( CancellationToken )cancellationToken;
-			}
+			this.CancellationToken = cancellationToken;
 
 			connectionString = connectionString.Trimmed() ?? throw new ArgumentNullException( nameof( connectionString ) );
 			useDatabase = useDatabase.Trimmed();
