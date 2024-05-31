@@ -1,42 +1,85 @@
 ﻿// Copyright © Protiguous. All Rights Reserved.
 //
-// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories,
-// or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
+// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries,
+// repositories, or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
 //
-// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten
-// by formatting. (We try to avoid it from happening, but it does accidentally happen.)
+// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has
+// been overwritten by formatting. (We try to avoid it from happening, but it does accidentally happen.)
 //
-// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to
-// those Authors. If you find your code unattributed in this source code, please let us know so we can properly attribute you
-// and include the proper license and/or copyright(s). If you want to use any of our code in a commercial project, you must
-// contact Protiguous@Protiguous.com for permission, license, and a quote.
+// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to those Authors.
+// If you find your code unattributed in this source code, please let us know so we can properly attribute you and include the proper licenses and/or copyrights.
+// If you want to use any of our code in a commercial project, you must contact Protiguous@Protiguous.com for permission, license, and a quote.
 //
 // Donations, payments, and royalties are accepted via bitcoin: 1Mad8TxTqxKnMiHuZxArFvX8BuFEB9nqX2 and PayPal: Protiguous@Protiguous.com
 //
 // ====================================================================
-// Disclaimer:  Usage of the source code or binaries is AS-IS. No warranties are expressed, implied, or given. We are NOT
-// responsible for Anything You Do With Our Code. We are NOT responsible for Anything You Do With Our Executables. We are NOT
-// responsible for Anything You Do With Your Computer. ====================================================================
+// Disclaimer:  Usage of the source code or binaries is AS-IS.
+// No warranties are expressed, implied, or given.
+// We are NOT responsible for Anything You Do With Our Code.
+// We are NOT responsible for Anything You Do With Our Executables.
+// We are NOT responsible for Anything You Do With Your Computer.
+// ====================================================================
 //
 // Contact us by email if you have any questions, helpful criticism, or if you would like to use our code in your project(s).
-// For business inquiries, please contact me at Protiguous@Protiguous.com. Our software can be found at
-// "https://Protiguous.com/Software/" Our GitHub address is "https://github.com/Protiguous".
+// For business inquiries, please contact me at Protiguous@Protiguous.com.
+// Our software can be found at "https://Protiguous.Software/"
+// Our GitHub address is "https://github.com/Protiguous/".
 //
-// File "NonRandomSequence.cs" last formatted on 2021-11-30 at 7:19 PM by Protiguous.
+// File "NonRandomSequence.cs" last formatted on 2022-06-22 at 7:10 AM by Protiguous.
 
 namespace Librainian.Maths;
 
-using System;
+using System.Diagnostics;
+using Exceptions;
 
 /// <summary>
-/// <para>Not really a 'random' sequence, but it does (*should*) hit every number eventually.</para>
-/// <para>Don't use in anything security-related, because the sequence can be predicted.</para>
+///     <para>Not really a 'random' sequence, but it does (*should*) hit every number eventually.</para>
+///     <para>Don't use in anything security-related, because the sequence can be predicted.</para>
 /// </summary>
-public class NonRandomSequence {
+public class NonRandomSequence : IEnumerable<Int32> {
+#if !NET6_0_OR_GREATER
+
+	/// <summary>Provide to each thread its own <see cref="Random" /> with a unique seed.</summary>
+	private static readonly ThreadLocal<Random> ThreadSafeRandom = new();
+
+#endif
 
 	private Int32 _actual;
 
-	public NonRandomSequence( Int32 seed ) => this._actual = seed;
+	private static Int32 InitWithSeed() {
+#if !NET6_0_OR_GREATER
+		if ( !ThreadSafeRandom.IsValueCreated ) {
+			ThreadSafeRandom.Value = new Random( (DateTime.UtcNow, Environment.CurrentManagedThreadId).GetHashCode() );
+			Debug.Assert( ThreadSafeRandom.IsValueCreated );
+		}
 
-	public Int32 Next() => this._actual = 16807 * this._actual % Int32.MaxValue;
+		var random = ThreadSafeRandom.Value ?? throw new NullException( nameof( ThreadSafeRandom ) );
+#else
+		var random = Random.Shared;
+#endif
+		var seed = random.Next();
+
+		return seed;
+	}
+
+	public NonRandomSequence( Int32? seed = null ) {
+		if ( seed is null ) {
+			seed = InitWithSeed();
+		}
+
+		this._actual = this.Next( seed );
+	}
+
+	public Int32 Next( Int32? seed = null ) {
+		if ( seed is not null ) {
+			this.Reseed( seed.Value );
+		}
+
+		return this._actual = unchecked(( 16807 * this._actual ) % Int32.MaxValue);
+	}
+
+	public void Reseed( Int32 seed ) => this._actual = seed;
+
+#if !NET6_0_OR_GREATER
+#endif
 }

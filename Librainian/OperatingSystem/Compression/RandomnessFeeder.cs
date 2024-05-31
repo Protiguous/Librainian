@@ -1,28 +1,29 @@
 // Copyright © Protiguous. All Rights Reserved.
 //
-// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories,
-// or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
+// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories, or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
 //
-// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten
-// by formatting. (We try to avoid it from happening, but it does accidentally happen.)
+// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten by formatting. (We try to avoid it from happening, but it does accidentally happen.)
 //
-// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to
-// those Authors. If you find your code unattributed in this source code, please let us know so we can properly attribute you
-// and include the proper license and/or copyright(s). If you want to use any of our code in a commercial project, you must
-// contact Protiguous@Protiguous.com for permission, license, and a quote.
+// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to those Authors.
+// If you find your code unattributed in this source code, please let us know so we can properly attribute you and include the proper license and/or copyright(s).
+// If you want to use any of our code in a commercial project, you must contact Protiguous@Protiguous.com for permission, license, and a quote.
 //
 // Donations, payments, and royalties are accepted via bitcoin: 1Mad8TxTqxKnMiHuZxArFvX8BuFEB9nqX2 and PayPal: Protiguous@Protiguous.com
 //
-// ====================================================================
-// Disclaimer:  Usage of the source code or binaries is AS-IS. No warranties are expressed, implied, or given. We are NOT
-// responsible for Anything You Do With Our Code. We are NOT responsible for Anything You Do With Our Executables. We are NOT
-// responsible for Anything You Do With Your Computer. ====================================================================
+//
+// Disclaimer:  Usage of the source code or binaries is AS-IS.
+// No warranties are expressed, implied, or given.
+// We are NOT responsible for Anything You Do With Our Code.
+// We are NOT responsible for Anything You Do With Our Executables.
+// We are NOT responsible for Anything You Do With Your Computer.
+//
 //
 // Contact us by email if you have any questions, helpful criticism, or if you would like to use our code in your project(s).
-// For business inquiries, please contact me at Protiguous@Protiguous.com. Our software can be found at
-// "https://Protiguous.com/Software/" Our GitHub address is "https://github.com/Protiguous".
+// For business inquiries, please contact me at Protiguous@Protiguous.com.
+// Our software can be found at "https://Protiguous.com/Software/"
+// Our GitHub address is "https://github.com/Protiguous".
 //
-// File "RandomnessFeeder.cs" last formatted on 2021-11-30 at 7:20 PM by Protiguous.
+// File "RandomnessFeeder.cs" last formatted on 2022-12-22 at 5:18 PM by Protiguous.
 
 namespace Librainian.OperatingSystem.Compression;
 
@@ -42,7 +43,7 @@ using Utilities.Disposables;
 
 public class RandomnessFeeder : ABetterClassDispose {
 
-	public RandomnessFeeder() : base( nameof( RandomnessFeeder ) ) {
+	public RandomnessFeeder() {
 		this.HowManyBytesAsCompressed = BigInteger.Zero;
 		this.HowManyBytesFed = BigInteger.Zero;
 		this.GZipStream = new GZipStream( this.NullStream, CompressionLevel.Optimal );
@@ -64,7 +65,7 @@ public class RandomnessFeeder : ABetterClassDispose {
 
 	public void FeedItData( Byte[] data ) {
 		if ( data is null ) {
-			throw new NullException( nameof( data ) );
+			throw new ArgumentEmptyException( nameof( data ) );
 		}
 
 		this.HowManyBytesFed += data.LongLength;
@@ -73,12 +74,12 @@ public class RandomnessFeeder : ABetterClassDispose {
 		this.NullStream.Seek( 0, SeekOrigin.Begin ); //rewind our 'position' so we don't overrun a long
 	}
 
-	public async Task FeedItDataAsync( Document document, CancellationToken cancellationToken ) {
-		if ( document == null ) {
-			throw new NullException( nameof( document ) );
+	public async Task FeedItDataAsync( DocumentFile documentFile, CancellationToken cancellationToken ) {
+		if ( documentFile == null ) {
+			throw new ArgumentEmptyException( nameof( documentFile ) );
 		}
 
-		this.FeedItData( await document.AsBytes( cancellationToken ).ToArrayAsync( cancellationToken ).ConfigureAwait( false ) );
+		this.FeedItData( await documentFile.AsBytes( cancellationToken ).ToArrayAsync( cancellationToken ).ConfigureAwait( false ) );
 	}
 
 	/// <summary>The smaller the compressed 'data' is, the less the random it was.</summary>

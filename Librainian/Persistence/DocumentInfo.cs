@@ -1,28 +1,29 @@
 ﻿// Copyright © Protiguous. All Rights Reserved.
 //
-// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories,
-// or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
+// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories, or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
 //
-// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten
-// by formatting. (We try to avoid it from happening, but it does accidentally happen.)
+// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten by formatting. (We try to avoid it from happening, but it does accidentally happen.)
 //
-// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to
-// those Authors. If you find your code unattributed in this source code, please let us know so we can properly attribute you
-// and include the proper license and/or copyright(s). If you want to use any of our code in a commercial project, you must
-// contact Protiguous@Protiguous.com for permission, license, and a quote.
+// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to those Authors.
+// If you find your code unattributed in this source code, please let us know so we can properly attribute you and include the proper license and/or copyright(s).
+// If you want to use any of our code in a commercial project, you must contact Protiguous@Protiguous.com for permission, license, and a quote.
 //
 // Donations, payments, and royalties are accepted via bitcoin: 1Mad8TxTqxKnMiHuZxArFvX8BuFEB9nqX2 and PayPal: Protiguous@Protiguous.com
 //
-// ====================================================================
-// Disclaimer:  Usage of the source code or binaries is AS-IS. No warranties are expressed, implied, or given. We are NOT
-// responsible for Anything You Do With Our Code. We are NOT responsible for Anything You Do With Our Executables. We are NOT
-// responsible for Anything You Do With Your Computer. ====================================================================
+//
+// Disclaimer:  Usage of the source code or binaries is AS-IS.
+// No warranties are expressed, implied, or given.
+// We are NOT responsible for Anything You Do With Our Code.
+// We are NOT responsible for Anything You Do With Our Executables.
+// We are NOT responsible for Anything You Do With Your Computer.
+//
 //
 // Contact us by email if you have any questions, helpful criticism, or if you would like to use our code in your project(s).
-// For business inquiries, please contact me at Protiguous@Protiguous.com. Our software can be found at
-// "https://Protiguous.com/Software/" Our GitHub address is "https://github.com/Protiguous".
+// For business inquiries, please contact me at Protiguous@Protiguous.com.
+// Our software can be found at "https://Protiguous.com/Software/"
+// Our GitHub address is "https://github.com/Protiguous".
 //
-// File "DocumentInfo.cs" last formatted on 2021-11-30 at 7:22 PM by Protiguous.
+// File "DocumentInfo.cs" last formatted on 2022-12-22 at 5:20 PM by Protiguous.
 
 namespace Librainian.Persistence;
 
@@ -34,36 +35,41 @@ using Exceptions;
 using FileSystem;
 using Logging;
 using Newtonsoft.Json;
+using Utilities;
 
 /// <summary>
-/// <para>Computes the various hashes of the given <see cref="AbsolutePath" />.</para>
+///     <para>Computes the various hashes of the given <see cref="AbsolutePath" />.</para>
 /// </summary>
 [DebuggerDisplay( "{" + nameof( ToString ) + "(),nq}" )]
 [Serializable]
 [JsonObject]
 public class DocumentInfo : IEquatable<DocumentInfo> {
 
-	public DocumentInfo( Document document ) {
-		if ( document is null ) {
-			throw new NullException( nameof( document ) );
+	public DocumentInfo( DocumentFile documentFile ) {
+		if ( documentFile is null ) {
+			throw new ArgumentEmptyException( nameof( documentFile ) );
 		}
 
 		this.Reset();
 
-		this.AbsolutePath = document.FullPath;
+		this.AbsolutePath = documentFile.FullPath;
 
-		this.Length = document.GetLength();
-		this.CreationTimeUtc = document.CreationTimeUtc;
-		this.LastWriteTimeUtc = document.LastWriteTimeUtc;
+		this.Length = documentFile.GetLength();
+		this.CreationTimeUtc = documentFile.CreationTimeUtc;
+		this.LastWriteTimeUtc = documentFile.LastWriteTimeUtc;
 
 		this.LastScanned = null;
 	}
 
-	/// <summary>"drive:\folder\file.ext"</summary>
+	/// <summary>
+	///     "drive:\folder\file.ext"
+	/// </summary>
 	[JsonProperty]
 	public String AbsolutePath { get; private set; }
 
-	/// <summary>The result of the Add-Hashing function.</summary>
+	/// <summary>
+	///     The result of the Add-Hashing function.
+	/// </summary>
 	[JsonProperty]
 	public Int32? AddHash { get; private set; }
 
@@ -79,14 +85,17 @@ public class DocumentInfo : IEquatable<DocumentInfo> {
 	[JsonProperty]
 	public DateTime? CreationTimeUtc { get; private set; }
 
-	/// <summary>The most recent UTC datetime this info was updated.</summary>
+	/// <summary>
+	///     The most recent UTC datetime this info was updated.
+	/// </summary>
 	[JsonProperty]
 	public DateTime? LastScanned { get; private set; }
 
 	[JsonProperty]
 	public DateTime? LastWriteTimeUtc { get; private set; }
 
-	/// <summary></summary>
+	/// <summary>
+	/// </summary>
 	[JsonProperty]
 	public UInt64? Length { get; private set; }
 
@@ -95,7 +104,7 @@ public class DocumentInfo : IEquatable<DocumentInfo> {
 			return true;
 		}
 
-		if ( left.CreationTimeUtc != right.CreationTimeUtc || left.LastWriteTimeUtc != right.LastWriteTimeUtc ) {
+		if ( ( left.CreationTimeUtc != right.CreationTimeUtc ) || ( left.LastWriteTimeUtc != right.LastWriteTimeUtc ) ) {
 			return true;
 		}
 
@@ -115,13 +124,14 @@ public class DocumentInfo : IEquatable<DocumentInfo> {
 	}
 
 	/// <summary>
-	/// <para>Static comparison test. Compares file lengths and hashes.</para>
-	/// <para>
-	/// If the hashes have not been computed yet on either file, the <see cref="Equals(DocumentInfo,DocumentInfo)" /> is false.
-	/// </para>
-	/// <para>Unless <paramref name="left" /> is the same object as <paramref name="right" />.</para>
+	///     <para>Static comparison test. Compares file lengths and hashes.</para>
+	///     <para>
+	///         If the hashes have not been computed yet on either file, the <see cref="Equals(DocumentInfo,DocumentInfo)" />
+	///         is false.
+	///     </para>
+	///     <para>Unless <paramref name="left" /> is the same object as <paramref name="right" />.</para>
 	/// </summary>
-	/// <param name="left"></param>
+	/// <param name="left"> </param>
 	/// <param name="right"></param>
 	public static Boolean Equals( DocumentInfo? left, DocumentInfo? right ) {
 		if ( left is null || right is null ) {
@@ -160,44 +170,48 @@ public class DocumentInfo : IEquatable<DocumentInfo> {
 
 	public override Boolean Equals( Object? obj ) => Equals( this, obj as DocumentInfo );
 
-	/// <summary></summary>
-	/// <returns></returns>
+	/// <summary>
+	/// </summary>
 	// ReSharper disable once NonReadonlyMemberInGetHashCode
 	public override Int32 GetHashCode() => this.Length?.GetHashCode() ?? 0;
 
-	/// <summary>Attempt to read all hashes at the same time (and thereby efficiently use the disk caching?)</summary>
-	/// <param name="document"></param>
-	/// <param name="cancellationToken"></param>
-	public async Task GetHashesAsync( Document document, CancellationToken cancellationToken ) {
-		if ( document is null ) {
-			throw new NullException( nameof( document ) );
+	/// <summary>
+	///     Attempt to read all hashes at the same time (and thereby efficiently use the disk caching?)
+	/// </summary>
+	/// <param name="documentFile"></param>
+	/// <param name="cancellationToken">   </param>
+	/// <exception cref="ArgumentEmptyException"></exception>
+	[NeedsTesting]
+	public async Task GetHashesAsync( DocumentFile documentFile, CancellationToken cancellationToken ) {
+		if ( documentFile is null ) {
+			throw new ArgumentEmptyException( nameof( documentFile ) );
 		}
 
 		var watch = Stopwatch.StartNew();
 		$"[{Environment.CurrentManagedThreadId}] Started hashings on {this.AbsolutePath}...".Verbose();
 
-		var addHash = document.HarkerHash32( cancellationToken ).AsValueTask().AsTask();
-		var crc32 = document.CRC32( cancellationToken ).AsValueTask().AsTask();
-		var crc64 = document.CRC64( cancellationToken ).AsValueTask().AsTask();
+		var addHash = documentFile.HarkerHash32( cancellationToken );
+		var crc32 = documentFile.CRC32( cancellationToken );
+		var crc64 = documentFile.CRC64( cancellationToken );
 
 		await Task.WhenAll( addHash, crc32, crc64 ).ConfigureAwait( false );
 
-		this.AddHash = addHash.Result;
+		this.AddHash = addHash.GetAwaiter().GetResult();
 
-		this.CRC32 = crc32.Result;
+		this.CRC32 = crc32.GetAwaiter().GetResult();
 
-		this.CRC64 = crc64.Result;
+		this.CRC64 = crc64.GetAwaiter().GetResult();
 
 		watch.Stop();
 
-		$"[{Environment.CurrentManagedThreadId}] Completed hashings on {this.AbsolutePath}...at {3 * await document.Size( cancellationToken ).ConfigureAwait( false ) / ( Decimal )watch.ElapsedMilliseconds:F} bytes per millisecond."
+		$"[{Environment.CurrentManagedThreadId}] Completed hashings on {this.AbsolutePath}...at {( 3 * await documentFile.Size( cancellationToken ).ConfigureAwait( false ) ) / ( Decimal )watch.ElapsedMilliseconds:F} bytes per millisecond."
 			.Verbose();
 	}
 
 	/// <summary>
-	/// <para>Resets the results of the hashes to null.</para>
-	/// <para>A change in <see cref="Length" /> basically means it's a new document.</para>
-	/// <para><see cref="ScanAsync" /> needs to be called to repopulate these values.</para>
+	///     <para>Resets the results of the hashes to null.</para>
+	///     <para>A change in <see cref="Length" /> basically means it's a new document.</para>
+	///     <para><see cref="ScanAsync" /> needs to be called to repopulate these values.</para>
 	/// </summary>
 	public void Reset() {
 		this.LastScanned = null;
@@ -209,15 +223,18 @@ public class DocumentInfo : IEquatable<DocumentInfo> {
 		this.CRC64 = null;
 	}
 
-	/// <summary>Looks at the entire document.</summary>
+	/// <summary>
+	///     Looks at the entire document.
+	/// </summary>
+	/// <param name="cancellationToken"></param>
 	public async Task ScanAsync( CancellationToken cancellationToken ) {
 		try {
-			var record = MainDocumentTable.DocumentInfos[ this.AbsolutePath ];
+			var record = MainDocumentTable.DocumentInfos[this.AbsolutePath];
 
 			var needScanned = AreEitherDifferent( this, record );
 
 			if ( needScanned == true ) {
-				var document = new Document( this.AbsolutePath );
+				var document = new DocumentFile( this.AbsolutePath );
 
 				this.Length = await document.Length( cancellationToken ).ConfigureAwait( false );
 				this.CreationTimeUtc = document.CreationTimeUtc;
@@ -234,7 +251,7 @@ public class DocumentInfo : IEquatable<DocumentInfo> {
 					AddHash = this.AddHash
 				};
 
-				MainDocumentTable.DocumentInfos[ this.AbsolutePath ] = documentInfo;
+				MainDocumentTable.DocumentInfos[this.AbsolutePath] = documentInfo;
 			}
 		}
 		catch ( Exception exception ) {

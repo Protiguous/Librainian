@@ -1,58 +1,71 @@
 ﻿// Copyright © Protiguous. All Rights Reserved.
 //
-// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories,
-// or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
+// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries,
+// repositories, or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
 //
-// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten
-// by formatting. (We try to avoid it from happening, but it does accidentally happen.)
+// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has
+// been overwritten by formatting. (We try to avoid it from happening, but it does accidentally happen.)
 //
-// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to
-// those Authors. If you find your code unattributed in this source code, please let us know so we can properly attribute you
-// and include the proper license and/or copyright(s). If you want to use any of our code in a commercial project, you must
-// contact Protiguous@Protiguous.com for permission, license, and a quote.
+// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to those Authors.
+// If you find your code unattributed in this source code, please let us know so we can properly attribute you and include the proper licenses and/or copyrights.
+// If you want to use any of our code in a commercial project, you must contact Protiguous@Protiguous.com for permission, license, and a quote.
 //
 // Donations, payments, and royalties are accepted via bitcoin: 1Mad8TxTqxKnMiHuZxArFvX8BuFEB9nqX2 and PayPal: Protiguous@Protiguous.com
 //
 // ====================================================================
-// Disclaimer:  Usage of the source code or binaries is AS-IS. No warranties are expressed, implied, or given. We are NOT
-// responsible for Anything You Do With Our Code. We are NOT responsible for Anything You Do With Our Executables. We are NOT
-// responsible for Anything You Do With Your Computer. ====================================================================
+// Disclaimer:  Usage of the source code or binaries is AS-IS.
+// No warranties are expressed, implied, or given.
+// We are NOT responsible for Anything You Do With Our Code.
+// We are NOT responsible for Anything You Do With Our Executables.
+// We are NOT responsible for Anything You Do With Your Computer.
+// ====================================================================
 //
 // Contact us by email if you have any questions, helpful criticism, or if you would like to use our code in your project(s).
-// For business inquiries, please contact me at Protiguous@Protiguous.com. Our software can be found at
-// "https://Protiguous.com/Software/" Our GitHub address is "https://github.com/Protiguous".
+// For business inquiries, please contact me at Protiguous@Protiguous.com.
+// Our software can be found at "https://Protiguous.com/Software/"
+// Our GitHub address is "https://github.com/Protiguous".
 //
-// File "SecurityExtensions.cs" last formatted on 2021-11-30 at 7:22 PM by Protiguous.
+// File "SecurityExtensions.cs" last formatted on 2022-02-22 at 7:10 AM by Protiguous.
 
-#nullable enable
 
 namespace Librainian.Security;
 
+using Exceptions;
+using FileSystem;
+using Logging;
+using Maths;
+using Microsoft.IO;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Exceptions;
-using FileSystem;
-using Logging;
-using Maths;
-using Parsing;
 using Utilities;
 
 public static class SecurityExtensions {
 
-	private const String DefaultIv = "Ez!an5hzr&W6RTU$Zcmd3ru7dc#zTQdE3HXN6w9^rKhn$7hkjfQzyX^qB^&9FG4YQ&&CrVY!^j!T$BfrwC9aXWzc799w%pa2DQr";
+	private const String Iv = "Ez!an5hzr&W6RTU$Zcmd3ru7dc#zTQdE3HXN6w9^rKhn$7hkjfQzyX^qB^&9FG4YQ&&CrVY!^j!T$BfrwC9aXWzc799w%pa2DQr";
 
-	private const String DefaultKey = "S#KPxgy3a3ccUHzXf3tp2s2yQNP#t@s!X3GECese5sNhjt5h$hJAfmjg#UeQRb%tuUbrRJj*M&&tsRvkcDW6bhWfaTDJP*pZhbQ";
+	private const String Key = "S#KPxgy3a3ccUHzXf3tp2s2yQNP#t@s!X3GECese5sNhjt5h$hJAfmjg#UeQRb%tuUbrRJj*M&&tsRvkcDW6bhWfaTDJP*pZhbQ";
+
+	private static RecyclableMemoryStreamManager MemoryStreamManager { get; } = new( MathConstants.Sizes.OneMegaByte, MathConstants.Sizes.OneGigaByte );
+
+	private static Byte[] Uid( String s ) {
+		var numArray = new Byte[s.Length];
+
+		for ( var i = 0; i < s.Length; i++ ) {
+			numArray[i] = ( Byte )( s[i] & '\u007F' );
+		}
+
+		return numArray;
+	}
 
 	public const String EntropyPhrase1 = "ZuZgBzuvvtn98vmmmt4vn4v9vwcaSjUtOmSkrA8Wo3ATOlMp3qXQmRQOdWyFFgJU";
 
@@ -61,16 +74,6 @@ public static class SecurityExtensions {
 	public const String EntropyPhrase3 = "XtXowrE3jz6UESvqb63bqw36nxtxTo0VYH5YJLbsxE4TR20c5nN9ocVxyabim2SX";
 
 	public static Byte[] Entropy { get; } = Encoding.Unicode.GetBytes( $"{EntropyPhrase1} {EntropyPhrase2} {EntropyPhrase3}" );
-
-	private static Byte[] Uid( String s ) {
-		var numArray = new Byte[ s.Length ];
-
-		for ( var i = 0; i < s.Length; i++ ) {
-			numArray[ i ] = ( Byte )( s[ i ] & '\u007F' );
-		}
-
-		return numArray;
-	}
 
 	public static async Task<Byte[]> ComputeMD5HashAsync( this FileInfo fileinfo, CancellationToken cancellationToken ) {
 		if ( fileinfo is null ) {
@@ -84,17 +87,17 @@ public static class SecurityExtensions {
 
 		filesize /= Environment.ProcessorCount;
 
-		await using var fs = new FileStream( fileinfo.FullName, FileMode.Open, FileAccess.Read, FileShare.Read, ( Int32 )filesize, true );
 		using var md5 = MD5.Create();
+		await using var fs = new FileStream( fileinfo.FullName, FileMode.Open, FileAccess.Read, FileShare.Read, ( Int32 )filesize, true );
 		return await md5.ComputeHashAsync( fs, cancellationToken ).ConfigureAwait( false );
 	}
 
 	/// <summary>Decrypts the string <paramref name="value" />.</summary>
 	/// <param name="value"></param>
+	/// <param name="encoding"></param>
 	/// <param name="iv">Optional input vector.</param>
 	/// <param name="key">Optional key.</param>
-	/// <param name="encoding"></param>
-	public static String? Decrypt( this String? value, String iv, String key, Encoding? encoding = null ) {
+	public static String? Decrypt( this String? value, Encoding? encoding = null, String? iv = null, String? key = null ) {
 		if ( String.IsNullOrEmpty( value ) ) {
 			return default( String );
 		}
@@ -102,17 +105,13 @@ public static class SecurityExtensions {
 		try {
 			encoding ??= Encoding.UTF8;
 
-			Debug.Assert( !String.IsNullOrEmpty( DefaultIv ) );
-			Debug.Assert( !String.IsNullOrEmpty( DefaultKey ) );
-
-			var ivBytes = encoding.GetBytes( iv[ ..8 ] );
-			var keybytes = encoding.GetBytes( key[ ..8 ] );
+			var ivByte = encoding.GetBytes( iv?[..8] ?? Iv[..8] );
+			var keybyte = encoding.GetBytes( key?[..8] ?? Key[..8] );
 			var inputbyteArray = Convert.FromBase64String( value.Replace( " ", "+" ) );
 
-			using var ms = new MemoryStream();
+			using var ms = MemoryStreamManager.GetStream();
 			using var des = DES.Create();
-			using var decryptor = des.CreateDecryptor( keybytes, ivBytes );
-			using var cs = new CryptoStream( ms, decryptor, CryptoStreamMode.Write );
+			using var cs = new CryptoStream( ms, des.CreateDecryptor( keybyte, ivByte ), CryptoStreamMode.Write );
 
 			cs.Write( inputbyteArray, 0, inputbyteArray.Length );
 			cs.FlushFinalBlock();
@@ -128,36 +127,19 @@ public static class SecurityExtensions {
 
 	/// <summary>To encrypt use <seealso cref="EncryptDES" />.</summary>
 	/// <param name="textToDecrypt"></param>
-	/// <param name="encoding"></param>
-	/// <param name="iv"></param>
 	/// <param name="key"></param>
-	/// <exception cref="ArgumentNullException"><paramref name="key" /> is <c>null</c>.</exception>
 	/// <exception cref="NullException"></exception>
 	[NeedsTesting]
-	public static String DecryptDES( this String textToDecrypt, Encoding encoding, Byte[] iv, Byte[] key ) {
-		if ( String.IsNullOrEmpty( textToDecrypt ) ) {
-			throw new NullException( nameof( textToDecrypt ) );
-		}
-
-		if ( iv is null ) {
-			throw new NullException( nameof( iv ) );
-		}
-
-		if ( key is null ) {
-			throw new NullException( nameof( key ) );
-		}
-
+	public static String DecryptDES( this String textToDecrypt, Byte[] key ) {
 		if ( textToDecrypt is null ) {
 			throw new NullException( nameof( textToDecrypt ) );
 		}
 
-		using var ms = new MemoryStream();
+		using var ms = MemoryStreamManager.GetStream();
 
 		using var tripleDes = TripleDES.Create();
 
-		tripleDes.IV = iv;
 		tripleDes.Key = key;
-
 		using var transform = tripleDes.CreateDecryptor();
 
 		using var cs = new CryptoStream( ms, transform, CryptoStreamMode.Write );
@@ -166,11 +148,10 @@ public static class SecurityExtensions {
 		cs.Write( buffer, 0, buffer.Length );
 		cs.FlushFinalBlock();
 
-		return encoding.GetString( ms.ToArray() );
+		return Encoding.Unicode.GetString( ms.ToArray() );
 	}
 
 	public static String DecryptRSA( this String inputString, Int32 keySize, String xmlString ) {
-
 		// TODO: Add Proper Exception Handlers
 		if ( inputString is null ) {
 			throw new NullException( nameof( inputString ) );
@@ -182,7 +163,7 @@ public static class SecurityExtensions {
 
 		var rsaCryptoServiceProvider = new RSACryptoServiceProvider( keySize );
 		rsaCryptoServiceProvider.FromXmlString( xmlString );
-		var base64BlockSize = keySize / 8 % 3 != 0 ? keySize / 8 / 3 * 4 + 4 : keySize / 8 / 3 * 4;
+		var base64BlockSize = ( ( keySize / 8 ) % 3 ) != 0 ? ( ( keySize / 8 / 3 ) * 4 ) + 4 : ( keySize / 8 / 3 ) * 4;
 		var iterations = inputString.Length / base64BlockSize;
 		var arrayList = new ArrayList(); //ugh
 
@@ -204,7 +185,6 @@ public static class SecurityExtensions {
 	}
 
 	public static String DecryptStringUsingRegistryKey( this String decryptValue, String privateKey ) {
-
 		// this is the variable that will be returned to the user
 		if ( decryptValue is null ) {
 			throw new NullException( nameof( decryptValue ) );
@@ -229,7 +209,6 @@ public static class SecurityExtensions {
 		// Supply the provider name
 
 		try {
-
 			//Create new RSA object passing our key info
 			var rsa = new RSACryptoServiceProvider( csp );
 
@@ -252,34 +231,24 @@ public static class SecurityExtensions {
 		return decryptedValue;
 	}
 
-	/// <summary>Uses <see cref="TripleDES.Create()" /> to encrypt a string and return the bytes as a Base64 string.</summary>
-	/// <param name="value"></param>
-	/// <param name="encoding"></param>
-	/// <param name="iv"></param>
-	/// <param name="key"></param>
-	/// <returns></returns>
-	public static String? Encrypt( this String? value, Encoding encoding, out Byte[]? iv, out Byte[]? key ) {
-		iv = default;
-		key = default;
-
+	public static String? Encrypt( this String? value, Encoding? encoding = null, String? iv = null, String? key = null ) {
 		if ( String.IsNullOrEmpty( value ) ) {
 			return default( String );
 		}
 
 		try {
-			using var des = TripleDES.Create();
+			encoding ??= Encoding.UTF8;
 
-			iv = new Byte[ des.IV.Length ];
-			Buffer.BlockCopy( des.IV, 0, iv, 0, des.IV.Length );
-
-			key = new Byte[ des.Key.Length ];
-			Buffer.BlockCopy( des.Key, 0, key, 0, des.Key.Length );
-
-			using var ms = new MemoryStream();
-
-			using var cs = new CryptoStream( ms, des.CreateEncryptor( key, iv ), CryptoStreamMode.Write );
-
+			var _ivByte = encoding.GetBytes( iv?[..8] ?? Iv[..8] );
+			var _keybyte = encoding.GetBytes( key?[..8] ?? Key[..8] );
 			var inputbyteArray = encoding.GetBytes( value );
+
+			using var des = DES.Create();
+
+			using var ms = MemoryStreamManager.GetStream();
+
+			using var cs = new CryptoStream( ms, des.CreateEncryptor( _keybyte, _ivByte ), CryptoStreamMode.Write );
+
 			cs.Write( inputbyteArray, 0, inputbyteArray.Length );
 			cs.FlushFinalBlock();
 
@@ -289,18 +258,19 @@ public static class SecurityExtensions {
 			exception.Log();
 		}
 
-		return default( String? );
+		return default( String );
 	}
 
 	/// <summary>To decrypt use <see cref="DecryptDES" />.</summary>
 	/// <param name="textToEncrypt"></param>
 	/// <param name="key"></param>
+	/// <exception cref="NullException"></exception>
 	public static String EncryptDES( this String textToEncrypt, Byte[] key ) {
 		if ( textToEncrypt is null ) {
 			throw new NullException( nameof( textToEncrypt ) );
 		}
 
-		using var ms = new MemoryStream();
+		using var ms = MemoryStreamManager.GetStream();
 
 		using var tripleDes = TripleDES.Create();
 
@@ -318,7 +288,6 @@ public static class SecurityExtensions {
 	}
 
 	public static String EncryptRSA( this String inputString, Int32 dwKeySize, String xmlString ) {
-
 		// TODO: Add Proper Exception Handlers
 		if ( inputString is null ) {
 			throw new NullException( nameof( inputString ) );
@@ -341,7 +310,7 @@ public static class SecurityExtensions {
 		var stringBuilder = new StringBuilder();
 
 		for ( var i = 0; i <= iterations; i++ ) {
-			var tempBytes = new Byte[ dataLength - maxLength * i > maxLength ? maxLength : dataLength - maxLength * i ];
+			var tempBytes = new Byte[( dataLength - ( maxLength * i ) ) > maxLength ? maxLength : dataLength - ( maxLength * i )];
 			Buffer.BlockCopy( bytes, maxLength * i, tempBytes, 0, tempBytes.Length );
 			var encryptedBytes = rsaCryptoServiceProvider.Encrypt( tempBytes, true );
 
@@ -358,7 +327,6 @@ public static class SecurityExtensions {
 	}
 
 	public static String EncryptStringUsingRegistryKey( this String stringToEncrypt, String publicKey ) {
-
 		// this is the variable that will be returned to the user
 		if ( stringToEncrypt is null ) {
 			throw new NullException( nameof( stringToEncrypt ) );
@@ -383,7 +351,6 @@ public static class SecurityExtensions {
 		// Supply the provider name
 
 		try {
-
 			//Create new RSA object passing our key info
 			var rsa = new RSACryptoServiceProvider( csp );
 
@@ -411,26 +378,26 @@ public static class SecurityExtensions {
 		var s = String.Empty;
 
 		for ( var i = 0; i < bt.Count; i++ ) {
-			var b = bt[ i ];
+			var b = bt[i];
 			Int32 n = b;
 			var n1 = n & 15;
 			var n2 = ( n >> 4 ) & 15;
 
 			if ( n2 > 9 ) {
-				s += ( ( Char )( n2 - 10 + 'A' ) ).ToString();
+				s += ( ( Char )( ( n2 - 10 ) + 'A' ) ).ToString();
 			}
 			else {
 				s += n2.ToString();
 			}
 
 			if ( n1 > 9 ) {
-				s += ( ( Char )( n1 - 10 + 'A' ) ).ToString();
+				s += ( ( Char )( ( n1 - 10 ) + 'A' ) ).ToString();
 			}
 			else {
 				s += n1.ToString();
 			}
 
-			if ( i + 1 != bt.Count && ( i + 1 ) % 2 == 0 ) {
+			if ( ( ( i + 1 ) != bt.Count ) && ( ( ( i + 1 ) % 2 ) == 0 ) ) {
 				s += "-";
 			}
 		}
@@ -438,6 +405,8 @@ public static class SecurityExtensions {
 		return s;
 	}
 
+	/// <summary>
+	/// </summary>
 	/// <param name="s"></param>
 	/// <param name="encoding"></param>
 	public static String GetMD5Hash( this String s, Encoding? encoding = null ) {
@@ -474,13 +443,13 @@ public static class SecurityExtensions {
 
 		var split = output.Split( ' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries );
 
-		var first = split[ 0 ];
+		var first = split[0];
 
 		if ( String.IsNullOrWhiteSpace( first ) ) {
 			return default( String? );
 		}
 
-		var s = first[ 1.. ];
+		var s = first[1..];
 
 		if ( String.IsNullOrWhiteSpace( s ) ) {
 			return default( String? );
@@ -498,11 +467,12 @@ public static class SecurityExtensions {
 	}
 
 	/// <summary>
-	/// <para>Compute the SHA-256 hash for the <paramref name="input" /></para>
-	/// <para>Defaults to <see cref="Encoding.UTF8" /></para>
+	///     <para>Compute the SHA-256 hash for the <paramref name="input" /></para>
+	///     <para>Defaults to <see cref="Encoding.UTF8" /></para>
 	/// </summary>
 	/// <param name="input"></param>
 	/// <param name="encoding"></param>
+	/// <exception cref="NullException"></exception>
 	public static Byte[] Sha256( this String input, Encoding? encoding = null ) {
 		if ( input is null ) {
 			throw new NullException( nameof( input ) );
@@ -514,11 +484,12 @@ public static class SecurityExtensions {
 	}
 
 	/// <summary>
-	/// <para>Compute the SHA-384 hash for the <paramref name="input" /></para>
-	/// <para>Defaults to <see cref="Encoding.UTF8" /></para>
+	///     <para>Compute the SHA-384 hash for the <paramref name="input" /></para>
+	///     <para>Defaults to <see cref="Encoding.UTF8" /></para>
 	/// </summary>
 	/// <param name="input"></param>
 	/// <param name="encoding"></param>
+	/// <exception cref="NullException"></exception>
 	public static Byte[] Sha384( this String input, Encoding? encoding = null ) {
 		if ( input is null ) {
 			throw new NullException( nameof( input ) );
@@ -538,11 +509,12 @@ public static class SecurityExtensions {
 	}
 
 	/// <summary>
-	/// <para>Compute the SHA-512 hash for the <paramref name="input" /></para>
-	/// <para>Defaults to <see cref="Encoding.UTF8" /></para>
+	///     <para>Compute the SHA-512 hash for the <paramref name="input" /></para>
+	///     <para>Defaults to <see cref="Encoding.UTF8" /></para>
 	/// </summary>
 	/// <param name="input"></param>
 	/// <param name="encoding"></param>
+	/// <exception cref="NullException"></exception>
 	public static Byte[] Sha512( this String input, Encoding? encoding = null ) {
 		if ( input is null ) {
 			throw new NullException( nameof( input ) );
@@ -576,14 +548,17 @@ public static class SecurityExtensions {
 			throw new NullException( nameof( input ) );
 		}
 
+		String returnValue;
 		var ptr = Marshal.SecureStringToBSTR( input );
 
 		try {
-			return Marshal.PtrToStringBSTR( ptr );
+			returnValue = Marshal.PtrToStringBSTR( ptr );
 		}
 		finally {
 			Marshal.ZeroFreeBSTR( ptr );
 		}
+
+		return returnValue;
 	}
 
 	public static SecureString ToSecureString( this String input ) {
@@ -602,7 +577,7 @@ public static class SecurityExtensions {
 		return secure;
 	}
 
-	public static Boolean TryComputeMd5ForFile( this Document? document, out String? md5 ) {
+	public static Boolean TryComputeMd5ForFile( this DocumentFile? document, out String? md5 ) {
 		md5 = null;
 
 		try {
@@ -622,9 +597,9 @@ public static class SecurityExtensions {
 			p.Start();
 			p.WaitForExit();
 			var output = p.StandardOutput.ReadToEnd();
-			md5 = output.Split( ' ' )[ 0 ][ 1.. ].ToUpper();
+			md5 = output.Split( ' ' )[0][1..].ToUpper();
 
-			return !String.IsNullOrWhiteSpace( md5 ) && md5.Length == 32;
+			return !String.IsNullOrWhiteSpace( md5 ) && ( md5.Length == 32 );
 		}
 		catch ( Exception exception ) {
 			exception.Log();
@@ -633,29 +608,25 @@ public static class SecurityExtensions {
 		return false;
 	}
 
-	/// <summary>Attempt to decrypt an encrypted version of the file with the given password and salt.</summary>
+	/// <summary>Attempt to decrypt an encrypted version of the file with the given key and salt.</summary>
 	/// <param name="input"></param>
 	/// <param name="output"></param>
-	/// <param name="password">Must be between 1 and 32767 bytes.</param>
-	/// <param name="reportProgress"></param>
+	/// <param name="key">Must be between 1 and 32767 bytes.</param>
 	/// <param name="salt"></param>
+	/// <param name="reportEveryXBytes"></param>
+	/// <param name="reportProgress"></param>
 	/// <param name="cancellationToken"></param>
 	/// <returns>Returns true if all is successful</returns>
 	public static async Task<(Status status, List<Exception> exceptions)> TryDecryptFile(
-		this IDocument input,
-		IDocument output,
-		String password,
-		String salt,
-		IProgress<Decimal> reportProgress,
+		this DocumentFile input,
+		DocumentFile output,
+		String key,
+		Int32 salt,
+		UInt64 reportEveryXBytes,
+		Action<Single>? reportProgress,
 		CancellationToken cancellationToken
 	) {
 		var exceptions = new List<Exception>( 1 );
-
-		if ( String.IsNullOrEmpty( salt ) ) {
-			exceptions.Add( new NullException( nameof( salt ) ) );
-
-			return (Status.Exception, exceptions);
-		}
 
 		if ( !await input.Exists( cancellationToken ).ConfigureAwait( false ) ) {
 			exceptions.Add( new FileNotFoundException( $"The input file {input.FullPath} is not found." ) );
@@ -665,13 +636,13 @@ public static class SecurityExtensions {
 
 		var size = await input.Size( cancellationToken ).ConfigureAwait( false );
 
-		if ( size == null || !size.Any() ) {
+		if ( !size.Any() ) {
 			exceptions.Add( new FileNotFoundException( $"The input file {input.FullPath} is empty." ) );
 
 			return (Status.Exception, exceptions);
 		}
 
-		var inputFileSize = ( Decimal )size.Value;
+		var inputFileSize = ( Single )size!.Value;
 
 		if ( await output.Exists( cancellationToken ).ConfigureAwait( false ) ) {
 			exceptions.Add( new IOException( $"The output file {output.FullPath} already exists." ) );
@@ -679,8 +650,8 @@ public static class SecurityExtensions {
 			return (Status.Exception, exceptions);
 		}
 
-		if ( !password.Length.Between( 1, Int16.MaxValue ) ) {
-			exceptions.Add( new ArgumentOutOfRangeException( nameof( password ) ) );
+		if ( !key.Length.Between( 1, Int16.MaxValue ) ) {
+			exceptions.Add( new ArgumentOutOfRangeException( nameof( key ) ) );
 
 			return (Status.Exception, exceptions);
 		}
@@ -694,14 +665,9 @@ public static class SecurityExtensions {
 				return (Status.Exception, exceptions);
 			}
 
-			var salty = Encoding.Unicode.GetBytes( salt.NullIfEmpty() ?? nameof( InvalidOperationException ) );
+			using var aes = Aes.Create();
 
-			using DeriveBytes rgb = new Rfc2898DeriveBytes( password, salty );
-
-			using var aes = Aes.Create( "AesManaged" );
-			if ( aes is null ) {
-				throw new InvalidOperationException( "Error creating AesManaged." );
-			}
+			DeriveBytes rgb = new Rfc2898DeriveBytes( key, Encoding.Unicode.GetBytes( salt.ToString() ) );
 
 			aes.BlockSize = 128;
 			aes.KeySize = 256;
@@ -715,159 +681,34 @@ public static class SecurityExtensions {
 
 			await using var inputStream = new FileStream( input.FullPath, FileMode.Open, FileAccess.Read );
 
-			await using var cryptoStream = new CryptoStream( inputStream, decryptor, CryptoStreamMode.Read );
+			await using var cs = new CryptoStream( inputStream, decryptor, CryptoStreamMode.Read );
 
-			//Int32 data;
-			var buffer = new Memory<Byte>();
+			Int32 data;
 
-			do {
-				var read = await cryptoStream.ReadAsync( buffer, cancellationToken ).ConfigureAwait( false );
-				if ( !read.Any() ) {
-					break;
+			while ( ( data = cs.ReadByte() ) != -1 ) {
+				if ( reportProgress is not null ) {
+					var position = ( UInt64 )inputStream.Position;
+
+					if ( ( position % reportEveryXBytes ) == 0 ) {
+						var progress = position / inputFileSize;
+						reportProgress( progress );
+					}
 				}
 
-				var position = ( Decimal )cryptoStream.Position;
-				var progress = position / inputFileSize;
-				reportProgress.Report( progress );
+				outputStream.WriteByte( ( Byte )data );
+			}
 
-				await outputStream.WriteAsync( buffer, cancellationToken ).ConfigureAwait( false );
-			} while ( true );
+			return (await output.Exists( cancellationToken ).ConfigureAwait( false ) ? Status.Go : Status.Stop, exceptions);
 		}
-		catch ( AggregateException aggregateException ) {
-			exceptions.AddRange( aggregateException.InnerExceptions );
-			exceptions.TrimExcess();
-		}
-		catch ( Exception exception ) {
-			exceptions.Add( exception );
-		}
+		catch ( AggregateException exceptionss ) {
+			exceptions.AddRange( exceptionss.InnerExceptions );
 
-		if ( exceptions.Any() ) {
 			return (Status.Exception, exceptions);
 		}
-
-		return (await output.Exists( cancellationToken ).ConfigureAwait( false ) ? Status.Success : Status.Failure, exceptions);
-	}
-
-	/// <summary>Attempt to encrypt a file with the given password and salt.</summary>
-	/// <param name="input"></param>
-	/// <param name="output"></param>
-	/// <param name="password">Must be between 1 and 32767 bytes.</param>
-	/// <param name="reportProgress"></param>
-	/// <param name="salt"></param>
-	/// <param name="cancellationToken"></param>
-	/// <returns>Returns true if all is successful</returns>
-	public static async Task<(Status status, List<Exception> exceptions, Byte[]? keyBytes, Byte[]? ivBytes)> TryEncryptFile(
-		this IDocument input,
-		IDocument output,
-		String password,
-		String salt,
-		IProgress<Decimal> reportProgress,
-		CancellationToken cancellationToken
-	) {
-		var exceptions = new List<Exception>( 1 );
-
-		if ( String.IsNullOrEmpty( salt ) ) {
-			exceptions.Add( new NullException( nameof( salt ) ) );
-
-			return (Status.Exception, exceptions, default( Byte[]? ), default( Byte[]? ));
-		}
-
-		if ( !await input.Exists( cancellationToken ).ConfigureAwait( false ) ) {
-			exceptions.Add( new FileNotFoundException( $"The input file {input.FullPath} is not found." ) );
-
-			return (Status.Exception, exceptions, default( Byte[]? ), default( Byte[]? ));
-		}
-
-		var size = await input.Size( cancellationToken ).ConfigureAwait( false );
-
-		if ( size == null || !size.Any() ) {
-			exceptions.Add( new FileNotFoundException( $"The input file {input.FullPath} is empty." ) );
-
-			return (Status.Exception, exceptions, default( Byte[]? ), default( Byte[]? ));
-		}
-
-		var inputFileSize = ( Decimal )size.Value;
-
-		if ( await output.Exists( cancellationToken ).ConfigureAwait( false ) ) {
-			exceptions.Add( new IOException( $"The output file {output.FullPath} already exists." ) );
-
-			return (Status.Exception, exceptions, default( Byte[]? ), default( Byte[]? ));
-		}
-
-		if ( !password.Length.Between( 1, Int16.MaxValue ) ) {
-			exceptions.Add( new ArgumentOutOfRangeException( nameof( password ) ) );
-
-			return (Status.Exception, exceptions, default( Byte[]? ), default( Byte[]? ));
-		}
-
-		Byte[]? keyBytes = null;
-		Byte[]? ivBytes = null;
-
-		try {
-			var containingingFolder = output.ContainingingFolder();
-
-			if ( !await containingingFolder.Create( cancellationToken ).ConfigureAwait( false ) ) {
-				exceptions.Add( new IOException( $"Unable to write to {output.FullPath} because folder {containingingFolder} does not exist." ) );
-
-				return (Status.Exception, exceptions, default( Byte[]? ), default( Byte[]? ));
-			}
-
-			var salty = Encoding.Unicode.GetBytes( salt.NullIfEmpty() ?? nameof( InvalidOperationException ) );
-
-			using DeriveBytes rgb = new Rfc2898DeriveBytes( password, salty );
-
-			using var aes = Aes.Create( "AesManaged" );
-			if ( aes is null ) {
-				throw new InvalidOperationException( "Error creating AesManaged." );
-			}
-
-			aes.BlockSize = 128;
-			aes.KeySize = 256;
-			aes.Key = rgb.GetBytes( aes.KeySize >> 3 );
-			aes.IV = rgb.GetBytes( aes.BlockSize >> 3 );
-			aes.Mode = CipherMode.CBC;
-
-			keyBytes = aes.Key;
-			ivBytes = aes.IV;
-
-			await using var inputStream = new FileStream( input.FullPath, FileMode.Open, FileAccess.Read );
-			inputStream.Lock( 0, ( Int64 )inputFileSize );
-
-			await using var outputStream = new FileStream( output.FullPath, FileMode.Create, FileAccess.Write );
-
-			using var encryptor = aes.CreateEncryptor();
-			await using var cryptoStream = new CryptoStream( outputStream, encryptor, CryptoStreamMode.Write );
-
-			var buffer = new Memory<Byte>();
-
-			do {
-				var read = await inputStream.ReadAsync( buffer, cancellationToken ).ConfigureAwait( false );
-				if ( !read.Any() ) {
-					break;
-				}
-
-				var progress = inputStream.Position / inputFileSize;
-				reportProgress.Report( progress );
-
-				await cryptoStream.WriteAsync( buffer, cancellationToken ).ConfigureAwait( false );
-			} while ( true );
-
-			inputStream.Close();
-			await outputStream.FlushAsync( cancellationToken ).ConfigureAwait( false );
-			await cryptoStream.FlushAsync( cancellationToken ).ConfigureAwait( false );
-		}
-		catch ( AggregateException aggregateException ) {
-			exceptions.AddRange( aggregateException.InnerExceptions );
-			exceptions.TrimExcess();
-		}
 		catch ( Exception exception ) {
 			exceptions.Add( exception );
-		}
 
-		if ( exceptions.Any() ) {
-			return (Status.Exception, exceptions, default( Byte[]? ), default( Byte[]? ));
+			return (Status.Exception, exceptions);
 		}
-
-		return (await output.Exists( cancellationToken ).ConfigureAwait( false ) ? Status.Success : Status.Failure, exceptions, keyBytes, ivBytes);
 	}
 }

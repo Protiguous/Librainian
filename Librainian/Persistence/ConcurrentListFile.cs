@@ -1,28 +1,31 @@
 // Copyright © Protiguous. All Rights Reserved.
 //
-// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories,
-// or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
+// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries,
+// repositories, or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
 //
-// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten
-// by formatting. (We try to avoid it from happening, but it does accidentally happen.)
+// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has
+// been overwritten by formatting. (We try to avoid it from happening, but it does accidentally happen.)
 //
-// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to
-// those Authors. If you find your code unattributed in this source code, please let us know so we can properly attribute you
-// and include the proper license and/or copyright(s). If you want to use any of our code in a commercial project, you must
-// contact Protiguous@Protiguous.com for permission, license, and a quote.
+// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to those Authors.
+// If you find your code unattributed in this source code, please let us know so we can properly attribute you and include the proper licenses and/or copyrights.
+// If you want to use any of our code in a commercial project, you must contact Protiguous@Protiguous.com for permission, license, and a quote.
 //
 // Donations, payments, and royalties are accepted via bitcoin: 1Mad8TxTqxKnMiHuZxArFvX8BuFEB9nqX2 and PayPal: Protiguous@Protiguous.com
 //
 // ====================================================================
-// Disclaimer:  Usage of the source code or binaries is AS-IS. No warranties are expressed, implied, or given. We are NOT
-// responsible for Anything You Do With Our Code. We are NOT responsible for Anything You Do With Our Executables. We are NOT
-// responsible for Anything You Do With Your Computer. ====================================================================
+// Disclaimer:  Usage of the source code or binaries is AS-IS.
+// No warranties are expressed, implied, or given.
+// We are NOT responsible for Anything You Do With Our Code.
+// We are NOT responsible for Anything You Do With Our Executables.
+// We are NOT responsible for Anything You Do With Your Computer.
+// ====================================================================
 //
 // Contact us by email if you have any questions, helpful criticism, or if you would like to use our code in your project(s).
-// For business inquiries, please contact me at Protiguous@Protiguous.com. Our software can be found at
-// "https://Protiguous.com/Software/" Our GitHub address is "https://github.com/Protiguous".
+// For business inquiries, please contact me at Protiguous@Protiguous.com.
+// Our software can be found at "https://Protiguous.com/Software/"
+// Our GitHub address is "https://github.com/Protiguous".
 //
-// File "ConcurrentListFile.cs" last formatted on 2021-11-30 at 7:22 PM by Protiguous.
+// File "ConcurrentListFile.cs" last formatted on 2022-02-06 at 7:40 AM by Protiguous.
 
 namespace Librainian.Persistence;
 
@@ -38,6 +41,7 @@ using Logging;
 using Maths.Numbers;
 using Newtonsoft.Json;
 using PooledAwait;
+using Utilities;
 
 /// <summary>Persist a list to and from a JSON formatted text document.</summary>
 [JsonObject]
@@ -46,38 +50,38 @@ public class ConcurrentListFile<TValue> : ConcurrentList<TValue> {
 	private ConcurrentListFile() => throw new NotImplementedException();
 
 	/// <summary>Persist a dictionary to and from a JSON formatted text document.</summary>
-	/// <param name="document"></param>
-	public ConcurrentListFile( Document document ) {
-		if ( document is null ) {
-			throw new NullException( nameof( document ) );
+	/// <param name="documentFile"></param>
+	public ConcurrentListFile( DocumentFile documentFile ) {
+		if ( documentFile is null ) {
+			throw new ArgumentEmptyException( nameof( documentFile ) );
 		}
 
-		document.ContainingingFolder().Info.Create();
+		documentFile.ContainingingFolder().Info.Create();
 
-		this.Document = document ?? throw new NullException( nameof( document ) );
+		this.DocumentFile = documentFile ?? throw new ArgumentEmptyException( nameof( documentFile ) );
 		this.Read().Wait(); //TODO I don't like this Wait being here.
 	}
 
 	/// <summary>
-	/// Persist a dictionary to and from a JSON formatted text document.
-	/// <para>Defaults to user\appdata\Local\productname\filename</para>
+	///     Persist a dictionary to and from a JSON formatted text document.
+	///     <para>Defaults to user\appdata\Local\productname\filename</para>
 	/// </summary>
 	/// <param name="filename"></param>
-	public ConcurrentListFile( String filename ) : this( new Document( filename ) ) { }
+	public ConcurrentListFile( String filename ) : this( new DocumentFile( filename ) ) { }
 
 	/// <summary>disallow constructor without a document/filename</summary>
 
 	[JsonProperty]
-	public Document Document { get; set; }
+	public DocumentFile DocumentFile { get; set; }
 
 	public async Task<Boolean> Read( CancellationToken cancellationToken = default ) {
-		if ( !await this.Document.Exists( cancellationToken ).ConfigureAwait( false ) ) {
+		if ( !await this.DocumentFile.Exists( cancellationToken ).ConfigureAwait( false ) ) {
 			return false;
 		}
 
 		try {
-			var progress = new Progress<ZeroToOne>( pro => { } );
-			(var status, var data) = await this.Document.LoadJSON<IEnumerable<TValue>>( progress, cancellationToken ).ConfigureAwait( false );
+			var progress = new Progress<ZeroToOne>( _ => { } );
+			(var status, var data) = await this.DocumentFile.LoadJSON<IEnumerable<TValue>>( progress, cancellationToken ).ConfigureAwait( false );
 
 			if ( status.IsGood() ) {
 				await this.AddRangeAsync( data, cancellationToken ).ConfigureAwait( false );
@@ -89,12 +93,10 @@ public class ConcurrentListFile<TValue> : ConcurrentList<TValue> {
 			exception.Log();
 		}
 		catch ( IOException exception ) {
-
 			//file in use by another app
 			exception.Log();
 		}
 		catch ( OutOfMemoryException exception ) {
-
 			//file is huge
 			exception.Log();
 		}
@@ -106,9 +108,9 @@ public class ConcurrentListFile<TValue> : ConcurrentList<TValue> {
 	/// <returns>A string that represents the current object.</returns>
 	public override String ToString() => $"{this.Count} items";
 
-	/// <summary>Saves the data to the <see cref="Document" />.</summary>
+	/// <summary>Saves the data to the <see cref="DocumentFile" />.</summary>
 	public async PooledValueTask<Boolean> Write() {
-		var document = this.Document;
+		var document = this.DocumentFile;
 
 		if ( !document.ContainingingFolder().Info.Exists ) {
 			document.ContainingingFolder().Info.Create();

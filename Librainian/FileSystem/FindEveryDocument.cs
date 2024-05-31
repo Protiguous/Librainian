@@ -1,30 +1,32 @@
 ﻿// Copyright © Protiguous. All Rights Reserved.
 //
-// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories,
-// or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
+// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries,
+// repositories, or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
 //
-// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten
-// by formatting. (We try to avoid it from happening, but it does accidentally happen.)
+// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has
+// been overwritten by formatting. (We try to avoid it from happening, but it does accidentally happen.)
 //
-// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to
-// those Authors. If you find your code unattributed in this source code, please let us know so we can properly attribute you
-// and include the proper license and/or copyright(s). If you want to use any of our code in a commercial project, you must
-// contact Protiguous@Protiguous.com for permission, license, and a quote.
+// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to those Authors.
+// If you find your code unattributed in this source code, please let us know so we can properly attribute you and include the proper licenses and/or copyrights.
+// If you want to use any of our code in a commercial project, you must contact Protiguous@Protiguous.com for permission, license, and a quote.
 //
 // Donations, payments, and royalties are accepted via bitcoin: 1Mad8TxTqxKnMiHuZxArFvX8BuFEB9nqX2 and PayPal: Protiguous@Protiguous.com
 //
 // ====================================================================
-// Disclaimer:  Usage of the source code or binaries is AS-IS. No warranties are expressed, implied, or given. We are NOT
-// responsible for Anything You Do With Our Code. We are NOT responsible for Anything You Do With Our Executables. We are NOT
-// responsible for Anything You Do With Your Computer. ====================================================================
+// Disclaimer:  Usage of the source code or binaries is AS-IS.
+// No warranties are expressed, implied, or given.
+// We are NOT responsible for Anything You Do With Our Code.
+// We are NOT responsible for Anything You Do With Our Executables.
+// We are NOT responsible for Anything You Do With Your Computer.
+// ====================================================================
 //
 // Contact us by email if you have any questions, helpful criticism, or if you would like to use our code in your project(s).
-// For business inquiries, please contact me at Protiguous@Protiguous.com. Our software can be found at
-// "https://Protiguous.com/Software/" Our GitHub address is "https://github.com/Protiguous".
+// For business inquiries, please contact me at Protiguous@Protiguous.com.
+// Our software can be found at "https://Protiguous.com/Software/"
+// Our GitHub address is "https://github.com/Protiguous".
 //
-// File "FindEveryDocument.cs" last formatted on 2021-11-30 at 7:17 PM by Protiguous.
+// File "FindEveryDocument.cs" last formatted on 2022-03-10 at 4:58 AM by Protiguous.
 
-#nullable enable
 
 namespace Librainian.FileSystem;
 
@@ -42,26 +44,26 @@ using Threadsafe;
 using Utilities.Disposables;
 
 /// <summary>
-/// <para>Scan every drive.</para>
-/// <para>Scan every folder.</para>
-/// <para>Scan every document.</para>
-/// <para>await <see cref="StartScanning" /> to start the scan.</para>
-/// <para>Cancel scanning via <see cref="CancellationTokenSource" />.</para>
+///     <para>Scan every drive.</para>
+///     <para>Scan every folder.</para>
+///     <para>Scan every document.</para>
+///     <para>await <see cref="StartScanning" /> to start the scan.</para>
+///     <para>Cancel scanning via <see cref="CancellationTokenSource" />.</para>
 /// </summary>
 public class FindEveryDocument : ABetterClassDispose {
 
 	private VolatileBoolean _pauseScanning;
 
-	public FindEveryDocument( IProgress<(Single, String)> progress, out BufferBlock<IDocument> documentsFound ) : base( nameof( FindEveryDocument ) ) {
-		this.Progress = progress ?? throw new NullException( nameof( progress ) );
-		documentsFound = new BufferBlock<IDocument>();
+	public FindEveryDocument( IProgress<(Single, String)> progress, out BufferBlock<IDocumentFile> documentsFound ) {
+		this.Progress = progress ?? throw new ArgumentEmptyException( nameof( progress ) );
+		documentsFound = new BufferBlock<IDocumentFile>();
 		this.DocumentsFound = documentsFound;
 	}
 
 	private CancellationTokenSource CancellationTokenSource { get; } = new();
 
 	/// <summary>A reference to the out parameter in the ctor.</summary>
-	private BufferBlock<IDocument> DocumentsFound { get; }
+	private BufferBlock<IDocumentFile> DocumentsFound { get; }
 
 	private ActionBlock<Disk>? DrivesFound { get; set; }
 
@@ -78,9 +80,9 @@ public class FindEveryDocument : ABetterClassDispose {
 	/// <summary>Dispose of any <see cref="IDisposable" /> (managed) fields or properties in this method.</summary>
 	public override void DisposeManaged() { }
 
-	public void PauseScanning() => this._pauseScanning.Value = true;
+	public void PauseScanning() => this._pauseScanning.GetSetValue = true;
 
-	public void ResumeScanning() => this._pauseScanning.Value = false;
+	public void ResumeScanning() => this._pauseScanning.GetSetValue = false;
 
 	public async Task StartScanning() {
 		Int64 counter = 0;
@@ -170,7 +172,7 @@ public class FindEveryDocument : ABetterClassDispose {
 			this.Progress.Report( (counter, $"Found sub folder {folder.FullPath.SmartQuote()}.") );
 		}
 
-		async Task AddFoundDocument( IDocument document ) {
+		async Task AddFoundDocument( IDocumentFile document ) {
 			await PauseWhilePaused().ConfigureAwait( false );
 			if ( this.CancellationToken.IsCancellationRequested ) {
 				return;

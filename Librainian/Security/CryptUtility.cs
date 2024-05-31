@@ -1,28 +1,31 @@
 ﻿// Copyright © Protiguous. All Rights Reserved.
 //
-// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories,
-// or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
+// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries,
+// repositories, or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
 //
-// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten
-// by formatting. (We try to avoid it from happening, but it does accidentally happen.)
+// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has
+// been overwritten by formatting. (We try to avoid it from happening, but it does accidentally happen.)
 //
-// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to
-// those Authors. If you find your code unattributed in this source code, please let us know so we can properly attribute you
-// and include the proper license and/or copyright(s). If you want to use any of our code in a commercial project, you must
-// contact Protiguous@Protiguous.com for permission, license, and a quote.
+// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to those Authors.
+// If you find your code unattributed in this source code, please let us know so we can properly attribute you and include the proper licenses and/or copyrights.
+// If you want to use any of our code in a commercial project, you must contact Protiguous@Protiguous.com for permission, license, and a quote.
 //
 // Donations, payments, and royalties are accepted via bitcoin: 1Mad8TxTqxKnMiHuZxArFvX8BuFEB9nqX2 and PayPal: Protiguous@Protiguous.com
 //
 // ====================================================================
-// Disclaimer:  Usage of the source code or binaries is AS-IS. No warranties are expressed, implied, or given. We are NOT
-// responsible for Anything You Do With Our Code. We are NOT responsible for Anything You Do With Our Executables. We are NOT
-// responsible for Anything You Do With Your Computer. ====================================================================
+// Disclaimer:  Usage of the source code or binaries is AS-IS.
+// No warranties are expressed, implied, or given.
+// We are NOT responsible for Anything You Do With Our Code.
+// We are NOT responsible for Anything You Do With Our Executables.
+// We are NOT responsible for Anything You Do With Your Computer.
+// ====================================================================
 //
 // Contact us by email if you have any questions, helpful criticism, or if you would like to use our code in your project(s).
-// For business inquiries, please contact me at Protiguous@Protiguous.com. Our software can be found at
-// "https://Protiguous.com/Software/" Our GitHub address is "https://github.com/Protiguous".
+// For business inquiries, please contact me at Protiguous@Protiguous.com.
+// Our software can be found at "https://Protiguous.com/Software/"
+// Our GitHub address is "https://github.com/Protiguous".
 //
-// File "CryptUtility.cs" last formatted on 2021-11-30 at 7:22 PM by Protiguous.
+// File "CryptUtility.cs" last formatted on 2022-02-06 at 5:39 AM by Protiguous.
 
 namespace Librainian.Security;
 
@@ -31,9 +34,13 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using Maths;
+using Microsoft.IO;
 
 /// <summary>Where did this class come from?</summary>
 public static class CryptUtility {
+
+	private static RecyclableMemoryStreamManager MemoryStreamManager { get; } = new( MathConstants.Sizes.OneMegaByte, MathConstants.Sizes.OneMegaByte );
 
 	/// <summary>Return one component of a color</summary>
 	/// <param name="pixelColor">The Color</param>
@@ -64,7 +71,7 @@ public static class CryptUtility {
 		}
 
 		//Buffer for the resulting stream
-		var resultKeyStream = new MemoryStream();
+		var resultKeyStream = MemoryStreamManager.GetStream();
 
 		//Find length of longest stream
 		var maxLength = keyStreams.Select( stream => stream.Length )
@@ -114,7 +121,7 @@ public static class CryptUtility {
 	/// <returns>The stream created from key and password</returns>
 	public static MemoryStream CreateKeyStream( FilePasswordPair key ) {
 		var fileStream = new FileStream( key.FileName, FileMode.Open );
-		var resultStream = new MemoryStream();
+		var resultStream = MemoryStreamManager.GetStream();
 		var passwordIndex = 0;
 		Int32 currentByte;
 
@@ -145,14 +152,13 @@ public static class CryptUtility {
 	/// <param name="pixelColor">The Color</param>
 	/// <param name="colorComponent">The component to change (0-R, 1-G, 2-B)</param>
 	/// <param name="newValue">New value of the component</param>
-	public static void SetColorComponent( ref Color pixelColor, Int32 colorComponent, Int32 newValue ) {
+	public static void SetColorComponent( ref Color pixelColor, Int32 colorComponent, Int32 newValue ) =>
 		pixelColor = colorComponent switch {
 			0 => Color.FromArgb( newValue, pixelColor.G, pixelColor.B ),
 			1 => Color.FromArgb( pixelColor.R, newValue, pixelColor.B ),
 			2 => Color.FromArgb( pixelColor.R, pixelColor.G, newValue ),
 			var _ => pixelColor
 		};
-	}
 
 	public static String UnTrimColorString( String color, Int32 desiredLength ) {
 		var difference = desiredLength - color.Length;

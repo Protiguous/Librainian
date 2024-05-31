@@ -1,28 +1,29 @@
 ﻿// Copyright © Protiguous. All Rights Reserved.
 //
-// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories,
-// or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
+// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories, or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
 //
-// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten
-// by formatting. (We try to avoid it from happening, but it does accidentally happen.)
+// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten by formatting. (We try to avoid it from happening, but it does accidentally happen.)
 //
-// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to
-// those Authors. If you find your code unattributed in this source code, please let us know so we can properly attribute you
-// and include the proper license and/or copyright(s). If you want to use any of our code in a commercial project, you must
-// contact Protiguous@Protiguous.com for permission, license, and a quote.
+// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to those Authors.
+// If you find your code unattributed in this source code, please let us know so we can properly attribute you and include the proper license and/or copyright(s).
+// If you want to use any of our code in a commercial project, you must contact Protiguous@Protiguous.com for permission, license, and a quote.
 //
 // Donations, payments, and royalties are accepted via bitcoin: 1Mad8TxTqxKnMiHuZxArFvX8BuFEB9nqX2 and PayPal: Protiguous@Protiguous.com
 //
-// ====================================================================
-// Disclaimer:  Usage of the source code or binaries is AS-IS. No warranties are expressed, implied, or given. We are NOT
-// responsible for Anything You Do With Our Code. We are NOT responsible for Anything You Do With Our Executables. We are NOT
-// responsible for Anything You Do With Your Computer. ====================================================================
+//
+// Disclaimer:  Usage of the source code or binaries is AS-IS.
+// No warranties are expressed, implied, or given.
+// We are NOT responsible for Anything You Do With Our Code.
+// We are NOT responsible for Anything You Do With Our Executables.
+// We are NOT responsible for Anything You Do With Your Computer.
+//
 //
 // Contact us by email if you have any questions, helpful criticism, or if you would like to use our code in your project(s).
-// For business inquiries, please contact me at Protiguous@Protiguous.com. Our software can be found at
-// "https://Protiguous.com/Software/" Our GitHub address is "https://github.com/Protiguous".
+// For business inquiries, please contact me at Protiguous@Protiguous.com.
+// Our software can be found at "https://Protiguous.com/Software/"
+// Our GitHub address is "https://github.com/Protiguous".
 //
-// File "MathStatistics.cs" last formatted on 2021-11-30 at 7:19 PM by Protiguous.
+// File "MathStatistics.cs" last formatted on 2022-12-22 at 4:22 AM by Protiguous.
 
 namespace Librainian.Maths;
 
@@ -32,24 +33,28 @@ using System.Linq;
 using Exceptions;
 using Measurement.Time;
 using Rationals;
+using Utilities;
 
 public static class MathStatistics {
 
 	public static Decimal CalcAvg( this IEnumerable<Decimal> values ) => values.DefaultIfEmpty().Average( arg => arg );
 
 	public static Decimal CalcEma( this IEnumerable<Decimal> values, Decimal alpha ) =>
-		values.DefaultIfEmpty().Aggregate( ( ema, nextQuote ) => alpha * nextQuote + ( 1 - alpha ) * ema );
+		values.DefaultIfEmpty().Aggregate( ( ema, nextQuote ) => ( alpha * nextQuote ) + ( ( 1 - alpha ) * ema ) );
 
 	/// <summary>
-	/// <para>
-	/// In mathematics, the geometric mean is a type of mean or average, which indicates the central tendency or typical value
-	/// of a set of numbers by using the product of their values (as opposed to the arithmetic mean which uses their sum).
-	/// </para>
-	/// <para>The geometric mean is defined as the nth root of the product of n numbers.</para>
+	///     <para>
+	///         In mathematics, the geometric mean is a type of mean or average, which indicates the central tendency or
+	///         typical value
+	///         of a set of numbers by using the product of their values (as opposed to the arithmetic mean which uses their
+	///         sum).
+	///     </para>
+	///     <para>The geometric mean is defined as the nth root of the product of n numbers.</para>
 	/// </summary>
 	/// <param name="data"></param>
 	/// <param name="items"></param>
 	/// <see cref="http://wikipedia.org/wiki/Geometric_mean" />
+	/// <exception cref="ArgumentOutOfRangeException"></exception>
 	public static Double GeometricMean( this IEnumerable<Double> data, Int32 items ) {
 		if ( items <= 0 ) {
 			throw new ArgumentOutOfRangeException( nameof( items ) );
@@ -61,15 +66,18 @@ public static class MathStatistics {
 	}
 
 	/// <summary>
-	/// <para>
-	/// In mathematics, the geometric mean is a type of mean or average, which indicates the central tendency or typical value
-	/// of a set of numbers by using the product of their values (as opposed to the arithmetic mean which uses their sum).
-	/// </para>
-	/// <para>The geometric mean is defined as the nth root of the product of n numbers.</para>
+	///     <para>
+	///         In mathematics, the geometric mean is a type of mean or average, which indicates the central tendency or
+	///         typical value
+	///         of a set of numbers by using the product of their values (as opposed to the arithmetic mean which uses their
+	///         sum).
+	///     </para>
+	///     <para>The geometric mean is defined as the nth root of the product of n numbers.</para>
 	/// </summary>
 	/// <param name="data"></param>
 	/// <param name="items"></param>
 	/// <see cref="http://wikipedia.org/wiki/Geometric_mean" />
+	/// <exception cref="ArgumentOutOfRangeException"></exception>
 	public static Decimal GeometricMean( this IEnumerable<Decimal> data, Int32 items ) {
 		if ( items <= 0 ) {
 			throw new ArgumentOutOfRangeException( nameof( items ) );
@@ -81,15 +89,18 @@ public static class MathStatistics {
 	}
 
 	/// <summary>
-	/// <para>
-	/// In mathematics, the geometric mean is a type of mean or average, which indicates the central tendency or typical value
-	/// of a set of numbers by using the product of their values (as opposed to the arithmetic mean which uses their sum).
-	/// </para>
-	/// <para>The geometric mean is defined as the nth root of the product of n numbers.</para>
+	///     <para>
+	///         In mathematics, the geometric mean is a type of mean or average, which indicates the central tendency or
+	///         typical value
+	///         of a set of numbers by using the product of their values (as opposed to the arithmetic mean which uses their
+	///         sum).
+	///     </para>
+	///     <para>The geometric mean is defined as the nth root of the product of n numbers.</para>
 	/// </summary>
 	/// <param name="data"></param>
 	/// <param name="items"></param>
 	/// <see cref="http://wikipedia.org/wiki/Geometric_mean" />
+	/// <exception cref="ArgumentOutOfRangeException"></exception>
 	public static Rational GeometricMean( this IEnumerable<Rational> data, Int32 items ) {
 		if ( items <= 0 ) {
 			throw new ArgumentOutOfRangeException( nameof( items ) );
@@ -102,18 +113,18 @@ public static class MathStatistics {
 
 	public static Double Intercept( this List<TimeProgression> data ) {
 		if ( data is null ) {
-			throw new NullException( nameof( data ) );
+			throw new ArgumentEmptyException( nameof( data ) );
 		}
 
 		var slope = data.Slope();
 
-		return data.Average( d => d.Progress ) - slope * data.Average( d => d.MillisecondsPassed );
+		return data.Average( d => d.Progress ) - ( slope * data.Average( d => d.MillisecondsPassed ) );
 	}
 
 	public static Double MeanGeometric( this IEnumerable<Double> numbers ) {
 		var enumerable = numbers as IList<Double> ?? numbers.ToList();
 		if ( !enumerable.Any() ) {
-			throw new NullException( nameof( numbers ) );
+			throw new ArgumentEmptyException( nameof( numbers ) );
 		}
 
 		return Math.Pow( enumerable.Aggregate( ( s, i ) => s * i ), 1.0 / enumerable.Count );
@@ -224,20 +235,21 @@ public static class MathStatistics {
 	/// <example>var f = 7000.OneIn();</example>
 	public static Double OneIn( this SByte possible ) => 1d / possible;
 
-	public static Int32 Percent( this Int32 x, Single percent ) => ( Int32 )( x * percent / 100.0f );
+	public static Int32 Percent( this Int32 x, Single percent ) => ( Int32 )( ( x * percent ) / 100.0f );
 
-	public static Single Percent( this Single x, Single percent ) => x * percent / 100.0f;
+	public static Single Percent( this Single x, Single percent ) => ( x * percent ) / 100.0f;
 
-	public static Double Percent( this Double x, Double percent ) => x * percent / 100.0;
+	public static Double Percent( this Double x, Double percent ) => ( x * percent ) / 100.0;
 
-	public static Decimal Percent( this Decimal x, Decimal percent ) => x * percent / 100.0m;
+	public static Decimal Percent( this Decimal x, Decimal percent ) => ( x * percent ) / 100.0m;
 
-	public static UInt64 Percent( this UInt64 x, Single percent ) => ( UInt64 )( x * percent / 100.0f );
+	public static UInt64 Percent( this UInt64 x, Single percent ) => ( UInt64 )( ( x * percent ) / 100.0f );
 
 	/// <summary>Returns true if this probability happens.</summary>
 	/// <param name="probability"></param>
 	/// <param name="maxvalue"></param>
 	/// <remarks>the higher the value of P, the more often this function should return true.</remarks>
+	[NeedsTesting]
 	public static Boolean Probability( this UInt64 probability, UInt64 maxvalue ) {
 		var chance = Randem.Next( 0, maxvalue );
 
@@ -248,6 +260,7 @@ public static class MathStatistics {
 	/// <param name="probability"></param>
 	/// <param name="maxvalue"></param>
 	/// <remarks>the higher the value of P, the more often this function should return true.</remarks>
+	[NeedsTesting]
 	public static Boolean Probability( this UInt32 probability, UInt32 maxvalue ) {
 		var chance = Randem.Next( 0, maxvalue );
 
@@ -258,6 +271,7 @@ public static class MathStatistics {
 	/// <param name="probability"></param>
 	/// <param name="maxvalue"></param>
 	/// <remarks>the higher the value of P, the more often this function should return true.</remarks>
+	[NeedsTesting]
 	public static Boolean Probability( this UInt16 probability, UInt16 maxvalue ) {
 		var chance = 0.Next( maxvalue );
 
@@ -268,6 +282,7 @@ public static class MathStatistics {
 	/// <param name="probability"></param>
 	/// <param name="maxvalue"></param>
 	/// <remarks>the higher the value of P, the more often this function should return true.</remarks>
+	[NeedsTesting]
 	public static Boolean Probability( this Int32 probability, Int32 maxvalue ) {
 		var chance = 0.Next( maxvalue );
 
@@ -277,6 +292,7 @@ public static class MathStatistics {
 	/// <summary>Returns true <b>if</b> this probability happens.</summary>
 	/// <param name="probability"></param>
 	/// <remarks>the higher the value of P, the more often this function should return true.</remarks>
+	[NeedsTesting]
 	public static Boolean Probability( this Double probability ) {
 		var chance = Randem.NextDouble();
 
@@ -286,6 +302,7 @@ public static class MathStatistics {
 	/// <summary>Returns true <b>if</b> this probability happens.</summary>
 	/// <param name="probability"></param>
 	/// <remarks>the higher the value of P, the more often this function should return true.</remarks>
+	[NeedsTesting]
 	public static Boolean Probability( this Single probability ) {
 		var chance = Randem.NextSingle();
 
@@ -303,7 +320,7 @@ public static class MathStatistics {
 
 	public static Double Slope( this List<TimeProgression> data ) {
 		if ( data is null ) {
-			throw new NullException( nameof( data ) );
+			throw new ArgumentEmptyException( nameof( data ) );
 		}
 
 		var averageX = data.Average( d => d.MillisecondsPassed );
@@ -317,7 +334,7 @@ public static class MathStatistics {
 
 	public static Double StandardDeviation( this IEnumerable<Double> values ) {
 		if ( values is null ) {
-			throw new NullException( nameof( values ) );
+			throw new ArgumentEmptyException( nameof( values ) );
 		}
 
 		var doubles = values as Double[] ?? values.ToArray();
@@ -328,7 +345,7 @@ public static class MathStatistics {
 
 	public static Decimal StandardDeviation( this IEnumerable<Decimal> values ) {
 		if ( values is null ) {
-			throw new NullException( nameof( values ) );
+			throw new ArgumentEmptyException( nameof( values ) );
 		}
 
 		var decimals = values as Decimal[] ?? values.ToArray();

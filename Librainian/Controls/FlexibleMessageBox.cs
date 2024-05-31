@@ -1,30 +1,32 @@
 ﻿// Copyright © Protiguous. All Rights Reserved.
 //
-// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories,
-// or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
+// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries,
+// repositories, or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
 //
-// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten
-// by formatting. (We try to avoid it from happening, but it does accidentally happen.)
+// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has
+// been overwritten by formatting. (We try to avoid it from happening, but it does accidentally happen.)
 //
-// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to
-// those Authors. If you find your code unattributed in this source code, please let us know so we can properly attribute you
-// and include the proper license and/or copyright(s). If you want to use any of our code in a commercial project, you must
-// contact Protiguous@Protiguous.com for permission, license, and a quote.
+// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to those Authors.
+// If you find your code unattributed in this source code, please let us know so we can properly attribute you and include the proper licenses and/or copyrights.
+// If you want to use any of our code in a commercial project, you must contact Protiguous@Protiguous.com for permission, license, and a quote.
 //
 // Donations, payments, and royalties are accepted via bitcoin: 1Mad8TxTqxKnMiHuZxArFvX8BuFEB9nqX2 and PayPal: Protiguous@Protiguous.com
 //
 // ====================================================================
-// Disclaimer:  Usage of the source code or binaries is AS-IS. No warranties are expressed, implied, or given. We are NOT
-// responsible for Anything You Do With Our Code. We are NOT responsible for Anything You Do With Our Executables. We are NOT
-// responsible for Anything You Do With Your Computer. ====================================================================
+// Disclaimer:  Usage of the source code or binaries is AS-IS.
+// No warranties are expressed, implied, or given.
+// We are NOT responsible for Anything You Do With Our Code.
+// We are NOT responsible for Anything You Do With Our Executables.
+// We are NOT responsible for Anything You Do With Your Computer.
+// ====================================================================
 //
 // Contact us by email if you have any questions, helpful criticism, or if you would like to use our code in your project(s).
-// For business inquiries, please contact me at Protiguous@Protiguous.com. Our software can be found at
-// "https://Protiguous.com/Software/" Our GitHub address is "https://github.com/Protiguous".
+// For business inquiries, please contact me at Protiguous@Protiguous.com.
+// Our software can be found at "https://Protiguous.com/Software/"
+// Our GitHub address is "https://github.com/Protiguous".
 //
-// File "FlexibleMessageBox.cs" last formatted on 2021-11-30 at 7:16 PM by Protiguous.
+// File "FlexibleMessageBox.cs" last formatted on 2022-02-08 at 7:34 AM by Protiguous.
 
-#nullable enable
 
 namespace Librainian.Controls;
 
@@ -89,117 +91,9 @@ using Exceptions;
 
 public static class FlexibleMessageBox {
 
-	/// <summary>Defines the font for all FlexibleMessageBox instances. Default is: SystemFonts.MessageBoxFont</summary>
-	public static Font? Font { get; } = SystemFonts.MessageBoxFont;
-
 	/// <summary>
-	/// Defines the maximum height for all FlexibleMessageBox instances in percent of the working area. Allowed values are 0.2
-	/// - 1.0 where: 0.2 means: The FlexibleMessageBox can be at most half as high as the working area. 1.0 means: The
-	/// FlexibleMessageBox can be as high as the working area. Default is: 90% of the working area height.
-	/// </summary>
-	public static Double MaxHeightFactor => 0.9;
-
-	/// <summary>
-	/// Defines the maximum width for all FlexibleMessageBox instances in percent of the working area. Allowed values are 0.2 -
-	/// 1.0 where: 0.2 means: The FlexibleMessageBox can be at most half as wide as the working area. 1.0 means: The
-	/// FlexibleMessageBox can be as wide as the working area. Default is: 70% of the working area width.
-	/// </summary>
-	public static Double MaxWidthFactor => 0.7;
-
-	/// <summary>Shows the specified message box.</summary>
-	/// <param name="text">The text.</param>
-	/// <returns>The dialog result.</returns>
-	public static DialogResult? Show( String? text ) =>
-		FlexibleMessageBoxForm.ShowDialog( null, text, String.Empty, MessageBoxButtons.OK, MessageBoxIcon.None, MessageBoxDefaultButton.Button1 );
-
-	/// <summary>Shows the specified message box.</summary>
-	/// <param name="owner">The owner.</param>
-	/// <param name="text">The text.</param>
-	/// <returns>The dialog result.</returns>
-	public static DialogResult? Show( IWin32Window? owner, String? text ) =>
-		FlexibleMessageBoxForm.ShowDialog( owner, text, String.Empty, MessageBoxButtons.OK, MessageBoxIcon.None, MessageBoxDefaultButton.Button1 );
-
-	/// <summary>Shows the specified message box.</summary>
-	/// <param name="text">The text.</param>
-	/// <param name="caption">The caption.</param>
-	/// <returns>The dialog result.</returns>
-	public static DialogResult? Show( String? text, String? caption ) =>
-		FlexibleMessageBoxForm.ShowDialog( null, text, caption, MessageBoxButtons.OK, MessageBoxIcon.None, MessageBoxDefaultButton.Button1 );
-
-	/// <summary>Shows the specified message box.</summary>
-	/// <param name="owner">The owner.</param>
-	/// <param name="text">The text.</param>
-	/// <param name="caption">The caption.</param>
-	/// <returns>The dialog result.</returns>
-	public static DialogResult? Show( IWin32Window? owner, String? text, String? caption ) =>
-		FlexibleMessageBoxForm.ShowDialog( owner, text, caption, MessageBoxButtons.OK, MessageBoxIcon.None, MessageBoxDefaultButton.Button1 );
-
-	/// <summary>Shows the specified message box.</summary>
-	/// <param name="text">The text.</param>
-	/// <param name="caption">The caption.</param>
-	/// <param name="buttons">The buttons.</param>
-	/// <returns>The dialog result.</returns>
-	public static DialogResult? Show( String? text, String? caption, MessageBoxButtons buttons ) =>
-		FlexibleMessageBoxForm.ShowDialog( null, text, caption, buttons, MessageBoxIcon.None, MessageBoxDefaultButton.Button1 );
-
-	/// <summary>Shows the specified message box.</summary>
-	/// <param name="owner">The owner.</param>
-	/// <param name="text">The text.</param>
-	/// <param name="caption">The caption.</param>
-	/// <param name="buttons">The buttons.</param>
-	/// <returns>The dialog result.</returns>
-	public static DialogResult? Show( IWin32Window? owner, String? text, String? caption, MessageBoxButtons buttons ) =>
-		FlexibleMessageBoxForm.ShowDialog( owner, text, caption, buttons, MessageBoxIcon.None, MessageBoxDefaultButton.Button1 );
-
-	/// <summary>Shows the specified message box.</summary>
-	/// <param name="text">The text.</param>
-	/// <param name="caption">The caption.</param>
-	/// <param name="buttons">The buttons.</param>
-	/// <param name="icon">The icon.</param>
-	public static DialogResult? Show( String? text, String? caption, MessageBoxButtons buttons, MessageBoxIcon icon ) =>
-		FlexibleMessageBoxForm.ShowDialog( null, text, caption, buttons, icon, MessageBoxDefaultButton.Button1 );
-
-	/// <summary>Shows the specified message box.</summary>
-	/// <param name="owner">The owner.</param>
-	/// <param name="text">The text.</param>
-	/// <param name="caption">The caption.</param>
-	/// <param name="buttons">The buttons.</param>
-	/// <param name="icon">The icon.</param>
-	/// <returns>The dialog result.</returns>
-	public static DialogResult? Show( IWin32Window? owner, String? text, String? caption, MessageBoxButtons buttons, MessageBoxIcon icon ) =>
-		FlexibleMessageBoxForm.ShowDialog( owner, text, caption, buttons, icon, MessageBoxDefaultButton.Button1 );
-
-	/// <summary>Shows the specified message box.</summary>
-	/// <param name="text">The text.</param>
-	/// <param name="caption">The caption.</param>
-	/// <param name="buttons">The buttons.</param>
-	/// <param name="icon">The icon.</param>
-	/// <param name="defaultButton">The default button.</param>
-	/// <returns>The dialog result.</returns>
-	public static DialogResult? Show( String? text, String? caption, MessageBoxButtons buttons, MessageBoxIcon icon, MessageBoxDefaultButton defaultButton ) =>
-		FlexibleMessageBoxForm.ShowDialog( null, text, caption, buttons, icon, defaultButton );
-
-	/// <summary>Shows the specified message box.</summary>
-	/// <param name="owner">The owner.</param>
-	/// <param name="text">The text.</param>
-	/// <param name="caption">The caption.</param>
-	/// <param name="buttons">The buttons.</param>
-	/// <param name="icon">The icon.</param>
-	/// <param name="defaultButton">The default button.</param>
-	/// <returns>The dialog result.</returns>
-	public static DialogResult? Show(
-		IWin32Window? owner,
-		String? text,
-		String? caption,
-		MessageBoxButtons buttons,
-		MessageBoxIcon icon,
-		MessageBoxDefaultButton defaultButton
-	) =>
-		FlexibleMessageBoxForm.ShowDialog( owner, text, caption, buttons, icon, defaultButton );
-
-	/// <summary>
-	/// The form to show the customized message box. It is defined as an internal class to keep the public interface of the
-	/// FlexibleMessageBox clean.
+	///     The form to show the customized message box. It is defined as an internal class to keep the public interface
+	///     of the FlexibleMessageBox clean.
 	/// </summary>
 	private class FlexibleMessageBoxForm : Form {
 
@@ -212,11 +106,11 @@ public static class FlexibleMessageBox {
 			"&OK", "&Cancel", "&Yes", "&No", "&Abort", "&Retry", "&Ignore"
 		};
 
-		private Button? _button1;
+		private Button _button1;
 
-		private Button? _button2;
+		private Button _button2;
 
-		private Button? _button3;
+		private Button _button3;
 
 		private MessageBoxDefaultButton _defaultButton;
 
@@ -257,24 +151,19 @@ public static class FlexibleMessageBox {
 			IGNORE
 		}
 
-		/// <summary>The text that is been used for the heading.</summary>
-		public String? CaptionText { get; set; }
-
-		/// <summary>The text that is been used in the FlexibleMessageBoxForm.</summary>
-		public String? MessageText { get; set; }
-
 		/// <summary>Gets the button text for the CurrentUICulture language. Note: The fallback language is English</summary>
 		/// <param name="buttonID">The ID of the button.</param>
 		/// <returns>The button text</returns>
 		private static String GetButtonText( ButtonID buttonID ) {
 			var buttonTextArrayIndex = Convert.ToInt32( buttonID );
 
-			return ButtonTextsEnglish[ buttonTextArrayIndex ];
+			return ButtonTextsEnglish[buttonTextArrayIndex];
 		}
 
 		/// <summary>
-		/// Ensure the given working area factor in the range of 0.2 - 1.0 where: 0.2 means: 20 percent of the working area
-		/// height or width. 1.0 means: 100 percent of the working area height or width.
+		///     Ensure the given working area factor in the range of 0.2 - 1.0 where: 0.2 means: 20 percent of the working area
+		///     height or width. 1.0 means: 100 percent of the working
+		///     area height or width.
 		/// </summary>
 		/// <param name="workingAreaFactor">The given working area factor.</param>
 		/// <returns>The corrected given working area factor.</returns>
@@ -306,7 +195,7 @@ public static class FlexibleMessageBox {
 
 		/// <summary>Handles the LinkClicked event of the richTextBoxMessage control.</summary>
 		/// <param name="sender">The source of the event.</param>
-		/// <param name="e">The <see cref="LinkClickedEventArgs" /> instance containing the event data.</param>
+		/// <param name="e">     The <see cref="LinkClickedEventArgs" /> instance containing the event data.</param>
 		private static void richTextBoxMessage_LinkClicked( Object? sender, LinkClickedEventArgs e ) {
 			try {
 				Cursor.Current = Cursors.WaitCursor;
@@ -322,32 +211,25 @@ public static class FlexibleMessageBox {
 
 		/// <summary>Set dialog buttons visibilities and texts. Also set a default button.</summary>
 		/// <param name="flexibleMessageBoxForm">The FlexibleMessageBox dialog.</param>
-		/// <param name="buttons">The buttons.</param>
-		/// <param name="defaultButton">The default button.</param>
+		/// <param name="buttons">               The buttons.</param>
+		/// <param name="defaultButton">         The default button.</param>
 		private static void SetDialogButtons( FlexibleMessageBoxForm flexibleMessageBoxForm, MessageBoxButtons buttons, MessageBoxDefaultButton defaultButton ) {
-
 			//Set the buttons visibilities and texts
 			switch ( buttons ) {
 				case MessageBoxButtons.AbortRetryIgnore:
 					flexibleMessageBoxForm._visibleButtonsCount = 3;
 
-					if ( flexibleMessageBoxForm._button1 != null ) {
-						flexibleMessageBoxForm._button1.Visible = true;
-						flexibleMessageBoxForm._button1.Text = GetButtonText( ButtonID.ABORT );
-						flexibleMessageBoxForm._button1.DialogResult = DialogResult.Abort;
-					}
+					flexibleMessageBoxForm._button1.Visible = true;
+					flexibleMessageBoxForm._button1.Text = GetButtonText( ButtonID.ABORT );
+					flexibleMessageBoxForm._button1.DialogResult = DialogResult.Abort;
 
-					if ( flexibleMessageBoxForm._button2 != null ) {
-						flexibleMessageBoxForm._button2.Visible = true;
-						flexibleMessageBoxForm._button2.Text = GetButtonText( ButtonID.RETRY );
-						flexibleMessageBoxForm._button2.DialogResult = DialogResult.Retry;
-					}
+					flexibleMessageBoxForm._button2.Visible = true;
+					flexibleMessageBoxForm._button2.Text = GetButtonText( ButtonID.RETRY );
+					flexibleMessageBoxForm._button2.DialogResult = DialogResult.Retry;
 
-					if ( flexibleMessageBoxForm._button3 != null ) {
-						flexibleMessageBoxForm._button3.Visible = true;
-						flexibleMessageBoxForm._button3.Text = GetButtonText( ButtonID.IGNORE );
-						flexibleMessageBoxForm._button3.DialogResult = DialogResult.Ignore;
-					}
+					flexibleMessageBoxForm._button3.Visible = true;
+					flexibleMessageBoxForm._button3.Text = GetButtonText( ButtonID.IGNORE );
+					flexibleMessageBoxForm._button3.DialogResult = DialogResult.Ignore;
 
 					flexibleMessageBoxForm.ControlBox = false;
 
@@ -356,55 +238,43 @@ public static class FlexibleMessageBox {
 				case MessageBoxButtons.OKCancel:
 					flexibleMessageBoxForm._visibleButtonsCount = 2;
 
-					if ( flexibleMessageBoxForm._button2 != null ) {
-						flexibleMessageBoxForm._button2.Visible = true;
-						flexibleMessageBoxForm._button2.Text = GetButtonText( ButtonID.OK );
-						flexibleMessageBoxForm._button2.DialogResult = DialogResult.OK;
-					}
+					flexibleMessageBoxForm._button2.Visible = true;
+					flexibleMessageBoxForm._button2.Text = GetButtonText( ButtonID.OK );
+					flexibleMessageBoxForm._button2.DialogResult = DialogResult.OK;
 
-					if ( flexibleMessageBoxForm._button3 != null ) {
-						flexibleMessageBoxForm._button3.Visible = true;
-						flexibleMessageBoxForm._button3.Text = GetButtonText( ButtonID.CANCEL );
-						flexibleMessageBoxForm._button3.DialogResult = DialogResult.Cancel;
+					flexibleMessageBoxForm._button3.Visible = true;
+					flexibleMessageBoxForm._button3.Text = GetButtonText( ButtonID.CANCEL );
+					flexibleMessageBoxForm._button3.DialogResult = DialogResult.Cancel;
 
-						flexibleMessageBoxForm.CancelButton = flexibleMessageBoxForm._button3;
-					}
+					flexibleMessageBoxForm.CancelButton = flexibleMessageBoxForm._button3;
 
 					break;
 
 				case MessageBoxButtons.RetryCancel:
 					flexibleMessageBoxForm._visibleButtonsCount = 2;
 
-					if ( flexibleMessageBoxForm._button2 != null ) {
-						flexibleMessageBoxForm._button2.Visible = true;
-						flexibleMessageBoxForm._button2.Text = GetButtonText( ButtonID.RETRY );
-						flexibleMessageBoxForm._button2.DialogResult = DialogResult.Retry;
-					}
+					flexibleMessageBoxForm._button2.Visible = true;
+					flexibleMessageBoxForm._button2.Text = GetButtonText( ButtonID.RETRY );
+					flexibleMessageBoxForm._button2.DialogResult = DialogResult.Retry;
 
-					if ( flexibleMessageBoxForm._button3 != null ) {
-						flexibleMessageBoxForm._button3.Visible = true;
-						flexibleMessageBoxForm._button3.Text = GetButtonText( ButtonID.CANCEL );
-						flexibleMessageBoxForm._button3.DialogResult = DialogResult.Cancel;
+					flexibleMessageBoxForm._button3.Visible = true;
+					flexibleMessageBoxForm._button3.Text = GetButtonText( ButtonID.CANCEL );
+					flexibleMessageBoxForm._button3.DialogResult = DialogResult.Cancel;
 
-						flexibleMessageBoxForm.CancelButton = flexibleMessageBoxForm._button3;
-					}
+					flexibleMessageBoxForm.CancelButton = flexibleMessageBoxForm._button3;
 
 					break;
 
 				case MessageBoxButtons.YesNo:
 					flexibleMessageBoxForm._visibleButtonsCount = 2;
 
-					if ( flexibleMessageBoxForm._button2 != null ) {
-						flexibleMessageBoxForm._button2.Visible = true;
-						flexibleMessageBoxForm._button2.Text = GetButtonText( ButtonID.YES );
-						flexibleMessageBoxForm._button2.DialogResult = DialogResult.Yes;
-					}
+					flexibleMessageBoxForm._button2.Visible = true;
+					flexibleMessageBoxForm._button2.Text = GetButtonText( ButtonID.YES );
+					flexibleMessageBoxForm._button2.DialogResult = DialogResult.Yes;
 
-					if ( flexibleMessageBoxForm._button3 != null ) {
-						flexibleMessageBoxForm._button3.Visible = true;
-						flexibleMessageBoxForm._button3.Text = GetButtonText( ButtonID.NO );
-						flexibleMessageBoxForm._button3.DialogResult = DialogResult.No;
-					}
+					flexibleMessageBoxForm._button3.Visible = true;
+					flexibleMessageBoxForm._button3.Text = GetButtonText( ButtonID.NO );
+					flexibleMessageBoxForm._button3.DialogResult = DialogResult.No;
 
 					flexibleMessageBoxForm.ControlBox = false;
 
@@ -413,38 +283,29 @@ public static class FlexibleMessageBox {
 				case MessageBoxButtons.YesNoCancel:
 					flexibleMessageBoxForm._visibleButtonsCount = 3;
 
-					if ( flexibleMessageBoxForm._button1 != null ) {
-						flexibleMessageBoxForm._button1.Visible = true;
-						flexibleMessageBoxForm._button1.Text = GetButtonText( ButtonID.YES );
-						flexibleMessageBoxForm._button1.DialogResult = DialogResult.Yes;
-					}
+					flexibleMessageBoxForm._button1.Visible = true;
+					flexibleMessageBoxForm._button1.Text = GetButtonText( ButtonID.YES );
+					flexibleMessageBoxForm._button1.DialogResult = DialogResult.Yes;
 
-					if ( flexibleMessageBoxForm._button2 != null ) {
-						flexibleMessageBoxForm._button2.Visible = true;
-						flexibleMessageBoxForm._button2.Text = GetButtonText( ButtonID.NO );
-						flexibleMessageBoxForm._button2.DialogResult = DialogResult.No;
-					}
+					flexibleMessageBoxForm._button2.Visible = true;
+					flexibleMessageBoxForm._button2.Text = GetButtonText( ButtonID.NO );
+					flexibleMessageBoxForm._button2.DialogResult = DialogResult.No;
 
-					if ( flexibleMessageBoxForm._button3 != null ) {
-						flexibleMessageBoxForm._button3.Visible = true;
-						flexibleMessageBoxForm._button3.Text = GetButtonText( ButtonID.CANCEL );
-						flexibleMessageBoxForm._button3.DialogResult = DialogResult.Cancel;
+					flexibleMessageBoxForm._button3.Visible = true;
+					flexibleMessageBoxForm._button3.Text = GetButtonText( ButtonID.CANCEL );
+					flexibleMessageBoxForm._button3.DialogResult = DialogResult.Cancel;
 
-						flexibleMessageBoxForm.CancelButton = flexibleMessageBoxForm._button3;
-					}
+					flexibleMessageBoxForm.CancelButton = flexibleMessageBoxForm._button3;
 
 					break;
 
-				case MessageBoxButtons.OK:
 				default:
 					flexibleMessageBoxForm._visibleButtonsCount = 1;
-					if ( flexibleMessageBoxForm._button3 != null ) {
-						flexibleMessageBoxForm._button3.Visible = true;
-						flexibleMessageBoxForm._button3.Text = GetButtonText( ButtonID.OK );
-						flexibleMessageBoxForm._button3.DialogResult = DialogResult.OK;
+					flexibleMessageBoxForm._button3.Visible = true;
+					flexibleMessageBoxForm._button3.Text = GetButtonText( ButtonID.OK );
+					flexibleMessageBoxForm._button3.DialogResult = DialogResult.OK;
 
-						flexibleMessageBoxForm.CancelButton = flexibleMessageBoxForm._button3;
-					}
+					flexibleMessageBoxForm.CancelButton = flexibleMessageBoxForm._button3;
 
 					break;
 			}
@@ -455,55 +316,54 @@ public static class FlexibleMessageBox {
 
 		/// <summary>Set the dialogs icon. When no icon is used: Correct placement and width of rich text box.</summary>
 		/// <param name="flexibleMessageBoxForm">The FlexibleMessageBox dialog.</param>
-		/// <param name="icon">The MessageBoxIcon.</param>
+		/// <param name="icon">                  The MessageBoxIcon.</param>
 		private static void SetDialogIcon( FlexibleMessageBoxForm flexibleMessageBoxForm, MessageBoxIcon icon ) {
 			var pictureBoxForIcon = new PictureBox();
 			switch ( icon ) {
 				case MessageBoxIcon.Information: {
-					pictureBoxForIcon.Image = SystemIcons.Information.ToBitmap();
+						pictureBoxForIcon.Image = SystemIcons.Information.ToBitmap();
 
-					break;
-				}
+						break;
+					}
 				case MessageBoxIcon.Warning: {
-					pictureBoxForIcon.Image = SystemIcons.Warning.ToBitmap();
+						pictureBoxForIcon.Image = SystemIcons.Warning.ToBitmap();
 
-					break;
-				}
-
-				case MessageBoxIcon.Error: {
-					pictureBoxForIcon.Image = SystemIcons.Error.ToBitmap();
-
-					break;
-				}
-
-				case MessageBoxIcon.Question: {
-					pictureBoxForIcon.Image = SystemIcons.Question.ToBitmap();
-
-					break;
-				}
-
-				default: {
-
-					//When no icon is used: Correct placement and width of rich text box.
-					pictureBoxForIcon.Visible = false;
-					if ( flexibleMessageBoxForm._richTextBoxMessage != null ) {
-						flexibleMessageBoxForm._richTextBoxMessage.Left -= pictureBoxForIcon.Width;
-						flexibleMessageBoxForm._richTextBoxMessage.Width += pictureBoxForIcon.Width;
+						break;
 					}
 
-					break;
-				}
+				case MessageBoxIcon.Error: {
+						pictureBoxForIcon.Image = SystemIcons.Error.ToBitmap();
+
+						break;
+					}
+
+				case MessageBoxIcon.Question: {
+						pictureBoxForIcon.Image = SystemIcons.Question.ToBitmap();
+
+						break;
+					}
+
+				default: {
+						//When no icon is used: Correct placement and width of rich text box.
+						pictureBoxForIcon.Visible = false;
+						if ( flexibleMessageBoxForm._richTextBoxMessage != null ) {
+							flexibleMessageBoxForm._richTextBoxMessage.Left -= pictureBoxForIcon.Width;
+							flexibleMessageBoxForm._richTextBoxMessage.Width += pictureBoxForIcon.Width;
+						}
+
+						break;
+					}
 			}
 		}
 
 		/// <summary>
-		/// Calculate the dialogs start size (Try to auto-size width to show longest text row). Also set the maximum dialog size.
+		///     Calculate the dialogs start size (Try to auto-size width to show longest text row). Also set the maximum
+		///     dialog size.
 		/// </summary>
 		/// <param name="flexibleMessageBoxForm">The FlexibleMessageBox dialog.</param>
-		/// <param name="text">The text (the longest text row is used to calculate the dialog width).</param>
-		/// <param name="caption">The caption (this can also affect the dialog width).</param>
+		/// <param name="text">                  The text (the longest text row is used to calculate the dialog width).</param>
+		/// <param name="caption">               The caption (this can also affect the dialog width).</param>
 		private static void SetDialogSizes( FlexibleMessageBoxForm flexibleMessageBoxForm, String? text, String? caption ) {
-
 			//First set the bounds for the maximum dialog size
 			flexibleMessageBoxForm.MaximumSize = new Size( Convert.ToInt32( SystemInformation.WorkingArea.Width * GetCorrectedWorkingAreaFactor( MaxWidthFactor ) ),
 				Convert.ToInt32( SystemInformation.WorkingArea.Height * GetCorrectedWorkingAreaFactor( MaxHeightFactor ) ) );
@@ -536,26 +396,24 @@ public static class FlexibleMessageBox {
 
 		/// <summary>Set the dialogs start position when given. Otherwise center the dialog on the current screen.</summary>
 		/// <param name="flexibleMessageBoxForm">The FlexibleMessageBox dialog.</param>
-		/// <param name="owner">The owner.</param>
+		/// <param name="owner">                 The owner.</param>
 		private static void SetDialogStartPosition( Form flexibleMessageBoxForm, IWin32Window? owner ) {
-
 			//If no owner given: Center on current screen
 			if ( owner is null ) {
 				var screen = Screen.FromPoint( Cursor.Position );
 
 				flexibleMessageBoxForm.StartPosition = FormStartPosition.Manual;
-				flexibleMessageBoxForm.Left = screen.Bounds.Left + screen.Bounds.Width / 2 - flexibleMessageBoxForm.Width / 2;
-				flexibleMessageBoxForm.Top = screen.Bounds.Top + screen.Bounds.Height / 2 - flexibleMessageBoxForm.Height / 2;
+				flexibleMessageBoxForm.Left = ( screen.Bounds.Left + ( screen.Bounds.Width / 2 ) ) - ( flexibleMessageBoxForm.Width / 2 );
+				flexibleMessageBoxForm.Top = ( screen.Bounds.Top + ( screen.Bounds.Height / 2 ) ) - ( flexibleMessageBoxForm.Height / 2 );
 			}
 		}
 
 		/// <summary>Handles the KeyUp event of the richTextBoxMessage control.</summary>
 		/// <param name="sender">The source of the event.</param>
-		/// <param name="e">The <see cref="KeyEventArgs" /> instance containing the event data.</param>
+		/// <param name="e">     The <see cref="KeyEventArgs" /> instance containing the event data.</param>
 		private void FlexibleMessageBoxForm_KeyUp( Object? sender, KeyEventArgs? e ) {
-
 			//Handle standard key strikes for clipboard copy: "Ctrl + C" and "Ctrl + Insert"
-			if ( e?.Control == true && e.KeyCode is Keys.C or Keys.Insert ) {
+			if ( ( e?.Control == true ) && e.KeyCode is Keys.C or Keys.Insert ) {
 				var buttonsTextLine = ( this._button1.Visible ? this._button1.Text + StandardMessageboxSeparatorSpaces : String.Empty ) +
 									  ( this._button2.Visible ? this._button2.Text + StandardMessageboxSeparatorSpaces : String.Empty ) +
 									  ( this._button3.Visible ? this._button3.Text + StandardMessageboxSeparatorSpaces : String.Empty );
@@ -571,14 +429,14 @@ public static class FlexibleMessageBox {
 
 		/// <summary>Handles the Shown event of the FlexibleMessageBoxForm control.</summary>
 		/// <param name="sender">The source of the event.</param>
-		/// <param name="e">The <see cref="EventArgs" /> instance containing the event data.</param>
+		/// <param name="e">     The <see cref="EventArgs" /> instance containing the event data.</param>
 		private void FlexibleMessageBoxForm_Shown( Object? sender, EventArgs? e ) {
-
 			//Set the default button...
 			var buttonIndexToFocus = this._defaultButton switch {
 				MessageBoxDefaultButton.Button1 => 1,
 				MessageBoxDefaultButton.Button2 => 2,
 				MessageBoxDefaultButton.Button3 => 3,
+				MessageBoxDefaultButton.Button4 => throw new NotImplementedException(),
 				var _ => 1
 			};
 
@@ -592,11 +450,12 @@ public static class FlexibleMessageBox {
 				var _ => this._button1
 			};
 
-			buttonToFocus?.Focus();
+			buttonToFocus.Focus();
 		}
 
 		/// <summary>
-		/// Erforderliche Methode für die Designerunterstützung. Der Inhalt der Methode darf nicht mit dem Code-Editor geändert werden.
+		///     Erforderliche Methode für die Designerunterstützung. Der Inhalt der Methode darf nicht mit dem Code-Editor
+		///     geändert werden.
 		/// </summary>
 		private void InitializeComponent() {
 			this.components = new Container();
@@ -727,12 +586,18 @@ public static class FlexibleMessageBox {
 			base.Dispose( disposing );
 		}
 
+		/// <summary>The text that is been used for the heading.</summary>
+		public String? CaptionText { get; set; }
+
+		/// <summary>The text that is been used in the FlexibleMessageBoxForm.</summary>
+		public String? MessageText { get; set; }
+
 		/// <summary>Shows the specified message box.</summary>
-		/// <param name="owner">The owner.</param>
-		/// <param name="text">The text.</param>
-		/// <param name="caption">The caption.</param>
-		/// <param name="buttons">The buttons.</param>
-		/// <param name="icon">The icon.</param>
+		/// <param name="owner">        The owner.</param>
+		/// <param name="text">         The text.</param>
+		/// <param name="caption">      The caption.</param>
+		/// <param name="buttons">      The buttons.</param>
+		/// <param name="icon">         The icon.</param>
 		/// <param name="defaultButton">The default button.</param>
 		/// <returns>The dialog result.</returns>
 		public static DialogResult? ShowDialog(
@@ -744,7 +609,6 @@ public static class FlexibleMessageBox {
 			MessageBoxDefaultButton defaultButton
 		) {
 			var func = new Func<DialogResult?>( () => {
-
 				//Create a new instance of the FlexibleMessageBox form
 				var flexibleMessageBoxForm = new FlexibleMessageBoxForm {
 					ShowInTaskbar = false,
@@ -775,7 +639,7 @@ public static class FlexibleMessageBox {
 				SetDialogStartPosition( flexibleMessageBoxForm, owner );
 
 				//Show the dialog
-				return flexibleMessageBoxForm.ShowDialog( owner ?? throw new NullException( nameof( owner ) ) );
+				return flexibleMessageBoxForm.ShowDialog( owner ?? throw new ArgumentEmptyException( nameof( owner ) ) );
 			} );
 
 			if ( owner is Control { InvokeRequired: true } control ) {
@@ -788,4 +652,114 @@ public static class FlexibleMessageBox {
 		//These are the buttons texts for different languages.
 		//If you want to add a new language, add it here and in the GetButtonText-Function
 	}
+
+	/// <summary>Defines the font for all FlexibleMessageBox instances. Default is: SystemFonts.MessageBoxFont</summary>
+	public static Font? Font { get; } = SystemFonts.MessageBoxFont;
+
+	/// <summary>
+	///     Defines the maximum height for all FlexibleMessageBox instances in percent of the working area. Allowed values are
+	///     0.2 - 1.0 where: 0.2 means: The FlexibleMessageBox can
+	///     be at most half as high as the working area. 1.0 means: The FlexibleMessageBox can be as high as the working area.
+	///     Default is: 90% of the working area height.
+	/// </summary>
+	public static Double MaxHeightFactor => 0.9;
+
+	/// <summary>
+	///     Defines the maximum width for all FlexibleMessageBox instances in percent of the working area. Allowed values are
+	///     0.2 - 1.0 where: 0.2 means: The FlexibleMessageBox can
+	///     be at most half as wide as the working area. 1.0 means: The FlexibleMessageBox can be as wide as the working area.
+	///     Default is: 70% of the working area width.
+	/// </summary>
+	public static Double MaxWidthFactor => 0.7;
+
+	/// <summary>Shows the specified message box.</summary>
+	/// <param name="text">The text.</param>
+	/// <returns>The dialog result.</returns>
+	public static DialogResult? Show( String? text ) =>
+		FlexibleMessageBoxForm.ShowDialog( null, text, String.Empty, MessageBoxButtons.OK, MessageBoxIcon.None, MessageBoxDefaultButton.Button1 );
+
+	/// <summary>Shows the specified message box.</summary>
+	/// <param name="owner">The owner.</param>
+	/// <param name="text"> The text.</param>
+	/// <returns>The dialog result.</returns>
+	public static DialogResult? Show( IWin32Window? owner, String? text ) =>
+		FlexibleMessageBoxForm.ShowDialog( owner, text, String.Empty, MessageBoxButtons.OK, MessageBoxIcon.None, MessageBoxDefaultButton.Button1 );
+
+	/// <summary>Shows the specified message box.</summary>
+	/// <param name="text">   The text.</param>
+	/// <param name="caption">The caption.</param>
+	/// <returns>The dialog result.</returns>
+	public static DialogResult? Show( String? text, String? caption ) =>
+		FlexibleMessageBoxForm.ShowDialog( null, text, caption, MessageBoxButtons.OK, MessageBoxIcon.None, MessageBoxDefaultButton.Button1 );
+
+	/// <summary>Shows the specified message box.</summary>
+	/// <param name="owner">  The owner.</param>
+	/// <param name="text">   The text.</param>
+	/// <param name="caption">The caption.</param>
+	/// <returns>The dialog result.</returns>
+	public static DialogResult? Show( IWin32Window? owner, String? text, String? caption ) =>
+		FlexibleMessageBoxForm.ShowDialog( owner, text, caption, MessageBoxButtons.OK, MessageBoxIcon.None, MessageBoxDefaultButton.Button1 );
+
+	/// <summary>Shows the specified message box.</summary>
+	/// <param name="text">   The text.</param>
+	/// <param name="caption">The caption.</param>
+	/// <param name="buttons">The buttons.</param>
+	/// <returns>The dialog result.</returns>
+	public static DialogResult? Show( String? text, String? caption, MessageBoxButtons buttons ) =>
+		FlexibleMessageBoxForm.ShowDialog( null, text, caption, buttons, MessageBoxIcon.None, MessageBoxDefaultButton.Button1 );
+
+	/// <summary>Shows the specified message box.</summary>
+	/// <param name="owner">  The owner.</param>
+	/// <param name="text">   The text.</param>
+	/// <param name="caption">The caption.</param>
+	/// <param name="buttons">The buttons.</param>
+	/// <returns>The dialog result.</returns>
+	public static DialogResult? Show( IWin32Window? owner, String? text, String? caption, MessageBoxButtons buttons ) =>
+		FlexibleMessageBoxForm.ShowDialog( owner, text, caption, buttons, MessageBoxIcon.None, MessageBoxDefaultButton.Button1 );
+
+	/// <summary>Shows the specified message box.</summary>
+	/// <param name="text">   The text.</param>
+	/// <param name="caption">The caption.</param>
+	/// <param name="buttons">The buttons.</param>
+	/// <param name="icon">   The icon.</param>
+	public static DialogResult? Show( String? text, String? caption, MessageBoxButtons buttons, MessageBoxIcon icon ) =>
+		FlexibleMessageBoxForm.ShowDialog( null, text, caption, buttons, icon, MessageBoxDefaultButton.Button1 );
+
+	/// <summary>Shows the specified message box.</summary>
+	/// <param name="owner">  The owner.</param>
+	/// <param name="text">   The text.</param>
+	/// <param name="caption">The caption.</param>
+	/// <param name="buttons">The buttons.</param>
+	/// <param name="icon">   The icon.</param>
+	/// <returns>The dialog result.</returns>
+	public static DialogResult? Show( IWin32Window? owner, String? text, String? caption, MessageBoxButtons buttons, MessageBoxIcon icon ) =>
+		FlexibleMessageBoxForm.ShowDialog( owner, text, caption, buttons, icon, MessageBoxDefaultButton.Button1 );
+
+	/// <summary>Shows the specified message box.</summary>
+	/// <param name="text">         The text.</param>
+	/// <param name="caption">      The caption.</param>
+	/// <param name="buttons">      The buttons.</param>
+	/// <param name="icon">         The icon.</param>
+	/// <param name="defaultButton">The default button.</param>
+	/// <returns>The dialog result.</returns>
+	public static DialogResult? Show( String? text, String? caption, MessageBoxButtons buttons, MessageBoxIcon icon, MessageBoxDefaultButton defaultButton ) =>
+		FlexibleMessageBoxForm.ShowDialog( null, text, caption, buttons, icon, defaultButton );
+
+	/// <summary>Shows the specified message box.</summary>
+	/// <param name="owner">        The owner.</param>
+	/// <param name="text">         The text.</param>
+	/// <param name="caption">      The caption.</param>
+	/// <param name="buttons">      The buttons.</param>
+	/// <param name="icon">         The icon.</param>
+	/// <param name="defaultButton">The default button.</param>
+	/// <returns>The dialog result.</returns>
+	public static DialogResult? Show(
+		IWin32Window? owner,
+		String? text,
+		String? caption,
+		MessageBoxButtons buttons,
+		MessageBoxIcon icon,
+		MessageBoxDefaultButton defaultButton
+	) =>
+		FlexibleMessageBoxForm.ShowDialog( owner, text, caption, buttons, icon, defaultButton );
 }

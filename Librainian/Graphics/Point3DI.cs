@@ -1,28 +1,29 @@
 // Copyright © Protiguous. All Rights Reserved.
 //
-// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories,
-// or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
+// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories, or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
 //
-// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten
-// by formatting. (We try to avoid it from happening, but it does accidentally happen.)
+// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten by formatting. (We try to avoid it from happening, but it does accidentally happen.)
 //
-// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to
-// those Authors. If you find your code unattributed in this source code, please let us know so we can properly attribute you
-// and include the proper license and/or copyright(s). If you want to use any of our code in a commercial project, you must
-// contact Protiguous@Protiguous.com for permission, license, and a quote.
+// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to those Authors.
+// If you find your code unattributed in this source code, please let us know so we can properly attribute you and include the proper license and/or copyright(s).
+// If you want to use any of our code in a commercial project, you must contact Protiguous@Protiguous.com for permission, license, and a quote.
 //
 // Donations, payments, and royalties are accepted via bitcoin: 1Mad8TxTqxKnMiHuZxArFvX8BuFEB9nqX2 and PayPal: Protiguous@Protiguous.com
 //
-// ====================================================================
-// Disclaimer:  Usage of the source code or binaries is AS-IS. No warranties are expressed, implied, or given. We are NOT
-// responsible for Anything You Do With Our Code. We are NOT responsible for Anything You Do With Our Executables. We are NOT
-// responsible for Anything You Do With Your Computer. ====================================================================
+//
+// Disclaimer:  Usage of the source code or binaries is AS-IS.
+// No warranties are expressed, implied, or given.
+// We are NOT responsible for Anything You Do With Our Code.
+// We are NOT responsible for Anything You Do With Our Executables.
+// We are NOT responsible for Anything You Do With Your Computer.
+//
 //
 // Contact us by email if you have any questions, helpful criticism, or if you would like to use our code in your project(s).
-// For business inquiries, please contact me at Protiguous@Protiguous.com. Our software can be found at
-// "https://Protiguous.com/Software/" Our GitHub address is "https://github.com/Protiguous".
+// For business inquiries, please contact me at Protiguous@Protiguous.com.
+// Our software can be found at "https://Protiguous.com/Software/"
+// Our GitHub address is "https://github.com/Protiguous".
 //
-// File "Point3DI.cs" last formatted on 2021-11-30 at 7:18 PM by Protiguous.
+// File "Point3DI.cs" last formatted on 2022-12-22 at 5:16 PM by Protiguous.
 
 namespace Librainian.Graphics;
 
@@ -30,7 +31,7 @@ using System;
 
 /// <summary>Represents a location in 3D integer space.</summary>
 /// <remarks>Culled from the file CPI.Plot3D.cs I don't know where that file came from otherwise I'd attribute it!</remarks>
-public struct Point3Di : IEquatable<Point3Di> {
+public readonly struct Point3Di : IEquatable<Point3Di> {
 
 	/// <summary>The maximum distance two coordinates can be from each other for them to be considered approximately equal.</summary>
 	public const Int32 Tolerance = 0;
@@ -75,7 +76,7 @@ public struct Point3Di : IEquatable<Point3Di> {
 
 	/// <summary>Static comparison.</summary>
 	/// <param name="left"></param>
-	/// <param name="right"></param>
+	/// <param name="right"> </param>
 	public static Boolean Equals( Point3Di left, Point3Di right ) => left.ApproximatelyEquals( right );
 
 	/// <summary>Determines whether the specified Point3D instances are unequal.</summary>
@@ -92,16 +93,18 @@ public struct Point3Di : IEquatable<Point3Di> {
 
 	/// <summary>Determines whether this instance is very nearly equal to a specified Point3D structure.</summary>
 	/// <remarks>
-	/// Since floating point math is kind of fuzzy, we're taking a "close enough" approach to equality with this method. If the
-	/// individual coordinates of two points fall within a small tolerance, we'll consider them to be approximately equal.
-	/// Remember, though, that the uncertainty here can be cumulative. For example: if pointA.Equals(pointB) and
-	/// pointB.Equals(pointC), then it's an absolute certainty that pointA.Equals(pointC). However, if
-	/// pointD.ApproximatelyEquals(pointE) and pointE.ApproximatelyEquals(pointF), it is NOT certain whether pointD.ApproximatelyEquals(pointF).
+	///     Since floating point math is kind of fuzzy, we're taking a "close enough" approach to equality with this method. If
+	///     the individual coordinates of two points fall within a
+	///     small tolerance, we'll consider them to be approximately equal. Remember, though, that the uncertainty here can be
+	///     cumulative. For example: if pointA.Equals(pointB) and
+	///     pointB.Equals(pointC), then it's an absolute certainty that pointA.Equals(pointC). However, if
+	///     pointD.ApproximatelyEquals(pointE) and pointE.ApproximatelyEquals(pointF), it is NOT
+	///     certain whether pointD.ApproximatelyEquals(pointF).
 	/// </remarks>
 	/// <param name="other">A Point3D structure to compare to this instance.</param>
 	/// <returns>True if the X,Y,Z components are approximately equal; false otherwise.</returns>
 	public Boolean ApproximatelyEquals( Point3Di other ) =>
-		Math.Abs( this.X - other.X ) <= Tolerance && Math.Abs( this.Y - other.Y ) <= Tolerance && Math.Abs( this.Z - other.Z ) <= Tolerance;
+		( Math.Abs( this.X - other.X ) <= Tolerance ) && ( Math.Abs( this.Y - other.Y ) <= Tolerance ) && ( Math.Abs( this.Z - other.Z ) <= Tolerance );
 
 	/// <summary>Returns a value indicating whether this instance is equal to a specified object.</summary>
 	/// <param name="obj">An object to compare with this instance.</param>

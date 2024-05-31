@@ -1,30 +1,32 @@
-// Copyright Â© Protiguous. All Rights Reserved.
+// Copyright © Protiguous. All Rights Reserved.
 //
-// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories,
-// or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
+// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries,
+// repositories, or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
 //
-// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten
-// by formatting. (We try to avoid it from happening, but it does accidentally happen.)
+// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has
+// been overwritten by formatting. (We try to avoid it from happening, but it does accidentally happen.)
 //
-// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to
-// those Authors. If you find your code unattributed in this source code, please let us know so we can properly attribute you
-// and include the proper license and/or copyright(s). If you want to use any of our code in a commercial project, you must
-// contact Protiguous@Protiguous.com for permission, license, and a quote.
+// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to those Authors.
+// If you find your code unattributed in this source code, please let us know so we can properly attribute you and include the proper licenses and/or copyrights.
+// If you want to use any of our code in a commercial project, you must contact Protiguous@Protiguous.com for permission, license, and a quote.
 //
 // Donations, payments, and royalties are accepted via bitcoin: 1Mad8TxTqxKnMiHuZxArFvX8BuFEB9nqX2 and PayPal: Protiguous@Protiguous.com
 //
 // ====================================================================
-// Disclaimer:  Usage of the source code or binaries is AS-IS. No warranties are expressed, implied, or given. We are NOT
-// responsible for Anything You Do With Our Code. We are NOT responsible for Anything You Do With Our Executables. We are NOT
-// responsible for Anything You Do With Your Computer. ====================================================================
+// Disclaimer:  Usage of the source code or binaries is AS-IS.
+// No warranties are expressed, implied, or given.
+// We are NOT responsible for Anything You Do With Our Code.
+// We are NOT responsible for Anything You Do With Our Executables.
+// We are NOT responsible for Anything You Do With Your Computer.
+// ====================================================================
 //
 // Contact us by email if you have any questions, helpful criticism, or if you would like to use our code in your project(s).
-// For business inquiries, please contact me at Protiguous@Protiguous.com. Our software can be found at
-// "https://Protiguous.com/Software/" Our GitHub address is "https://github.com/Protiguous".
+// For business inquiries, please contact me at Protiguous@Protiguous.com.
+// Our software can be found at "https://Protiguous.com/Software/"
+// Our GitHub address is "https://github.com/Protiguous".
 //
-// File "ConcurrentDictionaryFile.cs" last formatted on 2021-11-30 at 7:22 PM by Protiguous.
+// File "ConcurrentDictionaryFile.cs" last formatted on 2022-02-06 at 6:56 AM by Protiguous.
 
-#nullable enable
 
 namespace Librainian.Persistence;
 
@@ -42,6 +44,7 @@ using Maths.Numbers;
 using Measurement.Time;
 using Newtonsoft.Json;
 using PooledAwait;
+using Utilities;
 
 /// <summary>Persist a dictionary to and from a JSON formatted text document.</summary>
 [JsonObject]
@@ -53,32 +56,32 @@ public class ConcurrentDictionaryFile<TKey, TValue> : ConcurrentDictionary<TKey,
 
 	/// <summary>Disallow constructor without a document/filename</summary>
 	/// <summary>Persist a dictionary to and from a JSON formatted text document.</summary>
-	/// <param name="document"></param>
+	/// <param name="documentFile"></param>
 	/// <param name="progress"></param>
-	/// <param name="preload"></param>
-	public ConcurrentDictionaryFile( Document document, Progress<ZeroToOne> progress, Boolean preload = false ) {
-		this.Document = document ?? throw new NullException( nameof( document ) );
+	/// <param name="preload"> </param>
+	public ConcurrentDictionaryFile( DocumentFile documentFile, Progress<ZeroToOne> progress, Boolean preload = false ) {
+		this.DocumentFile = documentFile ?? throw new ArgumentEmptyException( nameof( documentFile ) );
 
-		if ( !this.Document.ContainingingFolder().Info.Exists ) {
-			this.Document.ContainingingFolder().Info.Create();
+		if ( !this.DocumentFile.ContainingingFolder().Info.Exists ) {
+			this.DocumentFile.ContainingingFolder().Info.Create();
 		}
 
 		if ( preload ) {
-			var _ = this.Load( progress );
+			this.Load( progress ).RunSynchronously();
 		}
 	}
 
 	/// <summary>
-	/// Persist a dictionary to and from a JSON formatted text document.
-	/// <para>Defaults to user\appdata\Local\productname\filename</para>
+	///     Persist a dictionary to and from a JSON formatted text document.
+	///     <para>Defaults to user\appdata\Local\productname\filename</para>
 	/// </summary>
 	/// <param name="filename"></param>
 	/// <param name="progress"></param>
-	/// <param name="preload"></param>
-	public ConcurrentDictionaryFile( String filename, Progress<ZeroToOne> progress, Boolean preload = false ) : this( new Document( filename ), progress, preload ) { }
+	/// <param name="preload"> </param>
+	public ConcurrentDictionaryFile( String filename, Progress<ZeroToOne> progress, Boolean preload = false ) : this( new DocumentFile( filename ), progress, preload ) { }
 
 	[JsonProperty]
-	public Document Document { get; }
+	public DocumentFile DocumentFile { get; }
 
 	public Boolean IsLoading {
 		get => this._isLoading;
@@ -102,17 +105,15 @@ public class ConcurrentDictionaryFile<TKey, TValue> : ConcurrentDictionary<TKey,
 	}
 
 	public async PooledValueTask<Boolean> Flush( CancellationToken cancellationToken ) {
-		var document = this.Document;
-
-		if ( !await document.ContainingingFolder().Exists( cancellationToken ).ConfigureAwait( false ) ) {
-			await document.ContainingingFolder().Create( cancellationToken ).ConfigureAwait( false );
+		if ( !await this.DocumentFile.ContainingingFolder().Exists( cancellationToken ).ConfigureAwait( false ) ) {
+			await this.DocumentFile.ContainingingFolder().Create( cancellationToken ).ConfigureAwait( false );
 		}
 
-		await document.TryDeleting( Seconds.One, cancellationToken ).ConfigureAwait( false );
+		await this.DocumentFile.TryDeleting( Seconds.One, cancellationToken ).ConfigureAwait( false );
 
 		var json = this.ToJSON( Formatting.Indented );
 		if ( json != null ) {
-			await document.AppendText( json, cancellationToken ).ConfigureAwait( false );
+			await this.DocumentFile.AppendText( json, cancellationToken ).ConfigureAwait( false );
 		}
 
 		return true;
@@ -122,9 +123,7 @@ public class ConcurrentDictionaryFile<TKey, TValue> : ConcurrentDictionary<TKey,
 		try {
 			this.IsLoading = true;
 
-			var document = this.Document;
-
-			if ( !await document.Exists( cancellationToken ).ConfigureAwait( false ) ) {
+			if ( !await this.DocumentFile.Exists( cancellationToken ).ConfigureAwait( false ) ) {
 				return default( Status );
 			}
 
@@ -132,7 +131,7 @@ public class ConcurrentDictionaryFile<TKey, TValue> : ConcurrentDictionary<TKey,
 				cancellationToken = this.MainCTS.Token;
 			}
 
-			(var status, var dictionary) = await document.LoadJSON<ConcurrentDictionary<TKey, TValue>>( progress, cancellationToken ).ConfigureAwait( false );
+			(var status, var dictionary) = await this.DocumentFile.LoadJSON<ConcurrentDictionary<TKey, TValue>>( progress, cancellationToken ).ConfigureAwait( false );
 
 			if ( status.IsGood() ) {
 				var options = new ParallelOptions {
@@ -141,7 +140,7 @@ public class ConcurrentDictionaryFile<TKey, TValue> : ConcurrentDictionary<TKey,
 				};
 
 				if ( dictionary != null ) {
-					var r = Parallel.ForEach( dictionary.Keys.AsParallel(), body: key => this[ key ] = dictionary[ key ], parallelOptions: options );
+					var r = Parallel.ForEach( dictionary.Keys.AsParallel(), body: key => this[key] = dictionary[key], parallelOptions: options );
 
 					return r.IsCompleted.ToStatus();
 				}
@@ -151,12 +150,10 @@ public class ConcurrentDictionaryFile<TKey, TValue> : ConcurrentDictionary<TKey,
 			exception.Log();
 		}
 		catch ( IOException exception ) {
-
 			//file in use by another app
 			exception.Log();
 		}
 		catch ( OutOfMemoryException exception ) {
-
 			//file is huge (too big to load into memory).
 			exception.Log();
 		}
@@ -167,7 +164,7 @@ public class ConcurrentDictionaryFile<TKey, TValue> : ConcurrentDictionary<TKey,
 		return Status.Failure;
 	}
 
-	/// <summary>Saves the data to the <see cref="Document" />.</summary>
+	/// <summary>Saves the data to the <see cref="DocumentFile" />.</summary>
 	/// <param name="cancellationToken"></param>
 	public PooledValueTask<Boolean> Save( CancellationToken? cancellationToken = null ) => this.Flush( cancellationToken ?? this.MainCTS.Token );
 

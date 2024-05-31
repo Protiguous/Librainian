@@ -1,39 +1,39 @@
 // Copyright © Protiguous. All Rights Reserved.
 //
-// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories,
-// or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
+// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories, or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
 //
-// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten
-// by formatting. (We try to avoid it from happening, but it does accidentally happen.)
+// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten by formatting. (We try to avoid it from happening, but it does accidentally happen.)
 //
-// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to
-// those Authors. If you find your code unattributed in this source code, please let us know so we can properly attribute you
-// and include the proper license and/or copyright(s). If you want to use any of our code in a commercial project, you must
-// contact Protiguous@Protiguous.com for permission, license, and a quote.
+// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to those Authors.
+// If you find your code unattributed in this source code, please let us know so we can properly attribute you and include the proper license and/or copyright(s).
+// If you want to use any of our code in a commercial project, you must contact Protiguous@Protiguous.com for permission, license, and a quote.
 //
 // Donations, payments, and royalties are accepted via bitcoin: 1Mad8TxTqxKnMiHuZxArFvX8BuFEB9nqX2 and PayPal: Protiguous@Protiguous.com
 //
-// ====================================================================
-// Disclaimer:  Usage of the source code or binaries is AS-IS. No warranties are expressed, implied, or given. We are NOT
-// responsible for Anything You Do With Our Code. We are NOT responsible for Anything You Do With Our Executables. We are NOT
-// responsible for Anything You Do With Your Computer. ====================================================================
+//
+// Disclaimer:  Usage of the source code or binaries is AS-IS.
+// No warranties are expressed, implied, or given.
+// We are NOT responsible for Anything You Do With Our Code.
+// We are NOT responsible for Anything You Do With Our Executables.
+// We are NOT responsible for Anything You Do With Your Computer.
+//
 //
 // Contact us by email if you have any questions, helpful criticism, or if you would like to use our code in your project(s).
-// For business inquiries, please contact me at Protiguous@Protiguous.com. Our software can be found at
-// "https://Protiguous.com/Software/" Our GitHub address is "https://github.com/Protiguous".
+// For business inquiries, please contact me at Protiguous@Protiguous.com.
+// Our software can be found at "https://Protiguous.com/Software/"
+// Our GitHub address is "https://github.com/Protiguous".
 //
-// File "Device.cs" last formatted on 2021-11-30 at 7:16 PM by Protiguous.
+// File "Device.cs" last formatted on 2022-12-22 at 5:14 PM by Protiguous.
 
-#nullable enable
 
 namespace Librainian.ComputerSystem.Devices;
 
+using Exceptions;
+using OperatingSystem;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
-using Exceptions;
-using OperatingSystem;
 
 /// <summary>A generic base class for physical devices.</summary>
 [TypeConverter( typeof( ExpandableObjectConverter ) )]
@@ -49,14 +49,14 @@ public class Device /*: IComparable<Device>*/ {
 
 	private String? _friendlyName;
 
-	private Boolean? _isUsb;
-
 	private Device? _parent;
 
+	private Boolean? isUsb;
+
 	public Device( DeviceClass deviceClass, NativeMethods.SP_DEVINFO_DATA? deviceInfoData, String? path, Int32 index, Int32? diskNumber = null ) {
-		this.DeviceClass = deviceClass ?? throw new NullException( nameof( deviceClass ) );
+		this.DeviceClass = deviceClass ?? throw new ArgumentEmptyException( nameof( deviceClass ) );
 		this.Path = path; // may be null
-		this.DeviceInfoData = deviceInfoData ?? throw new NullException( nameof( deviceInfoData ) );
+		this.DeviceInfoData = deviceInfoData ?? throw new ArgumentEmptyException( nameof( deviceInfoData ) );
 		this.Index = index;
 		this.DiskNumber = diskNumber;
 	}
@@ -78,17 +78,19 @@ public class Device /*: IComparable<Device>*/ {
 	/// <summary>Compares the current instance with another object of the same type.</summary>
 	/// <param name="obj">An object to compare with this instance.</param>
 	/// <returns>A 32-bit signed integer that indicates the relative order of the comparands.</returns>
+	/// <exception cref="ArgumentException"></exception>
 	public virtual Int32 CompareTo( Object obj ) {
-		if ( obj is not Device device ) {
-			throw new NullException( nameof( device ) );
+		if ( obj is Device device ) {
+			return this.Index.CompareTo( device.Index );
 		}
 
-		return this.Index.CompareTo( device.Index );
+		throw new ArgumentException( nameof( device ) );
 	}
 
 	/// <summary>Ejects the device.</summary>
 	/// <param name="allowUI">Pass true to allow the Windows shell to display any related UI element, false otherwise.</param>
 	/// <returns>null if no error occured, otherwise a contextual text.</returns>
+	/// <exception cref="Win32Exception"></exception>
 	public String? Eject( Boolean allowUI ) {
 		foreach ( var device in this.GetRemovableDevices() ) {
 			if ( allowUI ) {
@@ -124,18 +126,22 @@ public class Device /*: IComparable<Device>*/ {
 	}
 
 	/// <summary>Gets the device's class name.</summary>
+	/// <exception cref="InvalidOperationException"></exception>
 	public String GetClass() =>
 		( this._class ??= this.DeviceClass.GetProperty( this.DeviceInfoData, NativeMethods.SPDRP_CLASS, null ) ) ?? throw new InvalidOperationException();
 
 	/// <summary>Gets the device's class Guid as a string.</summary>
+	/// <exception cref="InvalidOperationException"></exception>
 	public String GetClassGuid() =>
 		( this._classGuid ??= this.DeviceClass.GetProperty( this.DeviceInfoData, NativeMethods.SPDRP_CLASSGUID, null ) ) ?? throw new InvalidOperationException();
 
 	/// <summary>Gets the device's description.</summary>
+	/// <exception cref="InvalidOperationException"></exception>
 	public String GetDescription() =>
 		( this._description ??= this.DeviceClass.GetProperty( this.DeviceInfoData, NativeMethods.SPDRP_DEVICEDESC, null ) ) ?? throw new InvalidOperationException();
 
 	/// <summary>Gets the device's friendly name.</summary>
+	/// <exception cref="InvalidOperationException"></exception>
 	public String GetFriendlyName() =>
 		( this._friendlyName ??= this.DeviceClass.GetProperty( this.DeviceInfoData, NativeMethods.SPDRP_FRIENDLYNAME, null ) ) ?? throw new InvalidOperationException();
 
@@ -162,13 +168,13 @@ public class Device /*: IComparable<Device>*/ {
 
 	/// <summary>Gets a value indicating whether this device is a USB device.</summary>
 	public virtual Boolean IsUsb() {
-		this._isUsb ??= this.GetClass().ToUpper().Contains( "USB" );
+		this.isUsb ??= this.GetClass().Contains( "USB", StringComparison.OrdinalIgnoreCase );
 
-		if ( this._isUsb != true ) {
-			this._isUsb = this.Parent()?.IsUsb();
+		if ( this.isUsb != true ) {
+			this.isUsb = this.Parent()?.IsUsb();
 		}
 
-		return this._isUsb == true;
+		return this.isUsb == true;
 	}
 
 	/// <summary>Gets the device's parent device or null if this device has not parent.</summary>

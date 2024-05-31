@@ -1,28 +1,29 @@
 // Copyright © Protiguous. All Rights Reserved.
 //
-// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories,
-// or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
+// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories, or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
 //
-// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten
-// by formatting. (We try to avoid it from happening, but it does accidentally happen.)
+// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten by formatting. (We try to avoid it from happening, but it does accidentally happen.)
 //
-// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to
-// those Authors. If you find your code unattributed in this source code, please let us know so we can properly attribute you
-// and include the proper license and/or copyright(s). If you want to use any of our code in a commercial project, you must
-// contact Protiguous@Protiguous.com for permission, license, and a quote.
+// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to those Authors.
+// If you find your code unattributed in this source code, please let us know so we can properly attribute you and include the proper license and/or copyright(s).
+// If you want to use any of our code in a commercial project, you must contact Protiguous@Protiguous.com for permission, license, and a quote.
 //
 // Donations, payments, and royalties are accepted via bitcoin: 1Mad8TxTqxKnMiHuZxArFvX8BuFEB9nqX2 and PayPal: Protiguous@Protiguous.com
 //
-// ====================================================================
-// Disclaimer:  Usage of the source code or binaries is AS-IS. No warranties are expressed, implied, or given. We are NOT
-// responsible for Anything You Do With Our Code. We are NOT responsible for Anything You Do With Our Executables. We are NOT
-// responsible for Anything You Do With Your Computer. ====================================================================
+//
+// Disclaimer:  Usage of the source code or binaries is AS-IS.
+// No warranties are expressed, implied, or given.
+// We are NOT responsible for Anything You Do With Our Code.
+// We are NOT responsible for Anything You Do With Our Executables.
+// We are NOT responsible for Anything You Do With Your Computer.
+//
 //
 // Contact us by email if you have any questions, helpful criticism, or if you would like to use our code in your project(s).
-// For business inquiries, please contact me at Protiguous@Protiguous.com. Our software can be found at
-// "https://Protiguous.com/Software/" Our GitHub address is "https://github.com/Protiguous".
+// For business inquiries, please contact me at Protiguous@Protiguous.com.
+// Our software can be found at "https://Protiguous.com/Software/"
+// Our GitHub address is "https://github.com/Protiguous".
 //
-// File "Pixel.cs" last formatted on 2021-11-30 at 7:18 PM by Protiguous.
+// File "Pixel.cs" last formatted on 2022-12-22 at 5:16 PM by Protiguous.
 
 namespace Librainian.Graphics.Imaging;
 
@@ -33,11 +34,17 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Exceptions;
 using Extensions;
-using JetBrains.Annotations;
 using Newtonsoft.Json;
+using Utilities;
 
-/// <summary> <para> A simple pixel with <see cref="Checksum" />, <see cref="Alpha" />, <see cref="Red" />, <see cref="Green"
-/// />, <see cref="Blue" />, and <see cref="X" /> & <see cref="Y" /> values. </para> <remarks>Thoroughly untested.</remarks> </summary>
+/// <summary>
+///     <para>
+///         A simple pixel with <see cref="Checksum" />, <see cref="Alpha" />, <see cref="Red" />, <see cref="Green" />,
+///         <see cref="Blue" />, and <see cref="X" /> & <see cref="Y" />
+///         values.
+///     </para>
+///     <remarks>Thoroughly untested.</remarks>
+/// </summary>
 [Immutable]
 [JsonObject]
 [StructLayout( LayoutKind.Sequential )]
@@ -107,8 +114,8 @@ public struct Pixel : IEquatable<Pixel> {
 	/// <param name="left"></param>
 	/// <param name="right"></param>
 	public static Boolean Equal( Pixel left, Pixel right ) =>
-		left.Checksum == right.Checksum && left.Alpha == right.Alpha && left.Red == right.Red && left.Green == right.Green && left.Blue == right.Blue && left.X == right.X &&
-		left.Y == right.Y;
+		( left.Checksum == right.Checksum ) && ( left.Alpha == right.Alpha ) && ( left.Red == right.Red ) && ( left.Green == right.Green ) && ( left.Blue == right.Blue ) && ( left.X == right.X ) &&
+		( left.Y == right.Y );
 
 	public static Boolean operator !=( Pixel left, Pixel right ) => !Equals( left, right );
 
@@ -121,14 +128,14 @@ public struct Pixel : IEquatable<Pixel> {
 
 	/// <summary>Returns the hash code for this instance.</summary>
 	/// <returns>A 32-bit signed integer that is the hash code for this instance.</returns>
-	[Pure]
+	[NeedsTesting]
 	public override Int32 GetHashCode() => this.Checksum + this.Alpha + this.Red + this.Green + this.Blue;
 
 	public override String ToString() => $"{this.Checksum}({this.Alpha},{this.Red},{this.Green},{this.Blue})@{this.X},{this.Y}";
 
 	public Task WriteToStreamAsync( StreamWriter streamWriter ) {
 		if ( streamWriter is null ) {
-			throw new NullException( nameof( streamWriter ) );
+			throw new ArgumentEmptyException( nameof( streamWriter ) );
 		}
 
 		return streamWriter.WriteLineAsync( this.ToString() );
@@ -136,7 +143,7 @@ public struct Pixel : IEquatable<Pixel> {
 
 	public static async Task<Pixel?> ReadFromStreamAsync( StreamReader reader, StreamWriter? errors = null ) {
 		if ( reader is null ) {
-			throw new NullException( nameof( reader ) );
+			throw new ArgumentEmptyException( nameof( reader ) );
 		}
 
 		var line = await reader.ReadLineAsync().ConfigureAwait( false ) ?? String.Empty;
@@ -160,7 +167,7 @@ public struct Pixel : IEquatable<Pixel> {
 			return default( Pixel? );
 		}
 
-		if ( !Byte.TryParse( line[ ..openParent ], out var checksum ) ) {
+		if ( !Byte.TryParse( line[..openParent], out var checksum ) ) {
 			if ( errors != null ) {
 				await errors.WriteLineAsync( $"Unable to parse Checksum from {line}" ).ConfigureAwait( false );
 			}
@@ -188,7 +195,7 @@ public struct Pixel : IEquatable<Pixel> {
 			return default( Pixel? );
 		}
 
-		if ( !Byte.TryParse( argb[ 0 ], out var alpha ) ) {
+		if ( !Byte.TryParse( argb[0], out var alpha ) ) {
 			if ( errors != null ) {
 				await errors.WriteLineAsync( $"Unable to parse Alpha from {line}" ).ConfigureAwait( false );
 			}
@@ -196,7 +203,7 @@ public struct Pixel : IEquatable<Pixel> {
 			return default( Pixel? );
 		}
 
-		if ( !Byte.TryParse( argb[ 1 ], out var red ) ) {
+		if ( !Byte.TryParse( argb[1], out var red ) ) {
 			if ( errors != null ) {
 				await errors.WriteLineAsync( $"Unable to parse Red from {line}" ).ConfigureAwait( false );
 			}
@@ -204,7 +211,7 @@ public struct Pixel : IEquatable<Pixel> {
 			return default( Pixel? );
 		}
 
-		if ( !Byte.TryParse( argb[ 2 ], out var green ) ) {
+		if ( !Byte.TryParse( argb[2], out var green ) ) {
 			if ( errors != null ) {
 				await errors.WriteLineAsync( $"Unable to parse Green from {line}" ).ConfigureAwait( false );
 			}
@@ -212,7 +219,7 @@ public struct Pixel : IEquatable<Pixel> {
 			return default( Pixel? );
 		}
 
-		if ( !Byte.TryParse( argb[ 3 ], out var blue ) ) {
+		if ( !Byte.TryParse( argb[3], out var blue ) ) {
 			if ( errors != null ) {
 				await errors.WriteLineAsync( $"Unable to parse Blue from {line}" ).ConfigureAwait( false );
 			}
@@ -230,7 +237,7 @@ public struct Pixel : IEquatable<Pixel> {
 			return default( Pixel? );
 		}
 
-		var xandy = line[ ( at + 1 ).. ].Split( ',', StringSplitOptions.RemoveEmptyEntries );
+		var xandy = line[( at + 1 )..].Split( ',', StringSplitOptions.RemoveEmptyEntries );
 
 		if ( xandy.Length != 2 ) {
 			if ( errors != null ) {
@@ -240,7 +247,7 @@ public struct Pixel : IEquatable<Pixel> {
 			return default( Pixel? );
 		}
 
-		if ( !UInt32.TryParse( xandy[ 0 ], out var x ) ) {
+		if ( !UInt32.TryParse( xandy[0], out var x ) ) {
 			if ( errors != null ) {
 				await errors.WriteLineAsync( $"Unable to parse X from {line}" ).ConfigureAwait( false );
 			}
@@ -248,7 +255,7 @@ public struct Pixel : IEquatable<Pixel> {
 			return default( Pixel? );
 		}
 
-		if ( !UInt32.TryParse( xandy[ 0 ], out var y ) ) {
+		if ( !UInt32.TryParse( xandy[0], out var y ) ) {
 			if ( errors != null ) {
 				await errors.WriteLineAsync( $"Unable to parse Y from {line}" ).ConfigureAwait( false );
 			}
@@ -258,10 +265,8 @@ public struct Pixel : IEquatable<Pixel> {
 
 		var pixel = new Pixel( alpha, red, green, blue, x, y );
 
-		if ( pixel.Checksum != checksum ) {
-			if ( errors != null ) {
-				await errors.WriteLineAsync( $"Warning checksums do not match! Expected {checksum}, but got {pixel.Checksum}" ).ConfigureAwait( false );
-			}
+		if ( ( pixel.Checksum != checksum ) && ( errors != null ) ) {
+			await errors.WriteLineAsync( $"Warning checksums do not match! Expected {checksum}, but got {pixel.Checksum}" ).ConfigureAwait( false );
 		}
 
 		return pixel;
@@ -270,8 +275,8 @@ public struct Pixel : IEquatable<Pixel> {
 	/// <summary>Indicates whether this instance and a specified object are equal.</summary>
 	/// <param name="obj">The object to compare with the current instance.</param>
 	/// <returns>
-	/// <see langword="true" /> if <paramref name="obj" /> and this instance are the same type and represent the same value;
-	/// otherwise, <see langword="false" />.
+	///     <see langword="true" /> if <paramref name="obj" /> and this instance are the same type and represent the same
+	///     value; otherwise, <see langword="false" />.
 	/// </returns>
 	public override Boolean Equals( Object? obj ) => Equals( this, obj as Pixel? ?? default( Pixel ) );
 }

@@ -1,30 +1,30 @@
 // Copyright © Protiguous. All Rights Reserved.
 //
-// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories,
-// or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
+// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories, or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
 //
-// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten
-// by formatting. (We try to avoid it from happening, but it does accidentally happen.)
+// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten by formatting. (We try to avoid it from happening, but it does accidentally happen.)
 //
-// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to
-// those Authors. If you find your code unattributed in this source code, please let us know so we can properly attribute you
-// and include the proper license and/or copyright(s). If you want to use any of our code in a commercial project, you must
-// contact Protiguous@Protiguous.com for permission, license, and a quote.
+// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to those Authors.
+// If you find your code unattributed in this source code, please let us know so we can properly attribute you and include the proper license and/or copyright(s).
+// If you want to use any of our code in a commercial project, you must contact Protiguous@Protiguous.com for permission, license, and a quote.
 //
 // Donations, payments, and royalties are accepted via bitcoin: 1Mad8TxTqxKnMiHuZxArFvX8BuFEB9nqX2 and PayPal: Protiguous@Protiguous.com
 //
-// ====================================================================
-// Disclaimer:  Usage of the source code or binaries is AS-IS. No warranties are expressed, implied, or given. We are NOT
-// responsible for Anything You Do With Our Code. We are NOT responsible for Anything You Do With Our Executables. We are NOT
-// responsible for Anything You Do With Your Computer. ====================================================================
+//
+// Disclaimer:  Usage of the source code or binaries is AS-IS.
+// No warranties are expressed, implied, or given.
+// We are NOT responsible for Anything You Do With Our Code.
+// We are NOT responsible for Anything You Do With Our Executables.
+// We are NOT responsible for Anything You Do With Your Computer.
+//
 //
 // Contact us by email if you have any questions, helpful criticism, or if you would like to use our code in your project(s).
-// For business inquiries, please contact me at Protiguous@Protiguous.com. Our software can be found at
-// "https://Protiguous.com/Software/" Our GitHub address is "https://github.com/Protiguous".
+// For business inquiries, please contact me at Protiguous@Protiguous.com.
+// Our software can be found at "https://Protiguous.com/Software/"
+// Our GitHub address is "https://github.com/Protiguous".
 //
-// File "TrimmedString.cs" last formatted on 2021-11-30 at 7:22 PM by Protiguous.
+// File "TrimmedString.cs" last formatted on 2022-12-22 at 5:20 PM by Protiguous.
 
-#nullable enable
 
 namespace Librainian.Parsing;
 
@@ -35,17 +35,16 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using Exceptions;
 using Extensions;
-using JetBrains.Annotations;
 using Maths;
 using Newtonsoft.Json;
+using Utilities;
 
-/// <summary>This <see cref="string" /> will always be <see cref="Empty" /> or trimmed, but *never* null. I hope.</summary>
+/// <summary>This <see cref="String" /> will always be <see cref="Empty" /> or trimmed, but *never* null. I hope.</summary>
 [DebuggerDisplay( "{" + nameof( ToString ) + "(),nq}" )]
 [Serializable]
 [JsonObject]
 [Immutable]
-public struct TrimmedString : IConvertible, IEquatable<TrimmedString>, IComparable<TrimmedString>, IComparable<String> {
-
+public record TrimmedString : IConvertible, IComparable<TrimmedString>, IComparable<String> {
 	[DebuggerStepThrough]
 	public TrimmedString( String? value, Boolean veryTrim = false ) {
 		if ( value == null ) {
@@ -102,7 +101,7 @@ public struct TrimmedString : IConvertible, IEquatable<TrimmedString>, IComparab
 	}
 
 	/// <summary>
-	/// Calls <see cref="Object.ToString" /> on the <paramref name="value" /> and calls <see cref="String.Trim(Char[])" />.
+	///     Calls <see cref="Object.ToString" /> on the <paramref name="value" /> and calls <see cref="String.Trim(Char[])" />.
 	/// </summary>
 	/// <param name="value"></param>
 	[DebuggerStepThrough]
@@ -114,55 +113,12 @@ public struct TrimmedString : IConvertible, IEquatable<TrimmedString>, IComparab
 	[field: JsonProperty]
 	public String Value { get; }
 
-	/// <summary>Static equality test. (Compares both values with <see cref="String.Equals(Object)" />)</summary>
-	/// <param name="left"></param>
-	/// <param name="right"></param>
-	[MethodImpl( MethodImplOptions.AggressiveInlining )]
-	[Pure]
-	public static Boolean Equals( TrimmedString left, TrimmedString right ) => String.Equals( left.Value, right.Value, StringComparison.Ordinal );
-
-	public static implicit operator String( TrimmedString value ) => value.Value;
-
-	public static implicit operator TrimmedString( String? value ) => new( value );
-
-	public static Boolean operator !=( TrimmedString left, TrimmedString right ) => !Equals( left, right );
-
-	public static Boolean operator ==( TrimmedString left, TrimmedString right ) => Equals( left, right );
-
-	public Int32 CompareTo( TrimmedString other ) => String.Compare( this.Value, other.Value, StringComparison.Ordinal );
-
 	public Int32 CompareTo( String? other ) => String.Compare( this.Value, other, StringComparison.Ordinal );
 
-	public Boolean Equals( TrimmedString other ) => Equals( this, other );
-
-	public override Boolean Equals( Object? obj ) => obj is TrimmedString right && Equals( this, right );
-
-	[DebuggerStepThrough]
-	public override Int32 GetHashCode() => this.Value.GetHashCode();
+	public Int32 CompareTo( TrimmedString? other ) => String.Compare( this.Value, other?.Value, StringComparison.Ordinal );
 
 	[DebuggerStepThrough]
 	public TypeCode GetTypeCode() => this.Value.GetTypeCode();
-
-	public Boolean IsEmpty() => !this.Value.Length.Any() || !this.Value.Any() || Equals( this, Empty );
-
-	public Boolean IsNotEmpty() => !this.IsEmpty();
-
-	/// <summary>Compares and ignores case. ( <see cref="StringComparison.CurrentCultureIgnoreCase" />)</summary>
-	/// <param name="right"></param>
-	[DebuggerStepThrough]
-	public Boolean Like( String? right ) => this.Value.Like( right );
-
-	/// <summary>Compares and ignores case. ( <see cref="StringComparison.CurrentCultureIgnoreCase" />)</summary>
-	/// <param name="right"></param>
-	[DebuggerStepThrough]
-	public Boolean Like( TrimmedString right ) => this.Value.Like( right.Value );
-
-	[DebuggerStepThrough]
-	public void ThrowIfEmpty() {
-		if ( this.IsEmpty() ) {
-			throw new NullException( "Value was empty." );
-		}
-	}
 
 	[DebuggerStepThrough]
 	public Boolean ToBoolean( IFormatProvider? provider ) => ( this.Value as IConvertible ).ToBoolean( provider );
@@ -191,16 +147,11 @@ public struct TrimmedString : IConvertible, IEquatable<TrimmedString>, IComparab
 	[DebuggerStepThrough]
 	public Int64 ToInt64( IFormatProvider? provider ) => ( this.Value as IConvertible ).ToInt64( provider );
 
-	public TrimmedString ToLower( CultureInfo? cultureInfo = null ) => this.Value.ToLower( cultureInfo ?? CultureInfo.CurrentCulture );
-
 	[DebuggerStepThrough]
 	public SByte ToSByte( IFormatProvider? provider ) => ( this.Value as IConvertible ).ToSByte( provider );
 
 	[DebuggerStepThrough]
 	public Single ToSingle( IFormatProvider? provider ) => ( this.Value as IConvertible ).ToSingle( provider );
-
-	[DebuggerStepThrough]
-	public override String ToString() => this.Value;
 
 	[DebuggerStepThrough]
 	public String ToString( IFormatProvider? provider ) => this.Value.ToString( provider );
@@ -217,12 +168,59 @@ public struct TrimmedString : IConvertible, IEquatable<TrimmedString>, IComparab
 	[DebuggerStepThrough]
 	public UInt64 ToUInt64( IFormatProvider? provider ) => ( this.Value as IConvertible ).ToUInt64( provider );
 
+	/// <summary>Static equality test. (Compares both values with <see cref="String.Equals(Object)" />)</summary>
+	/// <param name="left"></param>
+	/// <param name="right"></param>
+	[MethodImpl( MethodImplOptions.AggressiveInlining )]
+	[NeedsTesting]
+	public static Boolean Equals( TrimmedString? left, TrimmedString? right ) => String.Equals( left?.Value, right?.Value, StringComparison.Ordinal );
+
+	public static implicit operator String( TrimmedString value ) => value.Value;
+
+	public static implicit operator TrimmedString( String? value ) => new( value );
+
 	[DebuggerStepThrough]
-	public TrimmedString ToUpper( CultureInfo? cultureInfo = null ) => this.Value.ToUpper( cultureInfo ?? CultureInfo.CurrentCulture );
+	public override Int32 GetHashCode() => this.Value.GetHashCode();
+
+	public Boolean IsEmpty() => !this.Value.Length.Any() || !this.Value.Any() || Equals( this, Empty );
+
+	public Boolean IsNotEmpty() => !this.IsEmpty();
+
+	/// <summary>Compares and ignores case. ( <see cref="StringComparison.CurrentCultureIgnoreCase" />)</summary>
+	/// <param name="right"></param>
+	[DebuggerStepThrough]
+	public Boolean Like( String? right ) => this.Value.Like( right );
+
+	/// <summary>Compares and ignores case. ( <see cref="StringComparison.CurrentCultureIgnoreCase" />)</summary>
+	/// <param name="right"></param>
+	[DebuggerStepThrough]
+	public Boolean Like( TrimmedString right ) => this.Value.Like( right.Value );
+
+	[DebuggerStepThrough]
+	public void ThrowIfEmpty() {
+		if ( this.IsEmpty() ) {
+			throw new ArgumentEmptyException( "Value was empty." );
+		}
+	}
+
+	public TrimmedString ToLower( CultureInfo? cultureInfo = null ) => this.Value.ToLower( cultureInfo );
+
+	[DebuggerStepThrough]
+	public override String ToString() => this.Value;
+
+	[DebuggerStepThrough]
+	public TrimmedString ToUpper( CultureInfo? cultureInfo = null ) => this.Value.ToUpper( cultureInfo );
+
+	public static Boolean operator <( TrimmedString left, TrimmedString right ) => left.CompareTo( right ) < 0;
+
+	public static Boolean operator <=( TrimmedString left, TrimmedString right ) => left.CompareTo( right ) <= 0;
+
+	public static Boolean operator >( TrimmedString left, TrimmedString right ) => left.CompareTo( right ) > 0;
+
+	public static Boolean operator >=( TrimmedString left, TrimmedString right ) => left.CompareTo( right ) >= 0;
 
 	/// <summary>Strings to be replaced with <see cref="Replacements" />,</summary>
 	internal static class Patterns {
-
 		public const String Feeds = Replacements.Feed + Replacements.Feed;
 
 		public const String NewLines = Replacements.NewLine + Replacements.NewLine;
@@ -235,7 +233,6 @@ public struct TrimmedString : IConvertible, IEquatable<TrimmedString>, IComparab
 	}
 
 	internal static class Replacements {
-
 		public const String Feed = "\n";
 
 		public const String NewLine = Return + Feed;

@@ -1,46 +1,44 @@
 ﻿// Copyright © Protiguous. All Rights Reserved.
 //
-// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories,
-// or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
+// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories, or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
 //
-// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten
-// by formatting. (We try to avoid it from happening, but it does accidentally happen.)
+// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten by formatting. (We try to avoid it from happening, but it does accidentally happen.)
 //
-// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to
-// those Authors. If you find your code unattributed in this source code, please let us know so we can properly attribute you
-// and include the proper license and/or copyright(s). If you want to use any of our code in a commercial project, you must
-// contact Protiguous@Protiguous.com for permission, license, and a quote.
+// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to those Authors.
+// If you find your code unattributed in this source code, please let us know so we can properly attribute you and include the proper license and/or copyright(s).
+// If you want to use any of our code in a commercial project, you must contact Protiguous@Protiguous.com for permission, license, and a quote.
 //
 // Donations, payments, and royalties are accepted via bitcoin: 1Mad8TxTqxKnMiHuZxArFvX8BuFEB9nqX2 and PayPal: Protiguous@Protiguous.com
 //
-// ====================================================================
-// Disclaimer:  Usage of the source code or binaries is AS-IS. No warranties are expressed, implied, or given. We are NOT
-// responsible for Anything You Do With Our Code. We are NOT responsible for Anything You Do With Our Executables. We are NOT
-// responsible for Anything You Do With Your Computer. ====================================================================
+//
+// Disclaimer:  Usage of the source code or binaries is AS-IS.
+// No warranties are expressed, implied, or given.
+// We are NOT responsible for Anything You Do With Our Code.
+// We are NOT responsible for Anything You Do With Our Executables.
+// We are NOT responsible for Anything You Do With Your Computer.
+//
 //
 // Contact us by email if you have any questions, helpful criticism, or if you would like to use our code in your project(s).
-// For business inquiries, please contact me at Protiguous@Protiguous.com. Our software can be found at
-// "https://Protiguous.com/Software/" Our GitHub address is "https://github.com/Protiguous".
+// For business inquiries, please contact me at Protiguous@Protiguous.com.
+// Our software can be found at "https://Protiguous.com/Software/"
+// Our GitHub address is "https://github.com/Protiguous".
 //
-// File "Degrees.cs" last formatted on 2021-11-30 at 7:19 PM by Protiguous.
+// File "Degrees.cs" last formatted on 2022-12-22 at 5:17 PM by Protiguous.
 
 namespace Librainian.Measurement.Spatial;
 
 using System;
 using System.Diagnostics;
 using Extensions;
-using JetBrains.Annotations;
 using Newtonsoft.Json;
+using Utilities;
 
 /// <summary>A degree is a measurement of plane angle, representing 1⁄360 of a full rotation.</summary>
 /// <see cref="http://wikipedia.org/wiki/Degree_(angle)" />
 [DebuggerDisplay( "{" + nameof( ToString ) + "(),nq}" )]
 [JsonObject]
 [Immutable]
-public struct Degrees : IComparable<Degrees> {
-
-	[JsonProperty]
-	private volatile Single _value;
+public record Degrees : IComparable<Degrees> {
 
 	/// <summary>Math.PI / 180</summary>
 	public const Single DegreesToRadiansFactor = ( Single )( Math.PI / 180.0f );
@@ -54,32 +52,33 @@ public struct Degrees : IComparable<Degrees> {
 	/// <summary>One <see cref="Degrees" />.</summary>
 	public static readonly Degrees One = new( 1 );
 
-	public Degrees( Single value ) : this() => this.Value = value;
+	[JsonProperty]
+	private volatile Single _value;
+
+	public Degrees( Single value ) => this.Value = value;
 
 	public Single Value {
 		get => this._value;
 
 		set {
-			while ( value < MinimumValue ) {
-				value += MaximumValue; //BUG use math instead, is this even correct?
-			}
 
-			while ( value >= MaximumValue ) {
-				value -= MaximumValue; //BUG use math instead, is this even correct?
-			}
+			//BUG Is this even correct?
+			value = value switch {
+				< MinimumValue => MinimumValue,
+				> MaximumValue => MaximumValue,
+				var _ => value
+			};
 
 			this._value = value;
 		}
 	}
 
-	//public Boolean SetValue( Single degrees ) {
-	//    this.Value = degrees;
-	//    return true;
-	//}
+	public Int32 CompareTo( Degrees? other ) => this.Value.CompareTo( other?.Value );
+
 	public static Degrees Combine( Degrees left, Single degrees ) => new( left.Value + degrees );
 
 	/// <summary>
-	/// <para>static equality test</para>
+	///     <para>static equality test</para>
 	/// </summary>
 	/// <param name="left"></param>
 	/// <param name="right"></param>
@@ -99,7 +98,7 @@ public struct Degrees : IComparable<Degrees> {
 
 	public static Degrees operator -( Degrees left, Single degrees ) => Combine( left, -degrees );
 
-	public static Boolean operator !=( Degrees left, Degrees right ) => !Equals( left, right );
+	//public static Boolean operator !=( Degrees left, Degrees right ) => !Equals( left, right );
 
 	public static Degrees operator +( Degrees left, Degrees right ) => Combine( left, right.Value );
 
@@ -107,7 +106,7 @@ public struct Degrees : IComparable<Degrees> {
 
 	public static Boolean operator <( Degrees left, Degrees right ) => left.Value < right.Value;
 
-	public static Boolean operator ==( Degrees left, Degrees right ) => Equals( left, right );
+	//public static Boolean operator ==( Degrees left, Degrees right ) => Equals( left, right );
 
 	public static Boolean operator >( Degrees left, Degrees right ) => left.Value > right.Value;
 
@@ -115,22 +114,14 @@ public struct Degrees : IComparable<Degrees> {
 
 	public static Radians ToRadians( Single degrees ) => new( degrees * DegreesToRadiansFactor );
 
-	public Int32 CompareTo( Degrees other ) => this.Value.CompareTo( other.Value );
-
-	public Boolean Equals( Degrees other ) => Equals( this, other );
-
-	public override Boolean Equals( Object? obj ) {
-		if ( obj is null ) {
-			return false;
-		}
-
-		return obj is Degrees degrees && Equals( this, degrees );
-	}
-
 	public override Int32 GetHashCode() => this.Value.GetHashCode();
 
 	public Radians ToRadians() => ToRadians( this );
 
-	[Pure]
-	public override String ToString() => $"{this.Value} °";
+	[NeedsTesting]
+	public override String ToString() => $"{this.Value:F0} °";
+
+	public static Boolean operator <=( Degrees left, Degrees right ) => left.CompareTo( right ) <= 0;
+
+	public static Boolean operator >=( Degrees left, Degrees right ) => left.CompareTo( right ) >= 0;
 }

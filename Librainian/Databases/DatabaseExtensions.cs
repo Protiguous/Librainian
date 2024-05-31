@@ -1,30 +1,32 @@
 ﻿// Copyright © Protiguous. All Rights Reserved.
 //
-// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories,
-// or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
+// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries,
+// repositories, or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
 //
-// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten
-// by formatting. (We try to avoid it from happening, but it does accidentally happen.)
+// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has
+// been overwritten by formatting. (We try to avoid it from happening, but it does accidentally happen.)
 //
-// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to
-// those Authors. If you find your code unattributed in this source code, please let us know so we can properly attribute you
-// and include the proper license and/or copyright(s). If you want to use any of our code in a commercial project, you must
-// contact Protiguous@Protiguous.com for permission, license, and a quote.
+// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to those Authors.
+// If you find your code unattributed in this source code, please let us know so we can properly attribute you and include the proper licenses and/or copyrights.
+// If you want to use any of our code in a commercial project, you must contact Protiguous@Protiguous.com for permission, license, and a quote.
 //
 // Donations, payments, and royalties are accepted via bitcoin: 1Mad8TxTqxKnMiHuZxArFvX8BuFEB9nqX2 and PayPal: Protiguous@Protiguous.com
 //
 // ====================================================================
-// Disclaimer:  Usage of the source code or binaries is AS-IS. No warranties are expressed, implied, or given. We are NOT
-// responsible for Anything You Do With Our Code. We are NOT responsible for Anything You Do With Our Executables. We are NOT
-// responsible for Anything You Do With Your Computer. ====================================================================
+// Disclaimer:  Usage of the source code or binaries is AS-IS.
+// No warranties are expressed, implied, or given.
+// We are NOT responsible for Anything You Do With Our Code.
+// We are NOT responsible for Anything You Do With Our Executables.
+// We are NOT responsible for Anything You Do With Your Computer.
+// ====================================================================
 //
 // Contact us by email if you have any questions, helpful criticism, or if you would like to use our code in your project(s).
-// For business inquiries, please contact me at Protiguous@Protiguous.com. Our software can be found at
-// "https://Protiguous.com/Software/" Our GitHub address is "https://github.com/Protiguous".
+// For business inquiries, please contact me at Protiguous@Protiguous.com.
+// Our software can be found at "https://Protiguous.com/Software/"
+// Our GitHub address is "https://github.com/Protiguous".
 //
-// File "DatabaseExtensions.cs" last formatted on 2021-11-30 at 7:16 PM by Protiguous.
+// File "DatabaseExtensions.cs" last formatted on 2022-02-13 at 10:05 AM by Protiguous.
 
-#nullable enable
 
 namespace Librainian.Databases;
 
@@ -50,10 +52,10 @@ using Microsoft.Data.SqlClient;
 using Microsoft.SqlServer.Management.Smo;
 using Parsing;
 using Persistence;
+using Utilities;
 using FieldDictionary = System.Collections.Generic.Dictionary<System.String, System.Int32>;
 
 public static class DatabaseExtensions {
-
 	private static Dictionary<Type, IList<PropertyInfo>> TypeDictionary { get; } = new();
 
 	/// <summary>Return a dictionary of fields and their index.</summary>
@@ -71,50 +73,49 @@ public static class DatabaseExtensions {
 	}
 
 	/*
-	[return: System.Diagnostics.CodeAnalysis.NotNull]
-	public static T? Adhoc<T>( this SqlConnectionStringBuilder builderToTest, String applicationName, String command, CancellationToken cancellationToken ) {
-		if ( String.IsNullOrWhiteSpace( command ) ) {
-			throw new NullException(  nameof( command ) );
-		}
+    [return: System.Diagnostics.CodeAnalysis.NotNull]
+    public static T? Adhoc<T>( this SqlConnectionStringBuilder builderToTest, String applicationName, String command, CancellationToken cancellationToken ) {
+        if ( String.IsNullOrWhiteSpace( command ) ) {
+            throw new NullException( "Value cannot be null or whitespace.", nameof( command ) );
+        }
 
-		try {
-			using var db = new DatabaseServer( builderToTest.ConnectionString, null, applicationName  );
+        try {
+            using var db = new DatabaseServer( builderToTest.ConnectionString, null, applicationName  );
 
-			return db.ExecuteScalar<T>( command, CommandType.Text );
-		}
-		catch ( Exception exception ) {
-			exception.Log();
+            return db.ExecuteScalar<T>( command, CommandType.Text );
+        }
+        catch ( Exception exception ) {
+            exception.Log();
 
-			throw;
-		}
-	}
-	*/
+            throw;
+        }
+    }
+    */
 
 	/*
-	public static async PooledValueTask<T?> AdhocAsync<T>(
-		IValidatedConnectionString connectionStringSetting,
-		String query,
-		String applicationName,
-		CancellationToken cancellationToken
-	) {
+    public static async PooledValueTask<T?> AdhocAsync<T>(
+        IValidatedConnectionString connectionStringSetting,
+        String query,
+        String applicationName,
+        CancellationToken cancellationToken
+    ) {
+        //TODO This needs redone. I don't want to be passing around a SqlConnectionStringBuilder.
+        if ( String.IsNullOrWhiteSpace( query ) ) {
+            throw new NullException( "Value cannot be null or whitespace.", nameof( query ) );
+        }
 
-		//TODO This needs redone. I don't want to be passing around a SqlConnectionStringBuilder.
-		if ( String.IsNullOrWhiteSpace( query ) ) {
-			throw new NullException(  nameof( query ) );
-		}
+        try {
+            await using var db = new DatabaseServer( builderToTest.ConnectionString, applicationName, QueryTiming.ReportTiming );
 
-		try {
-			await using var db = new DatabaseServer( builderToTest.ConnectionString, applicationName, QueryTiming.ReportTiming );
+            return await db.ExecuteScalarAsync<T>( query, CommandType.Text, cancellationToken ).ConfigureAwait( false );
+        }
+        catch ( Exception exception ) {
+            exception.Log( BreakOrDontBreak.Break );
 
-			return await db.ExecuteScalarAsync<T>( query, CommandType.Text, cancellationToken ).ConfigureAwait( false );
-		}
-		catch ( Exception exception ) {
-			exception.Log( BreakOrDontBreak.Break );
-
-			throw;
-		}
-	}
-	*/
+            throw;
+        }
+    }
+    */
 
 	/*
 
@@ -122,10 +123,10 @@ public static class DatabaseExtensions {
     /// <typeparam name="T">Generic object</typeparam>
     /// <param name="table">DataTable</param>
     /// <returns>List with generic objects</returns>
-    [NotNull]
-    public static List<T> DataTableToList<T>( [NotNull] this DataTable table ) where T : class, new() {
+    [NeedsTesting]
+    public static List<T> DataTableToList<T>( [NeedsTesting] this DataTable table ) where T : class, new() {
         if ( table is null ) {
-            throw new NullException( nameof( table ) );
+            throw new ArgumentEmptyException( nameof( table ) );
         }
 
         var list = new List<T>( table.Rows.Count );
@@ -151,7 +152,7 @@ public static class DatabaseExtensions {
 
         return list;
     }
-	*/
+    */
 
 	public static Boolean AttemptQueryAgain<T>( this T exception, ref Int32 retriesLeft ) where T : Exception {
 		if ( !retriesLeft.Any() || exception is TaskCanceledException or OperationCanceledException ) {
@@ -163,37 +164,38 @@ public static class DatabaseExtensions {
 		switch ( exception ) {
 			case SqlException {
 				IsTransient: true
-			}:
-				return true;
+			}: {
+					return true;
+				}
 
 			case DbException {
 				IsTransient: true
-			}:
-				return true;
+			}: {
+					return true;
+				}
 
 			case SqlException {
 				Errors: { }
 			} sqlxException: {
-				foreach ( SqlError error in sqlxException.Errors ) {
-					if ( error.Message?.Contains( "Execution Timeout Expired", StringComparison.CurrentCultureIgnoreCase ) == true ) {
-						return true;
+					foreach ( SqlError error in sqlxException.Errors ) {
+						if ( error.Message?.Contains( "Execution Timeout Expired", StringComparison.OrdinalIgnoreCase ) == true ) {
+							return true;
+						}
 					}
-				}
 
-				break;
-			}
+					break;
+				}
 		}
 
-		if ( exception.Message.Contains( "deadlocked", StringComparison.CurrentCultureIgnoreCase ) ) {
-			if ( exception.Message.Contains( "Rerun the transaction", StringComparison.CurrentCultureIgnoreCase ) ) {
-				return true;
-			}
+		if ( exception.Message.Contains( "deadlocked", StringComparison.CurrentCultureIgnoreCase ) &&
+			 exception.Message.Contains( "Rerun the transaction", StringComparison.CurrentCultureIgnoreCase ) ) {
+			return true;
 		}
 
 		return exception.Message.Contains( "server was not found", StringComparison.CurrentCultureIgnoreCase ) ||
 			   exception.Message.Contains( "was not accessible", StringComparison.CurrentCultureIgnoreCase ) ||
 			   exception.Message.Contains( "timed out", StringComparison.CurrentCultureIgnoreCase ) ||
-			   exception.Message.Contains( "requires an open and available Connection", StringComparison.CurrentCultureIgnoreCase ) || exception.HResult == -2146233079;
+			   exception.Message.Contains( "requires an open and available Connection", StringComparison.CurrentCultureIgnoreCase ) || ( exception.HResult == -2146233079 );
 	}
 
 	/// <summary>Enumerates all SQL Server instances on the machine.</summary>
@@ -212,35 +214,53 @@ public static class DatabaseExtensions {
 				yield break;
 			}
 
-			foreach ( var serviceName in getSqlEngine.Get().Cast<ManagementObject>().Select( sqlEngine => sqlEngine[ "ServiceName" ]?.ToString() ) ) {
-				if ( !String.IsNullOrWhiteSpace( serviceName ) ) {
-					var instance = new SqlServerInstance {
-						ServiceName = serviceName,
-						MachineName = Environment.MachineName,
-						InstanceName = GetInstanceNameFromServiceName( serviceName ),
-						Edition = GetWmiPropertyValueForEngineService( serviceName, correctNamespace, "SKUNAME" )
-					};
-
-					if ( Version.TryParse( GetWmiPropertyValueForEngineService( serviceName, correctNamespace, "Version" ), out var version ) ) {
-						instance.Version = version;
-					}
-
-					yield return instance;
+			foreach ( var serviceName in getSqlEngine.Get().Cast<ManagementObject>().Select( sqlEngine => sqlEngine["ServiceName"]?.ToString() ) ) {
+				if ( String.IsNullOrWhiteSpace( serviceName ) ) {
+					continue;
 				}
+
+				var instanceName = GetInstanceNameFromServiceName( serviceName );
+				if ( String.IsNullOrWhiteSpace( instanceName ) ) {
+					continue;
+				}
+
+				var wmiSku = GetWmiPropertyValueForEngineService( serviceName, correctNamespace, "SKUNAME" );
+
+				var instance = new SqlServerInstance {
+					ServiceName = serviceName,
+					MachineName = Environment.MachineName,
+					InstanceName = instanceName,
+					Edition = wmiSku
+				};
+
+				var wmiVersion = GetWmiPropertyValueForEngineService( serviceName, correctNamespace, "Version" );
+
+				if ( Version.TryParse( wmiVersion, out var version ) ) {
+					instance.Version = version;
+				}
+
+				yield return instance;
 			}
 		}
 	}
 
 	/// <summary>
-	/// Add the <paramref name="connectionString" /> to the <paramref name="file" /> under the given <paramref name="key" />.
-	/// <para>Returns the key.</para>
+	///     Add the <paramref name="connectionString" /> to the <paramref name="file" /> under the given
+	///     <paramref name="key" />.
+	///     <para>Returns the key.</para>
 	/// </summary>
 	/// <param name="file"></param>
 	/// <param name="connectionString"></param>
 	/// <param name="key"></param>
-	public static async Task<String> FileSet( this ConcurrentDictionaryFile<String, String> file, String connectionString, String key = "PrimeConnectionString" ) {
+	/// <exception cref="ArgumentEmptyException"></exception>
+	/// <exception cref="NullException"></exception>
+	public static async Task<String> FileSet(
+		this ConcurrentDictionaryFile<String, String> file,
+		String connectionString,
+		String key = ParsingConstants.ConstantStrings.PrimeConnectionString
+	) {
 		if ( file is null ) {
-			throw new NullException( nameof( file ) );
+			throw new ArgumentEmptyException( nameof( file ) );
 		}
 
 		if ( String.IsNullOrWhiteSpace( key ) ) {
@@ -251,21 +271,25 @@ public static class DatabaseExtensions {
 			throw new NullException( nameof( connectionString ) );
 		}
 
-		file[ key ] = connectionString;
+		file[key] = connectionString;
 		await file.Flush( CancellationToken.None ).ConfigureAwait( false );
 
-		Debug.Assert( file[ key ].Like( connectionString ) );
+		Debug.Assert( file[key].Like( connectionString ) );
 
 		return key;
 	}
 
-	public static async Task<Boolean> FileSet( this ConcurrentDictionaryFile<String, String> file, SqlServerInfo sqlServerInfo, String key = "PrimeConnectionString" ) {
+	public static async Task<Boolean> FileSet(
+		this ConcurrentDictionaryFile<String, String> file,
+		SqlServerInfo sqlServerInfo,
+		String key = ParsingConstants.ConstantStrings.PrimeConnectionString
+	) {
 		if ( file is null ) {
-			throw new NullException( nameof( file ) );
+			throw new ArgumentEmptyException( nameof( file ) );
 		}
 
 		if ( sqlServerInfo is null ) {
-			throw new NullException( nameof( sqlServerInfo ) );
+			throw new ArgumentEmptyException( nameof( sqlServerInfo ) );
 		}
 
 		if ( sqlServerInfo.Status != Status.Success ) {
@@ -285,19 +309,21 @@ public static class DatabaseExtensions {
 		return file.Get( key ).Like( connectionString );
 	}
 
-	public static String? Get( this ConcurrentDictionaryFile<String, String> file, String key = "PrimeConnectionString", Boolean throwIfNotFound = true ) {
+	public static String? Get(
+		this ConcurrentDictionaryFile<String, String> file,
+		String key = ParsingConstants.ConstantStrings.PrimeConnectionString,
+		Boolean throwIfNotFound = true
+	) {
 		if ( file is null ) {
-			throw new NullException( nameof( file ) );
+			throw new ArgumentEmptyException( nameof( file ) );
 		}
 
 		if ( String.IsNullOrWhiteSpace( key ) ) {
 			throw new NullException( nameof( key ) );
 		}
 
-		if ( file.TryGetValue( key, out var connection ) ) {
-			if ( !String.IsNullOrWhiteSpace( connection ) ) {
-				return connection;
-			}
+		if ( file.TryGetValue( key, out var connection ) && !String.IsNullOrWhiteSpace( connection ) ) {
+			return connection;
 		}
 
 		if ( throwIfNotFound ) {
@@ -315,7 +341,6 @@ public static class DatabaseExtensions {
 		var namespaces = new List<String>();
 
 		try {
-
 			// Enumerate all WMI instances of __namespace WMI class.
 			var objectGetOptions = new ObjectGetOptions {
 				Timeout = Seconds.Ten
@@ -323,7 +348,7 @@ public static class DatabaseExtensions {
 
 			using var nsClass = new ManagementClass( new ManagementScope( root ), new ManagementPath( "__namespace" ), objectGetOptions );
 
-			var items = nsClass.GetInstances().OfType<ManagementObject>().Select( ns => ns[ "Name" ]?.ToString() );
+			var items = nsClass.GetInstances().OfType<ManagementObject>().Select( ns => ns["Name"]?.ToString() );
 
 			foreach ( var item in items ) {
 				if ( !String.IsNullOrWhiteSpace( item ) ) {
@@ -341,7 +366,6 @@ public static class DatabaseExtensions {
 	}
 
 	public static dynamic? GetDataSources() {
-
 		//var services = ServiceController.GetServices().Where( service => service.ServiceName.StartsWith( "MSSQL$" ) );
 		//return services;
 
@@ -372,35 +396,38 @@ public static class DatabaseExtensions {
 			TypeDictionary.Add( type, type.GetProperties() );
 		}
 
-		return TypeDictionary[ type ];
+		return TypeDictionary[type];
 	}
 
 	/// <summary>Returns the WMI property value for a given property name for a particular SQL Server service Name</summary>
 	/// <param name="serviceName">The service name for the SQL Server engine serivce to query for</param>
 	/// <param name="wmiNamespace">The wmi namespace to connect to</param>
 	/// <param name="propertyName">The property name whose value is required</param>
+	/// <exception cref="ArgumentEmptyException"></exception>
 	public static String GetWmiPropertyValueForEngineService( String serviceName, String wmiNamespace, String propertyName ) {
 		if ( serviceName is null ) {
-			throw new NullException( nameof( serviceName ) );
+			throw new ArgumentEmptyException( nameof( serviceName ) );
 		}
 
 		if ( wmiNamespace is null ) {
-			throw new NullException( nameof( wmiNamespace ) );
+			throw new ArgumentEmptyException( nameof( wmiNamespace ) );
 		}
 
 		if ( propertyName is null ) {
-			throw new NullException( nameof( propertyName ) );
+			throw new ArgumentEmptyException( nameof( propertyName ) );
 		}
 
 		var query = $"select * from SqlServiceAdvancedProperty where SQLServiceType = 1 and PropertyName = '{propertyName}' and ServiceName = '{serviceName}'";
 		using var propertySearcher = new ManagementObjectSearcher( wmiNamespace, query );
 
 		foreach ( var o in propertySearcher.Get() ) {
-			if ( o is ManagementObject managementObject ) {
-				var value = managementObject[ "PropertyStrValue" ]?.ToString();
-				if ( !String.IsNullOrWhiteSpace( value ) ) {
-					return value;
-				}
+			if ( o is not ManagementObject managementObject ) {
+				continue;
+			}
+
+			var value = managementObject["PropertyStrValue"]?.ToString();
+			if ( !String.IsNullOrWhiteSpace( value ) ) {
+				return value;
 			}
 		}
 
@@ -408,44 +435,44 @@ public static class DatabaseExtensions {
 	}
 
 	/*
-	public static async ValueTask<(Status, String?)> TestDatabaseConnectionString( IValidatedConnectionString validatedConnectionString, IApplicationSetting applicationSettings, CancellationToken cancellationToken ) {
-		if ( validatedConnectionString == null ) {
-			throw new ArgumentNullException( nameof( validatedConnectionString ) );
-		}
+    public static async ValueTask<(Status, String?)> TestDatabaseConnectionString( IValidatedConnectionString validatedConnectionString, IApplicationSetting applicationSettings, CancellationToken cancellationToken ) {
+        if ( validatedConnectionString == null ) {
+            throw new ArgumentNullException( nameof( validatedConnectionString ) );
+        }
 
-		if ( applicationSettings == null ) {
-			throw new ArgumentNullException( nameof( applicationSettings ) );
-		}
+        if ( applicationSettings == null ) {
+            throw new ArgumentNullException( nameof( applicationSettings ) );
+        }
 
-		var retries = DatabaseServer.DefaultRetries;
-		TryAgain:
-		try {
-			var database = new DatabaseServer( validatedConnectionString, applicationSettings, QueryTiming.ReportTiming );
+        var retries = DatabaseServer.DefaultRetries;
+        TryAgain:
+        try {
+            var database = new DatabaseServer( validatedConnectionString, applicationSettings, QueryTiming.ReportTiming );
 
-			await database
-			      .ExecuteScalarAsync( $"{this.AIServer.DatabaseToUse}.[Neuron].[DepolarizeNeurons]", this.CancellationToken, depolarized, peakedneurons )
-			      .ConfigureAwait( false );
+            await database
+                  .ExecuteScalarAsync( $"{this.AIServer.DatabaseToUse}.[Neuron].[DepolarizeNeurons]", this.CancellationToken, depolarized, peakedneurons )
+                  .ConfigureAwait( false );
 
-			var sqlServer = await builder.TryGetResponse( applicationName, cancellationToken ).ConfigureAwait( false );
+            var sqlServer = await builder.TryGetResponse( applicationName, cancellationToken ).ConfigureAwait( false );
 
-			if ( sqlServer?.Status.IsGood() == true ) {
-				if ( sqlServer.ConnectionStringBuilder != null ) {
-					return ( sqlServer.Status, sqlServer.ConnectionStringBuilder.ConnectionString );
-				}
-			}
-		}
-		catch ( Exception exception ) {
-			if ( exception.AttemptQueryAgain( ref retries ) ) {
-				await Task.Delay( DatabaseServer.DefaultTimeBetweenRetries, cancellationToken ).ConfigureAwait( false );
-				goto TryAgain;
-			}
+            if ( sqlServer?.Status.IsGood() == true ) {
+                if ( sqlServer.ConnectionStringBuilder != null ) {
+                    return ( sqlServer.Status, sqlServer.ConnectionStringBuilder.ConnectionString );
+                }
+            }
+        }
+        catch ( Exception exception ) {
+            if ( exception.AttemptQueryAgain( ref retries ) ) {
+                await Task.Delay( DatabaseServer.DefaultTimeBetweenRetries, cancellationToken ).ConfigureAwait( false );
+                goto TryAgain;
+            }
 
-			exception.Log();
-		}
+            exception.Log();
+        }
 
-		return ( Status.Failure, default( String? ) );
-	}
-	*/
+        return ( Status.Failure, default( String? ) );
+    }
+    */
 
 	/// <summary>Convert our IList to a DataSet</summary>
 	/// <typeparam name="T"></typeparam>
@@ -455,9 +482,11 @@ public static class DatabaseExtensions {
 	/// <copyright>
 	///     Based from http://codereview.stackexchange.com/q/40891
 	/// </copyright>
+	/// <exception cref="ArgumentEmptyException"></exception>
+	/// <exception cref="ArgumentOutOfRangeException"></exception>
 	public static DataSet ToDataSet<T>( this IEnumerable<T> list, DataSet? exampleSet = null ) {
 		if ( list is null ) {
-			throw new NullException( nameof( list ) );
+			throw new ArgumentEmptyException( nameof( list ) );
 		}
 
 		var dataSet = new DataSet {
@@ -474,13 +503,14 @@ public static class DatabaseExtensions {
 				SerializationFormat.Binary => SerializationFormat.Binary,
 				SerializationFormat.Xml => SerializationFormat.Xml,
 				null => SerializationFormat.Xml,
-				var _ => throw new ArgumentOutOfRangeException( $"Invalid {nameof( exampleSet.RemotingFormat )}." )
+				var _ => throw new ArgumentOutOfRangeException( nameof( exampleSet ), exampleSet.RemotingFormat, $"Invalid {nameof( exampleSet.RemotingFormat )}." )
 			},
 			SchemaSerializationMode = exampleSet?.SchemaSerializationMode switch {
 				SchemaSerializationMode.ExcludeSchema => SchemaSerializationMode.ExcludeSchema,
 				SchemaSerializationMode.IncludeSchema => SchemaSerializationMode.IncludeSchema,
 				null => SchemaSerializationMode.IncludeSchema,
-				var _ => throw new ArgumentOutOfRangeException( $"Invalid {nameof( exampleSet.SchemaSerializationMode )}." )
+				var _ => throw new ArgumentOutOfRangeException( nameof( exampleSet ), exampleSet.SchemaSerializationMode,
+					$"Invalid {nameof( exampleSet.SchemaSerializationMode )}." )
 			},
 			Site = exampleSet?.Site
 		};
@@ -506,7 +536,7 @@ public static class DatabaseExtensions {
 		var i = 0;
 
 		foreach ( DataViewSetting dataViewSetting in exampleSet.DefaultViewManager.DataViewSettings ) {
-			dataSet.DefaultViewManager.DataViewSettings[ i++ ] = dataViewSetting;
+			dataSet.DefaultViewManager.DataViewSettings[i++] = dataViewSetting;
 		}
 
 		return dataSet;
@@ -528,7 +558,7 @@ public static class DatabaseExtensions {
 
 			var row = table.NewRow();
 			foreach ( PropertyDescriptor prop in properties ) {
-				row[ prop.Name ] = prop.GetValue( item ) ?? DBNull.Value;
+				row[prop.Name] = prop.GetValue( item ) ?? DBNull.Value;
 			}
 
 			table.Rows.Add( row );
@@ -554,7 +584,7 @@ public static class DatabaseExtensions {
 
 			var row = table.NewRow();
 			foreach ( PropertyDescriptor prop in properties ) {
-				row[ prop.Name ] = prop.GetValue( item ) ?? DBNull.Value;
+				row[prop.Name] = prop.GetValue( item ) ?? DBNull.Value;
 			}
 
 			table.Rows.Add( row );
@@ -586,8 +616,8 @@ public static class DatabaseExtensions {
 		foreach ( var getProperty in columns ) {
 			var icolType = getProperty.PropertyType;
 
-			if ( icolType.IsGenericType && icolType.GetGenericTypeDefinition() == typeof( Nullable<> ) ) {
-				icolType = icolType.GetGenericArguments()[ 0 ];
+			if ( icolType.IsGenericType && ( icolType.GetGenericTypeDefinition() == typeof( Nullable<> ) ) ) {
+				icolType = icolType.GetGenericArguments()[0];
 			}
 
 			table.Columns.Add( new DataColumn( getProperty.Name, icolType ) );
@@ -597,7 +627,7 @@ public static class DatabaseExtensions {
 			var dr = table.NewRow();
 
 			foreach ( var p in columns ) {
-				dr[ p.Name ] = p.GetValue( record, default( Object?[]? ) ) ?? DBNull.Value;
+				dr[p.Name] = p.GetValue( record, default( Object?[]? ) ) ?? DBNull.Value;
 			}
 
 			table.Rows.Add( dr );
@@ -607,8 +637,8 @@ public static class DatabaseExtensions {
 	}
 
 	/// <summary>
-	/// <para>Warning: Untested and possibly buggy.</para>
-	/// Convert our <paramref name="list" /> to a <see cref="DataTable" />.
+	///     <para>Warning: Untested and possibly buggy.</para>
+	///     Convert our <paramref name="list" /> to a <see cref="DataTable" />.
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	/// <param name="list"></param>
@@ -616,9 +646,10 @@ public static class DatabaseExtensions {
 	/// <copyright>
 	///     Based from http://codereview.stackexchange.com/q/40891
 	/// </copyright>
+	/// <exception cref="ArgumentEmptyException"></exception>
 	public static DataTable ToDataTableBuggy<T>( this IEnumerable<T> list ) {
 		if ( list is null ) {
-			throw new NullException( nameof( list ) );
+			throw new ArgumentEmptyException( nameof( list ) );
 		}
 
 		using var table = new DataTable();
@@ -635,7 +666,7 @@ public static class DatabaseExtensions {
 			var newRow = table.NewRow();
 
 			foreach ( var propInfo in properties ) {
-				newRow[ propInfo.Name ] = item; //BUG This does not look right??
+				newRow[propInfo.Name] = item; //BUG This does not look right??
 			}
 
 			table.Rows.Add( newRow );
@@ -679,25 +710,25 @@ public static class DatabaseExtensions {
     */
 
 	/*
-	[NotNull]
-	public static IEnumerable<T> ToList<T>( [NotNull] this DataTable table ) {
-		if ( table is null ) {
-			throw new NullException( nameof( table ) );
-		}
+    [NeedsTesting]
+    public static IEnumerable<T> ToList<T>( [NeedsTesting] this DataTable table ) {
+        if ( table is null ) {
+            throw new ArgumentEmptyException( nameof( table ) );
+        }
 
-		var properties = GetPropertiesForType<T>();
+        var properties = GetPropertiesForType<T>();
 
-		foreach ( var row in table.Rows.Cast<DataRow>() ) {
-			if ( row != null ) {
-				yield return row.CreateItemFromRow<T>( properties );
-			}
-		}
-	}
-	*/
+        foreach ( var row in table.Rows.Cast<DataRow>() ) {
+            if ( row != null ) {
+                yield return row.CreateItemFromRow<T>( properties );
+            }
+        }
+    }
+    */
 
 	public static SqlParameter ToSqlParameter<TValue>( [DisallowNull] this TValue value, String parameterName ) {
 		if ( value is null ) {
-			throw new NullException( nameof( value ) );
+			throw new ArgumentEmptyException( nameof( value ) );
 		}
 
 		if ( String.IsNullOrEmpty( parameterName ) ) {
@@ -819,66 +850,66 @@ public static class DatabaseExtensions {
 
 	/*
 
-	/// <summary>
-	/// Performs two adhoc selects on the database.
-	/// <code>select @@VERSION;" and "select SYSUTCDATETIME();</code>
-	/// </summary>
-	/// <param name="test"></param>
-	/// <param name="applicationName"></param>
-	/// <param name="cancellationToken"></param>
-	public static async PooledValueTask<SqlServerInfo?> TryGetResponse(
-		this SqlConnectionStringBuilder test,
-		String applicationName,
-		CancellationToken cancellationToken
-	) {
-		if ( test is null ) {
-			throw new NullException( nameof( test ) );
-		}
+    /// <summary>
+    /// Performs two adhoc selects on the database.
+    /// <code>select @@VERSION;" and "select SYSUTCDATETIME();</code>
+    /// </summary>
+    /// <param name="test"></param>
+    /// <param name="applicationName"></param>
+    /// <param name="cancellationToken"></param>
+    public static async PooledValueTask<SqlServerInfo?> TryGetResponse(
+        this SqlConnectionStringBuilder test,
+        String applicationName,
+        CancellationToken cancellationToken
+    ) {
+        if ( test is null ) {
+            throw new ArgumentEmptyException( nameof( test ) );
+        }
 
-		if ( String.IsNullOrWhiteSpace( applicationName ) ) {
-			throw new NullException(  nameof( applicationName ) );
-		}
+        if ( String.IsNullOrWhiteSpace( applicationName ) ) {
+            throw new NullException( "Value cannot be null or whitespace.", nameof( applicationName ) );
+        }
 
-		try {
-			var version = await test.AdhocAsync<String>( "select @@version;", applicationName, cancellationToken ).ConfigureAwait( false );
+        try {
+            var version = await test.AdhocAsync<String>( "select @@version;", applicationName, cancellationToken ).ConfigureAwait( false );
 
-			if ( String.IsNullOrWhiteSpace( version ) ) {
-				$"Failed connecting to server {test.DataSource}.".TraceLine();
+            if ( String.IsNullOrWhiteSpace( version ) ) {
+                $"Failed connecting to server {test.DataSource}.".TraceLine();
 
-				return default( SqlServerInfo? );
-			}
+                return default( SqlServerInfo? );
+            }
 
-			var getdate = await test.AdhocAsync<DateTimeOffset?>( "select sysdatetimeoffset();", applicationName, cancellationToken ).ConfigureAwait( false );
+            var getdate = await test.AdhocAsync<DateTimeOffset?>( "select sysdatetimeoffset();", applicationName, cancellationToken ).ConfigureAwait( false );
 
-			if ( !getdate.HasValue ) {
-				$"Failed connecting to server {test.DataSource}.".TraceLine();
+            if ( !getdate.HasValue ) {
+                $"Failed connecting to server {test.DataSource}.".TraceLine();
 
-				return default( SqlServerInfo? );
-			}
+                return default( SqlServerInfo? );
+            }
 
-			var serverDateTime = getdate.Value; //should already be utc+offset.
-			var now = DateTime.UtcNow; //get this computer's utc
+            var serverDateTime = getdate.Value; //should already be utc+offset.
+            var now = DateTime.UtcNow; //get this computer's utc
 
-			if ( serverDateTime.Date == now.Date ) {
-				( $"Opened a connection to {test.DataSource}!" + $"{Environment.NewLine}Server Version:{version}" +
-				  $"{Environment.NewLine}Server time is {serverDateTime.ToLocalTime()}" ).Log();
+            if ( serverDateTime.Date == now.Date ) {
+                ( $"Opened a connection to {test.DataSource}!" + $"{Environment.NewLine}Server Version:{version}" +
+                  $"{Environment.NewLine}Server time is {serverDateTime.ToLocalTime()}" ).Log();
 
-				var connectionStringBuilder = new SqlConnectionStringBuilder( test.ConnectionString );
+                var connectionStringBuilder = new SqlConnectionStringBuilder( test.ConnectionString );
 
-				return new SqlServerInfo( version ) {
-					Status = Status.Success, ConnectionStringBuilder = connectionStringBuilder, UTCDateTime = serverDateTime
-				};
-			}
-		}
-		catch ( TaskCanceledException exception ) {
-			exception.Log( BreakOrDontBreak.DontBreak );
-		}
+                return new SqlServerInfo( version ) {
+                    Status = Status.Success, ConnectionStringBuilder = connectionStringBuilder, UTCDateTime = serverDateTime
+                };
+            }
+        }
+        catch ( TaskCanceledException exception ) {
+            exception.Log( BreakOrDontBreak.DontBreak );
+        }
 
-		"Failed connecting to server.".Break();
+        "Failed connecting to server.".Break();
 
-		return default( SqlServerInfo? );
-	}
-	*/
+        return default( SqlServerInfo? );
+    }
+    */
 
 	/*
             [Obsolete( "No access to a local Server atm." )]

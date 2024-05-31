@@ -1,45 +1,50 @@
 ﻿// Copyright © Protiguous. All Rights Reserved.
 //
-// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories,
-// or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
+// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries,
+// repositories, or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
 //
-// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten
-// by formatting. (We try to avoid it from happening, but it does accidentally happen.)
+// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has
+// been overwritten by formatting. (We try to avoid it from happening, but it does accidentally happen.)
 //
-// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to
-// those Authors. If you find your code unattributed in this source code, please let us know so we can properly attribute you
-// and include the proper license and/or copyright(s). If you want to use any of our code in a commercial project, you must
-// contact Protiguous@Protiguous.com for permission, license, and a quote.
+// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to those Authors.
+// If you find your code unattributed in this source code, please let us know so we can properly attribute you and include the proper licenses and/or copyrights.
+// If you want to use any of our code in a commercial project, you must contact Protiguous@Protiguous.com for permission, license, and a quote.
 //
 // Donations, payments, and royalties are accepted via bitcoin: 1Mad8TxTqxKnMiHuZxArFvX8BuFEB9nqX2 and PayPal: Protiguous@Protiguous.com
 //
 // ====================================================================
-// Disclaimer:  Usage of the source code or binaries is AS-IS. No warranties are expressed, implied, or given. We are NOT
-// responsible for Anything You Do With Our Code. We are NOT responsible for Anything You Do With Our Executables. We are NOT
-// responsible for Anything You Do With Your Computer. ====================================================================
+// Disclaimer:  Usage of the source code or binaries is AS-IS.
+// No warranties are expressed, implied, or given.
+// We are NOT responsible for Anything You Do With Our Code.
+// We are NOT responsible for Anything You Do With Our Executables.
+// We are NOT responsible for Anything You Do With Your Computer.
+// ====================================================================
 //
 // Contact us by email if you have any questions, helpful criticism, or if you would like to use our code in your project(s).
-// For business inquiries, please contact me at Protiguous@Protiguous.com. Our software can be found at
-// "https://Protiguous.com/Software/" Our GitHub address is "https://github.com/Protiguous".
+// For business inquiries, please contact me at Protiguous@Protiguous.com.
+// Our software can be found at "https://Protiguous.com/Software/"
+// Our GitHub address is "https://github.com/Protiguous".
 //
-// File "NumberExtensions.cs" last formatted on 2021-11-30 at 7:19 PM by Protiguous.
+// File "NumberExtensions.cs" last formatted on 2022-03-09 at 9:51 AM by Protiguous.
 
-#nullable enable
 
 namespace Librainian.Maths;
 
 using System;
 using System.Collections.Generic;
+using Exceptions;
+using Measurement.Time;
+using Numbers;
+using Rationals;
 using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
-using Exceptions;
-using JetBrains.Annotations;
-using Measurement.Time;
-using Numbers;
-using Rationals;
+using System.Threading;
+using System.Threading.Tasks;
+using Utilities;
+using System.Diagnostics.Contracts;
 
 public static class NumberExtensions {
 
@@ -73,7 +78,7 @@ public static class NumberExtensions {
 		0x5F, 0xDF, 0x3F, 0xBF, 0x7F, 0xFF
 	};
 
-	private static readonly String[] SizeSuffixes = {
+    private static readonly String[] SizeSuffixes = {
 		"bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"
 	};
 
@@ -138,6 +143,20 @@ public static class NumberExtensions {
 	[Pure]
 	[DebuggerStepThrough]
 	[MethodImpl( MethodImplOptions.AggressiveInlining )]
+	public static Boolean Any( this Single number ) => number > 0;
+
+	/// <summary>Returns true if <paramref name="number" /> is greater than 0.</summary>
+	/// <param name="number"></param>
+	[Pure]
+	[DebuggerStepThrough]
+	[MethodImpl( MethodImplOptions.AggressiveInlining )]
+	public static Boolean Any( this Double number ) => number > 0;
+
+	/// <summary>Returns true if <paramref name="number" /> is greater than 0.</summary>
+	/// <param name="number"></param>
+	[Pure]
+	[DebuggerStepThrough]
+	[MethodImpl( MethodImplOptions.AggressiveInlining )]
 	public static Boolean Any( this UInt64? number ) => number > 0;
 
 	/// <summary>Returns true if <paramref name="number" /> is greater than 0.</summary>
@@ -153,13 +172,6 @@ public static class NumberExtensions {
 	[DebuggerStepThrough]
 	[MethodImpl( MethodImplOptions.AggressiveInlining )]
 	public static Boolean Any( this Decimal number ) => number > Decimal.Zero;
-
-	/// <summary>Returns true if <paramref name="number" /> is greater than 0.</summary>
-	/// <param name="number"></param>
-	[Pure]
-	[DebuggerStepThrough]
-	[MethodImpl( MethodImplOptions.AggressiveInlining )]
-	public static Boolean Any( this Double number ) => number > 0;
 
 	/// <summary>Counts the number of set (bit = 1) bits in a given value.</summary>
 	/// <param name="value">Value to check.</param>
@@ -273,27 +285,41 @@ public static class NumberExtensions {
 		return i;
 	}
 
-	public static TimeSpan GetStep( this DateTime from, DateTime to ) {
-		var diff = from >= to ? from - to : to - from;
+    /// <summary>Returns true if <paramref name="number" /> is less than or equal to 0.</summary>
+	/// <param name="number"></param>
+	[Pure]
+	[DebuggerStepThrough]
+	[MethodImpl( MethodImplOptions.AggressiveInlining )]
+	public static Boolean NotAny( this Int32 number ) => number <= 0;
 
-		if ( diff.TotalDays > 1 ) {
-			return Days.One;
-		}
+	/// <summary>Returns true if <paramref name="number" /> is less than or equal to 0.</summary>
+	/// <param name="number"></param>
+	[Pure]
+	[DebuggerStepThrough]
+	[MethodImpl( MethodImplOptions.AggressiveInlining )]
+	public static Boolean NotAny( this UInt32 number ) => number <= 0;
 
-		if ( diff.TotalHours > 1 ) {
-			return Hours.One;
-		}
+#if NET7_0_OR_GREATER
+	public static Boolean NotAny<T>( this T number ) where T: INumber<T> {
+		var result = number <= number.MemoryUsed;
 
-		if ( diff.TotalMinutes > 1 ) {
-			return Minutes.One;
-		}
+        return result;
+    }
+#endif
 
-		if ( diff.TotalSeconds > 1 ) {
-			return Seconds.One;
-		}
+	/// <summary>Returns true if <paramref name="number" /> is less than or equal to 0.</summary>
+	/// <param name="number"></param>
+	[Pure]
+	[DebuggerStepThrough]
+	[MethodImpl( MethodImplOptions.AggressiveInlining )]
+	public static Boolean NotAny( this Int64 number ) => number <= 0;
 
-		return Milliseconds.One;
-	}
+	/// <summary>Returns true if <paramref name="number" /> is less than or euqal to 0.</summary>
+	/// <param name="number"></param>
+	[Pure]
+	[DebuggerStepThrough]
+	[MethodImpl( MethodImplOptions.AggressiveInlining )]
+	public static Boolean NotAny( this UInt64 number ) => number <= 0;
 
 	/// <summary>Finds the parity of a given value.</summary>
 	/// <param name="value">Value to check.</param>
@@ -307,7 +333,7 @@ public static class NumberExtensions {
 			i += value & 1;
 		}
 
-		return i % 2 == 1;
+		return ( i % 2 ) == 1;
 	}
 
 	/// <summary>Finds the parity of a given value.</summary>
@@ -322,7 +348,7 @@ public static class NumberExtensions {
 			i += value & 1;
 		}
 
-		return i % 2 == 1;
+		return ( i % 2 ) == 1;
 	}
 
 	/// <summary>Finds the parity of a given value.</summary>
@@ -337,7 +363,7 @@ public static class NumberExtensions {
 			i += value & 1;
 		}
 
-		return i % 2 == 1;
+		return ( i % 2 ) == 1;
 	}
 
 	/// <summary>Finds the parity of a given value.</summary>
@@ -352,7 +378,7 @@ public static class NumberExtensions {
 			i += value & 1;
 		}
 
-		return i % 2 == 1;
+		return ( i % 2 ) == 1;
 	}
 
 	/// <summary>Finds the parity of a given value.</summary>
@@ -367,7 +393,7 @@ public static class NumberExtensions {
 			i += value & 1;
 		}
 
-		return i % 2 == 1;
+		return ( i % 2 ) == 1;
 	}
 
 	/// <summary>Finds the parity of a given value.</summary>
@@ -382,7 +408,7 @@ public static class NumberExtensions {
 			i += value & 1;
 		}
 
-		return i % 2 == 1;
+		return ( i % 2 ) == 1;
 	}
 
 	/// <summary>Finds the parity of a given value.</summary>
@@ -397,7 +423,7 @@ public static class NumberExtensions {
 			i += value & 1;
 		}
 
-		return i % 2 == 1;
+		return ( i % 2 ) == 1;
 	}
 
 	/// <summary>Finds the parity of a given value.</summary>
@@ -417,16 +443,16 @@ public static class NumberExtensions {
 	/// <summary>Reverses the bit order of a variable (ie: 0100 1000 becomes 0001 0010)</summary>
 	/// <param name="source">Source value to reverse</param>
 	/// <returns>Input value with reversed bits</returns>
-	public static Int32 ReverseBits( this Int32 source ) =>
-		( BitReverseTable256[ source & 0xff ] << 24 ) | ( BitReverseTable256[ ( source >> 8 ) & 0xff ] << 16 ) | ( BitReverseTable256[ ( source >> 16 ) & 0xff ] << 8 ) |
-		BitReverseTable256[ ( source >> 24 ) & 0xff ];
+	public static Int32 ReverseBits( this Int32 source ) => ( BitReverseTable256[source & 0xff] << 24 ) | ( BitReverseTable256[( source >> 8 ) & 0xff] << 16 ) |
+															( BitReverseTable256[( source >> 16 ) & 0xff] << 8 ) | BitReverseTable256[( source >> 24 ) & 0xff];
 
 	/// <summary>Reverses the bit order of a variable (ie: 0100 1000 becomes 0001 0010)</summary>
 	/// <param name="source">Source value to reverse</param>
 	/// <returns>Input value with reversed bits</returns>
-	public static UInt32 ReverseBits( this UInt32 source ) =>
-		( UInt32 )( ( BitReverseTable256[ source & 0xff ] << 24 ) | ( BitReverseTable256[ ( source >> 8 ) & 0xff ] << 16 ) |
-					 ( BitReverseTable256[ ( source >> 16 ) & 0xff ] << 8 ) | BitReverseTable256[ ( source >> 24 ) & 0xff ] );
+	public static UInt32 ReverseBits( this UInt32 source ) => ( UInt32 )( ( BitReverseTable256[source & 0xff] << 24 ) |
+																		   ( BitReverseTable256[( source >> 8 ) & 0xff] << 16 ) |
+																		   ( BitReverseTable256[( source >> 16 ) & 0xff] << 8 ) |
+																		   BitReverseTable256[( source >> 24 ) & 0xff] );
 
 	/// <summary>Reverses the bit order of a variable (ie: 0100 1000 becomes 0001 0010)</summary>
 	/// <param name="source">Source value to reverse</param>
@@ -469,87 +495,49 @@ public static class NumberExtensions {
 
 		// make adjustment when the value is large enough that it would round up to 1000 or more
 		if ( Math.Round( adjustedSize, decimalPlaces ) >= 1000 ) {
-			mag += 1;
+			mag++;
 			adjustedSize /= 1024;
 		}
 
-		return String.Format( $"{{0:n{decimalPlaces}}} {{1}}", adjustedSize, SizeSuffixes[ mag ] );
+		return String.Format( $"{{0:n{decimalPlaces}}} {{1}}", adjustedSize, SizeSuffixes[mag] );
 	}
 
+	[Pure]
 	public static IEnumerable<Int32> Through( this Int32 begin, Int32 end ) {
-		Int32 offset;
+		var offset = begin < end ? 1 : -1;
 
-		if ( begin < end ) {
-			offset = 1;
-		}
-		else {
-			offset = -1;
-		}
-
-		for ( var i = begin; i != end + offset; i += offset ) {
+		for ( var i = begin; i != ( end + offset ); i += offset ) {
 			yield return i;
 		}
 	}
 
 	/// <summary>Example: foreach (var i in 102.To(204)) { Console.WriteLine(i); }</summary>
-	/// <param name="start"></param>
-	/// <param name="end"></param>
-	/// <param name="step"></param>
-	public static IEnumerable<Byte> To( this Byte start, Byte end, Byte step = 1 ) {
-		if ( step == 0 ) {
-			throw new ArgumentOutOfRangeException( nameof( step ), $"{nameof( step )} must not equal zero." );
-		}
-
-		if ( start <= end ) {
-			for ( var b = start; b <= end; b += step ) {
-				yield return b;
-
-				if ( b == Byte.MaxValue ) {
-					yield break; //special case to deal with overflow
-				}
-			}
-		}
-		else {
-			for ( var b = start; b >= end; b -= step ) {
-				yield return b;
-
-				if ( b == Byte.MinValue ) {
-					yield break; //special case to deal with underflow
-				}
-			}
-		}
-	}
-
-	/// <summary>Example: foreach (var i in 10240.To(20448)) { Console.WriteLine(i); }</summary>
 	/// <param name="begin"></param>
-	/// <param name="end"></param>
-	/// <param name="step"></param>
-	public static IEnumerable<UInt64> To( this Int32 begin, UInt64 end, UInt64 step = 1 ) {
+	/// <param name="end">  </param>
+	/// <param name="step"> </param>
+	/// <exception cref="ArgumentOutOfRangeException">
+	///     <paramref name="step" />
+	/// </exception>
+	public static IEnumerable<Byte> To( this Byte begin, Byte end, Byte step = 1 ) {
 		if ( step == 0 ) {
 			throw new ArgumentOutOfRangeException( nameof( step ), $"{nameof( step )} must not equal zero." );
 		}
 
-		var start = ( Decimal )begin;
+		return Inner();
 
-		if ( start <= end ) {
-			const Decimal maxValue = UInt64.MaxValue;
+		IEnumerable<Byte> Inner() {
+			if ( begin == end ) {
+				yield break;
+			}
 
-			for ( var value = start; value <= end; value += step ) {
-				yield return ( UInt64 )value; //TODO needs unit tested
-
-				if ( value >= maxValue ) {
-					yield break; //special case to deal with overflow
+			if ( begin <= end ) {
+				for ( var value = begin; value <= end; value += step ) {
+					yield return value;
 				}
 			}
-		}
-		else {
-			const Decimal minValue = UInt64.MinValue;
-
-			for ( var ul = start; ul >= end; ul -= step ) {
-				yield return ( UInt64 )ul; //TODO needs unit test
-
-				if ( ul < minValue ) {
-					yield break; //special case to deal with overflow
+			else {
+				for ( var value = begin; value >= end; value -= step ) {
+					yield return value;
 				}
 			}
 		}
@@ -557,200 +545,201 @@ public static class NumberExtensions {
 
 	/// <summary>Example: foreach (var i in 10240.To(20448)) { Console.WriteLine(i); }</summary>
 	/// <param name="begin">inclusive</param>
-	/// <param name="end">inclusive</param>
-	/// <param name="step"></param>
+	/// <param name="end">  inclusive</param>
+	/// <param name="step"> </param>
+	/// <exception cref="ArgumentOutOfRangeException">
+	///     <paramref name="step" />
+	/// </exception>
 	[Pure]
 	public static IEnumerable<Int32> To( this Int32 begin, Int32 end, Int32 step = 1 ) {
-		if ( step == 0 ) {
-			throw new ArgumentOutOfRangeException( nameof( step ), $"{nameof( step )} must not equal zero." );
-		}
+		Guard();
 
-		if ( begin == end ) {
-			/*no-op?*/
-		}
-		else if ( begin < end ) {
-			for ( var i = begin; i < end; i += step ) {
-				yield return i;
+		return Inner();
+
+		IEnumerable<Int32> Inner() {
+			if ( begin == end ) {
+				yield break;
+			}
+
+			if ( begin < end ) {
+				for ( var value = begin; value <= end; value += step ) {
+					yield return value;
+				}
+			}
+			else {
+				for ( var value = end; value >= begin; value-- ) {
+					yield return value;
+				}
 			}
 		}
-		else {
-			var length = end - begin;
 
-			for ( var i = length - 1; i >= 0; i-- ) {
-				yield return i; //TODO needs a proper test, with many variations
-			}
-		}
-	}
-
-	/// <summary>Example: foreach (var i in 10240.To(20448)) { Console.WriteLine(i); }</summary>
-	/// <param name="from"></param>
-	/// <param name="end"></param>
-	/// <param name="step"></param>
-	[Pure]
-	public static IEnumerable<UInt64> To( this UInt64 from, UInt64 end, UInt64 step = 1 ) {
-		if ( step == 0 ) {
-			throw new ArgumentOutOfRangeException( nameof( step ), $"{nameof( step )} must not equal zero." );
-		}
-
-		if ( from <= end ) {
-			for ( var ul = from; ul <= end; ul += step ) {
-				yield return ul;
-
-				if ( ul == UInt64.MaxValue ) {
-					yield break;
-				} //special case to deal with overflow
-			}
-		}
-		else {
-			for ( var ul = from; ul >= end; ul -= step ) {
-				yield return ul;
-
-				if ( ul == UInt64.MinValue ) {
-					yield break;
-				} //special case to deal with overflow
+		void Guard() {
+			if ( step.NotAny() ) {
+				throw new ArgumentOutOfRangeException( nameof( step ), $"{nameof( step )} must not equal zero." );
 			}
 		}
 	}
 
 	/// <summary>Example: foreach (var i in 10240.To(20448)) { Console.WriteLine(i); }</summary>
 	/// <param name="begin"></param>
-	/// <param name="end"></param>
+	/// <param name="end"> </param>
 	/// <param name="step"></param>
+	/// <exception cref="ArgumentOutOfRangeException">
+	///     <paramref name="step" />
+	/// </exception>
+	[Pure]
+	public static IEnumerable<UInt64> To( this UInt64 begin, UInt64 end, UInt64 step = 1 ) {
+		if ( step == 0 ) {
+			throw new ArgumentOutOfRangeException( nameof( step ), $"{nameof( step )} must not equal zero." );
+		}
+
+		return Inner();
+
+		IEnumerable<UInt64> Inner() {
+			if ( begin == end ) {
+				yield break;
+			}
+
+			if ( begin <= end ) {
+				for ( var ul = begin; ul <= end; ul += step ) {
+					yield return ul;
+				}
+			}
+			else {
+				for ( var value = end; value >= begin; value -= step ) {
+					yield return value;
+				}
+			}
+		}
+	}
+
+	/// <summary>Example: foreach (var i in 10240.To(20448)) { Console.WriteLine(i); }</summary>
+	/// <param name="begin"></param>
+	/// <param name="end"> </param>
+	/// <param name="step"></param>
+	/// <exception cref="ArgumentOutOfRangeException">
+	///     <paramref name="step" />
+	/// </exception>
 	[Pure]
 	public static IEnumerable<Int64> To( this Int64 begin, Int64 end, Int64 step = 1 ) {
 		if ( step == 0 ) {
 			throw new ArgumentOutOfRangeException( nameof( step ), $"{nameof( step )} must not equal zero." );
 		}
 
-		if ( begin <= end ) {
-			for ( var ul = begin; ul <= end; ul += step ) {
-				yield return ul;
+		return Inner();
 
-				if ( ul == Int64.MaxValue ) {
-					yield break;
-				} //special case to deal with overflow
+		IEnumerable<Int64> Inner() {
+			if ( begin <= end ) {
+				for ( var value = begin; value <= end; value += step ) {
+					yield return value;
+				}
 			}
-		}
-		else {
-			for ( var ul = begin; ul >= end; ul -= step ) {
-				yield return ul;
-
-				if ( ul == Int64.MinValue ) {
-					yield break;
-				} //special case to deal with overflow
+			else {
+				for ( var ul = end; ul >= begin; ul -= step ) {
+					yield return ul;
+				}
 			}
 		}
 	}
 
 	/// <summary>Example: foreach (var i in 10240.To(20448)) { Console.WriteLine(i); }</summary>
 	/// <param name="from"></param>
-	/// <param name="end"></param>
+	/// <param name="end">  </param>
 	/// <param name="step"></param>
+	/// <exception cref="ArgumentOutOfRangeException">
+	///     <paramref name="step" />
+	/// </exception>
 	[Pure]
 	public static IEnumerable<BigInteger> To( this BigInteger from, BigInteger end, UInt64 step = 1 ) {
 		if ( step == 0 ) {
 			throw new ArgumentOutOfRangeException( nameof( step ), $"{nameof( step )} must not equal zero." );
 		}
 
-		if ( from <= end ) {
-			for ( var ul = from; ul <= end; ul += step ) {
-				yield return ul;
+		return Inner();
+
+		IEnumerable<BigInteger> Inner() {
+			if ( from <= end ) {
+				for ( var value = from; value <= end; value += step ) {
+					yield return value;
+				}
 			}
-		}
-		else {
-			for ( var ul = from; ul >= end; ul -= step ) {
-				yield return ul;
+			else {
+				for ( var value = from; value >= end; value -= step ) {
+					yield return value;
+				}
 			}
 		}
 	}
 
 	/// <summary>Example: foreach (var i in 10240.To(20448)) { Console.WriteLine(i); }</summary>
 	/// <param name="begin"></param>
-	/// <param name="end"></param>
+	/// <param name="end">  </param>
 	/// <param name="step"></param>
+	/// <exception cref="ArgumentOutOfRangeException">
+	///     <paramref name="step" />
+	/// </exception>
 	[Pure]
 	public static IEnumerable<BigInteger> To( this Int64 begin, BigInteger end, UInt64 step = 1 ) {
 		if ( step == 0 ) {
 			throw new ArgumentOutOfRangeException( nameof( step ), $"{nameof( step )} must not equal zero." );
 		}
 
-		BigInteger start = begin;
+		return Inner();
 
-		if ( start <= end ) {
-			for ( var ul = start; ul <= end; ul += step ) {
-				yield return ul;
+		IEnumerable<BigInteger> Inner() {
+			BigInteger start = begin;
+
+			if ( start <= end ) {
+				for ( var value = start; value <= end; value += step ) {
+					yield return value;
+				}
 			}
-		}
-		else {
-			for ( var ul = start; ul >= end; ul -= step ) {
-				yield return ul;
+			else {
+				for ( var value = end; value >= begin; value -= step ) {
+					yield return value;
+				}
 			}
 		}
 	}
 
 	/// <summary>Example: foreach (var i in 10240.To(20448)) { Console.WriteLine(i); }</summary>
 	/// <param name="begin"></param>
-	/// <param name="end"></param>
-	/// <param name="step"></param>
+	/// <param name="end">   </param>
+	/// <param name="step"> </param>
+	/// <exception cref="ArgumentOutOfRangeException">
+	///     <paramref name="step" />
+	/// </exception>
 	[Pure]
 	public static IEnumerable<Rational> To( this Int32 begin, Rational end, Rational step ) {
 		if ( step == 0 ) {
 			throw new ArgumentOutOfRangeException( nameof( step ), $"{nameof( step )} must not equal zero." );
 		}
 
-		Rational start = begin;
+		return Inner();
 
-		if ( start <= end ) {
-			for ( var ul = start; ul <= end; ul += step ) {
-				yield return ul;
+		IEnumerable<Rational> Inner() {
+			Rational start = begin;
+
+			if ( start <= end ) {
+				for ( var value = start; value <= end; value += step ) {
+					yield return value;
+				}
 			}
-		}
-		else {
-			for ( var ul = start; ul >= end; ul -= step ) {
-				yield return ul;
-			}
-		}
-	}
-
-	/// <summary>
-	/// Return each <see cref="DateTime" /> between <paramref name="from" /> and <paramref name="to" />, stepped by a <see
-	/// cref="TimeSpan" /> ( <paramref name="step" />).
-	/// </summary>
-	/// <param name="from"></param>
-	/// <param name="to"></param>
-	/// <param name="step"></param>
-	/// <remarks>//TODO Untested code!</remarks>
-	/// <example>
-	/// var now = DateTime.UtcNow; var then = now.AddMinutes( 10 ); var minutes = now.To( then, TimeSpan.FromMinutes( 1 ) );
-	/// foreach ( var dateTime in minutes ) { Console.WriteLine( dateTime ); }
-	/// </example>
-	[Pure]
-	public static IEnumerable<DateTime> To( this DateTime from, DateTime to, TimeSpan? step = null ) {
-		step ??= from.GetStep( to );
-
-		if ( step == TimeSpan.Zero ) {
-			throw new ArgumentOutOfRangeException( nameof( step ), $"{nameof( step )} must not equal zero." );
-		}
-
-		if ( from > to ) {
-			for ( var dateTime = from; dateTime >= to; dateTime -= step.Value ) {
-				yield return dateTime;
-			}
-		}
-		else {
-			for ( var dateTime = from; dateTime <= to; dateTime += step.Value ) {
-				yield return dateTime;
+			else {
+				for ( var value = start; value >= end; value -= step ) {
+					yield return value;
+				}
 			}
 		}
 	}
 
-	[Pure]
+    [Pure]
 	public static IEnumerable<Single> To( this Single start, Single end, Single step ) {
-		if ( step == 0 ) {
+		if ( !step.Any() ) {
 			throw new ArgumentOutOfRangeException( nameof( step ), $"{nameof( step )} must not equal zero." );
 		}
 
-		var count = end - start + 1.0f;
+		var count = ( end - start ) + 1.0f;
 
 		for ( var idx = 0.0f; idx < count; idx += step ) {
 			yield return start + idx;
@@ -781,14 +770,41 @@ public static class NumberExtensions {
 			throw new ArgumentOutOfRangeException( nameof( step ), $"{nameof( step )} must not equal zero." );
 		}
 
-		if ( end >= start ) {
-			for ( var i = start; i <= end; i += step ) {
-				yield return i;
+		return Inner();
+
+		IEnumerable<Decimal> Inner() {
+			if ( start <= end ) {
+				for ( var i = start; i <= end; i += step ) {
+					yield return i;
+				}
+			}
+			else {
+				for ( var i = start; i >= end; i -= step ) {
+					yield return i;
+				}
 			}
 		}
-		else {
-			for ( var i = start; i >= end; i -= step ) {
-				yield return i;
+	}
+
+	/// <summary>Example: foreach (var i in 10240.To(20480)) { Console.WriteLine(i); }</summary>
+	/// <param name="begin">inclusive</param>
+	/// <param name="end">  inclusive</param>
+	/// <param name="step"> </param>
+	/// <param name="cancellationToken"></param>
+	/// <exception cref="ArgumentOutOfRangeException">
+	///     <paramref name="step" />
+	/// </exception>
+	[Pure]
+	public static async IAsyncEnumerable<Int32> ToAsync( this Int32 begin, Int32 end, Int32 step, [EnumeratorCancellation] CancellationToken cancellationToken ) {
+		Guard();
+
+		await foreach ( var i in begin.To( end ).ToAsyncEnumerable().WithCancellation( cancellationToken ).ConfigureAwait( false ) ) {
+			yield return i;
+		}
+
+		void Guard() {
+			if ( step.NotAny() ) {
+				throw new ArgumentOutOfRangeException( nameof( step ), $"{nameof( step )} must not equal zero." );
 			}
 		}
 	}
@@ -796,7 +812,7 @@ public static class NumberExtensions {
 	[Pure]
 	public static String ToHex( this IEnumerable<Byte> input ) {
 		if ( input is null ) {
-			throw new NullException( nameof( input ) );
+			throw new ArgumentEmptyException( nameof( input ) );
 		}
 
 		var result = new StringBuilder();
@@ -812,7 +828,7 @@ public static class NumberExtensions {
 
 	public static String ToHex( this UInt64 value ) => BitConverter.GetBytes( value ).Aggregate( String.Empty, ( current, b ) => current + b.ToString( "X2" ) );
 
-	public static String ToHexNumberString( this IEnumerable<Byte> value ) => Bits.ToString( value.Reverse().ToArray() ).Replace( "-", "" ).ToLower();
+	public static String ToHexNumberString( this IEnumerable<Byte> value ) => Bits.ToString( value.Reverse().ToArray() ).Replace( "-", "" ).ToUpperInvariant();
 
 	public static String ToHexNumberString( this UInt256 value ) => value.ToByteArray().ToHexNumberString();
 }

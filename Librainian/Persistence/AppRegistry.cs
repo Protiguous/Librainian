@@ -1,28 +1,29 @@
 ﻿// Copyright © Protiguous. All Rights Reserved.
 //
-// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories,
-// or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
+// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories, or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
 //
-// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten
-// by formatting. (We try to avoid it from happening, but it does accidentally happen.)
+// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten by formatting. (We try to avoid it from happening, but it does accidentally happen.)
 //
-// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to
-// those Authors. If you find your code unattributed in this source code, please let us know so we can properly attribute you
-// and include the proper license and/or copyright(s). If you want to use any of our code in a commercial project, you must
-// contact Protiguous@Protiguous.com for permission, license, and a quote.
+// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to those Authors.
+// If you find your code unattributed in this source code, please let us know so we can properly attribute you and include the proper license and/or copyright(s).
+// If you want to use any of our code in a commercial project, you must contact Protiguous@Protiguous.com for permission, license, and a quote.
 //
 // Donations, payments, and royalties are accepted via bitcoin: 1Mad8TxTqxKnMiHuZxArFvX8BuFEB9nqX2 and PayPal: Protiguous@Protiguous.com
 //
-// ====================================================================
-// Disclaimer:  Usage of the source code or binaries is AS-IS. No warranties are expressed, implied, or given. We are NOT
-// responsible for Anything You Do With Our Code. We are NOT responsible for Anything You Do With Our Executables. We are NOT
-// responsible for Anything You Do With Your Computer. ====================================================================
+//
+// Disclaimer:  Usage of the source code or binaries is AS-IS.
+// No warranties are expressed, implied, or given.
+// We are NOT responsible for Anything You Do With Our Code.
+// We are NOT responsible for Anything You Do With Our Executables.
+// We are NOT responsible for Anything You Do With Your Computer.
+//
 //
 // Contact us by email if you have any questions, helpful criticism, or if you would like to use our code in your project(s).
-// For business inquiries, please contact me at Protiguous@Protiguous.com. Our software can be found at
-// "https://Protiguous.com/Software/" Our GitHub address is "https://github.com/Protiguous".
+// For business inquiries, please contact me at Protiguous@Protiguous.com.
+// Our software can be found at "https://Protiguous.com/Software/"
+// Our GitHub address is "https://github.com/Protiguous".
 //
-// File "AppRegistry.cs" last formatted on 2021-11-30 at 7:22 PM by Protiguous.
+// File "AppRegistry.cs" last formatted on 2022-12-22 at 5:20 PM by Protiguous.
 
 namespace Librainian.Persistence;
 
@@ -32,10 +33,10 @@ using System.Windows.Forms;
 using Collections.Extensions;
 using Converters;
 using Exceptions;
-using JetBrains.Annotations;
 using Logging;
 using Microsoft.Win32;
 using Parsing;
+using Utilities;
 
 public static class AppRegistry {
 
@@ -61,30 +62,40 @@ public static class AppRegistry {
 		TheApplication = TheCompany.CreateSubKey( product, true ) ?? throw new NullException( nameof( TheApplication ) );
 	}
 
-	/// <summary>Registry key for the user's software.</summary>
+	/// <summary>
+	///     Registry key for the user's software.
+	/// </summary>
 	public static RegistryKey Software { get; }
 
-	/// <summary>Registry key for the application.</summary>
+	/// <summary>
+	///     Registry key for the application.
+	/// </summary>
 	public static RegistryKey TheApplication { get; }
 
-	/// <summary>Registry key for the product's company.</summary>
+	/// <summary>
+	///     Registry key for the product's company.
+	/// </summary>
 	public static RegistryKey TheCompany { get; }
 
-	/// <summary>Registry key for the current user;</summary>
+	/// <summary>
+	///     Registry key for the current user;
+	/// </summary>
 	public static RegistryKey TheUser { get; } = Registry.CurrentUser ?? throw new NullException( nameof( TheUser ) );
 
 	/// <summary>
-	/// <para>Gets the value of the current user's software's company's application's folder's key.</para>
+	///     <para>Gets the value of the current user's software's company's application's folder's key.</para>
 	/// </summary>
 	/// <param name="folder"></param>
-	/// <param name="key"></param>
+	/// <param name="key">   </param>
+	/// <exception cref="ArgumentEmptyException"></exception>
+	/// <exception cref="NullException"></exception>
 	public static Object? Get( String folder, String key ) {
 		if ( folder.IsEmpty() ) {
-			throw new NullException( nameof( folder ) );
+			throw new ArgumentEmptyException( nameof( folder ) );
 		}
 
 		if ( key.IsEmpty() ) {
-			throw new NullException( nameof( key ) );
+			throw new ArgumentEmptyException( nameof( key ) );
 		}
 
 		try {
@@ -103,22 +114,24 @@ public static class AppRegistry {
 	}
 
 	/// <summary>
-	/// <para>Gets the value of the current user's software's company's application's folder's key.</para>
+	///     <para>Gets the value of the current user's software's company's application's folder's key.</para>
 	/// </summary>
 	/// <param name="folder"></param>
-	/// <param name="key"></param>
+	/// <param name="key">   </param>
 	/// <param name="subkey"></param>
+	/// <exception cref="ArgumentEmptyException"></exception>
+	/// <exception cref="NullException"></exception>
 	public static Object? Get( String folder, String key, String subkey ) {
 		if ( folder.IsEmpty() ) {
-			throw new NullException( nameof( folder ) );
+			throw new ArgumentEmptyException( nameof( folder ) );
 		}
 
 		if ( key.IsEmpty() ) {
-			throw new NullException( nameof( key ) );
+			throw new ArgumentEmptyException( nameof( key ) );
 		}
 
 		if ( subkey.IsEmpty() ) {
-			throw new NullException( nameof( subkey ) );
+			throw new ArgumentEmptyException( nameof( subkey ) );
 		}
 
 		try {
@@ -142,18 +155,20 @@ public static class AppRegistry {
 	}
 
 	/// <summary>
-	/// <para>Gets the value of the current user's software's company's application's folder's key.</para>
+	///     <para>Gets the value of the current user's software's company's application's folder's key.</para>
 	/// </summary>
 	/// <param name="folder"></param>
-	/// <param name="key"></param>
-	[Pure]
+	/// <param name="key">   </param>
+	/// <exception cref="ArgumentEmptyException"></exception>
+	/// <exception cref="NullException"></exception>
+	[NeedsTesting]
 	public static Boolean? GetBoolean( String folder, String key ) {
 		if ( folder.IsEmpty() ) {
-			throw new NullException( nameof( folder ) );
+			throw new ArgumentEmptyException( nameof( folder ) );
 		}
 
 		if ( key.IsEmpty() ) {
-			throw new NullException( nameof( key ) );
+			throw new ArgumentEmptyException( nameof( key ) );
 		}
 
 		try {
@@ -172,23 +187,25 @@ public static class AppRegistry {
 	}
 
 	/// <summary>
-	/// <para>Gets the value of the current user's software's company's application's folder's key.</para>
+	///     <para>Gets the value of the current user's software's company's application's folder's key.</para>
 	/// </summary>
 	/// <param name="folder"></param>
-	/// <param name="key"></param>
+	/// <param name="key">   </param>
 	/// <param name="subkey"></param>
-	[Pure]
+	/// <exception cref="ArgumentEmptyException"></exception>
+	/// <exception cref="NullException"></exception>
+	[NeedsTesting]
 	public static Boolean? GetBoolean( String folder, String key, String subkey ) {
 		if ( folder.IsEmpty() ) {
-			throw new NullException( nameof( folder ) );
+			throw new ArgumentEmptyException( nameof( folder ) );
 		}
 
 		if ( key.IsEmpty() ) {
-			throw new NullException( nameof( key ) );
+			throw new ArgumentEmptyException( nameof( key ) );
 		}
 
 		if ( subkey.IsEmpty() ) {
-			throw new NullException( nameof( subkey ) );
+			throw new ArgumentEmptyException( nameof( subkey ) );
 		}
 
 		try {
@@ -212,18 +229,20 @@ public static class AppRegistry {
 	}
 
 	/// <summary>
-	/// <para>Gets the value of the current user's software's company's application's folder's key.</para>
+	///     <para>Gets the value of the current user's software's company's application's folder's key.</para>
 	/// </summary>
 	/// <param name="folder"></param>
-	/// <param name="key"></param>
-	[Pure]
+	/// <param name="key">   </param>
+	/// <exception cref="ArgumentEmptyException"></exception>
+	/// <exception cref="NullException"></exception>
+	[NeedsTesting]
 	public static Byte? GetByte( String folder, String key ) {
 		if ( folder.IsEmpty() ) {
-			throw new NullException( nameof( folder ) );
+			throw new ArgumentEmptyException( nameof( folder ) );
 		}
 
 		if ( key.IsEmpty() ) {
-			throw new NullException( nameof( key ) );
+			throw new ArgumentEmptyException( nameof( key ) );
 		}
 
 		try {
@@ -242,23 +261,25 @@ public static class AppRegistry {
 	}
 
 	/// <summary>
-	/// <para>Gets the value of the current user's software's company's application's folder's key.</para>
+	///     <para>Gets the value of the current user's software's company's application's folder's key.</para>
 	/// </summary>
 	/// <param name="folder"></param>
-	/// <param name="key"></param>
+	/// <param name="key">   </param>
 	/// <param name="subkey"></param>
-	[Pure]
+	/// <exception cref="ArgumentEmptyException"></exception>
+	/// <exception cref="NullException"></exception>
+	[NeedsTesting]
 	public static Byte? GetByte( String folder, String key, String subkey ) {
 		if ( folder.IsEmpty() ) {
-			throw new NullException( nameof( folder ) );
+			throw new ArgumentEmptyException( nameof( folder ) );
 		}
 
 		if ( key.IsEmpty() ) {
-			throw new NullException( nameof( key ) );
+			throw new ArgumentEmptyException( nameof( key ) );
 		}
 
 		if ( subkey.IsEmpty() ) {
-			throw new NullException( nameof( subkey ) );
+			throw new ArgumentEmptyException( nameof( subkey ) );
 		}
 
 		try {
@@ -282,18 +303,20 @@ public static class AppRegistry {
 	}
 
 	/// <summary>
-	/// <para>Gets the value of the current user's software's company's application's folder's key.</para>
+	///     <para>Gets the value of the current user's software's company's application's folder's key.</para>
 	/// </summary>
 	/// <param name="folder"></param>
-	/// <param name="key"></param>
-	[Pure]
+	/// <param name="key">   </param>
+	/// <exception cref="ArgumentEmptyException"></exception>
+	/// <exception cref="NullException"></exception>
+	[NeedsTesting]
 	public static Int32? GetInt32( String folder, String key ) {
 		if ( folder.IsEmpty() ) {
-			throw new NullException( nameof( folder ) );
+			throw new ArgumentEmptyException( nameof( folder ) );
 		}
 
 		if ( key.IsEmpty() ) {
-			throw new NullException( nameof( key ) );
+			throw new ArgumentEmptyException( nameof( key ) );
 		}
 
 		try {
@@ -312,23 +335,24 @@ public static class AppRegistry {
 	}
 
 	/// <summary>
-	/// <para>Gets the value of the current user's software's company's application's folder's key.</para>
+	///     <para>Gets the value of the current user's software's company's application's folder's key.</para>
 	/// </summary>
 	/// <param name="folder"></param>
-	/// <param name="key"></param>
+	/// <param name="key">   </param>
 	/// <param name="subkey"></param>
-	[Pure]
+	/// <exception cref="ArgumentEmptyException"></exception>
+	[NeedsTesting]
 	public static Int32? GetInt32( String folder, String key, String subkey ) {
 		if ( folder.IsEmpty() ) {
-			throw new NullException( nameof( folder ) );
+			throw new ArgumentEmptyException( nameof( folder ) );
 		}
 
 		if ( key.IsEmpty() ) {
-			throw new NullException( nameof( key ) );
+			throw new ArgumentEmptyException( nameof( key ) );
 		}
 
 		if ( subkey.IsEmpty() ) {
-			throw new NullException( nameof( subkey ) );
+			throw new ArgumentEmptyException( nameof( subkey ) );
 		}
 
 		try {
@@ -346,18 +370,20 @@ public static class AppRegistry {
 	}
 
 	/// <summary>
-	/// <para>Gets the value of the current user's software's company's application's folder's key.</para>
+	///     <para>Gets the value of the current user's software's company's application's folder's key.</para>
 	/// </summary>
 	/// <param name="folder"></param>
-	/// <param name="key"></param>
-	[Pure]
+	/// <param name="key">   </param>
+	/// <exception cref="ArgumentEmptyException"></exception>
+	/// <exception cref="NullException"></exception>
+	[NeedsTesting]
 	public static Int64? GetInt64( String folder, String key ) {
 		if ( folder.IsEmpty() ) {
-			throw new NullException( nameof( folder ) );
+			throw new ArgumentEmptyException( nameof( folder ) );
 		}
 
 		if ( key.IsEmpty() ) {
-			throw new NullException( nameof( key ) );
+			throw new ArgumentEmptyException( nameof( key ) );
 		}
 
 		try {
@@ -379,23 +405,25 @@ public static class AppRegistry {
 	}
 
 	/// <summary>
-	/// <para>Gets the value of the current user's software's company's application's folder's key.</para>
+	///     <para>Gets the value of the current user's software's company's application's folder's key.</para>
 	/// </summary>
 	/// <param name="folder"></param>
-	/// <param name="key"></param>
+	/// <param name="key">   </param>
 	/// <param name="subkey"></param>
-	[Pure]
+	/// <exception cref="ArgumentEmptyException"></exception>
+	/// <exception cref="NullException"></exception>
+	[NeedsTesting]
 	public static Int64? GetInt64( String folder, String key, String subkey ) {
 		if ( folder.IsEmpty() ) {
-			throw new NullException( nameof( folder ) );
+			throw new ArgumentEmptyException( nameof( folder ) );
 		}
 
 		if ( key.IsEmpty() ) {
-			throw new NullException( nameof( key ) );
+			throw new ArgumentEmptyException( nameof( key ) );
 		}
 
 		if ( subkey.IsEmpty() ) {
-			throw new NullException( nameof( subkey ) );
+			throw new ArgumentEmptyException( nameof( subkey ) );
 		}
 
 		try {
@@ -423,19 +451,20 @@ public static class AppRegistry {
 	}
 
 	/// <summary>
-	/// <para>Gets the value of the current user's software's company's application's folder's key.</para>
+	///     <para>Gets the value of the current user's software's company's application's folder's key.</para>
 	/// </summary>
 	/// <param name="folder"></param>
-	/// <param name="key"></param>
-	[Pure]
+	/// <param name="key">   </param>
+	/// <exception cref="ArgumentEmptyException"></exception>
+	[NeedsTesting]
 	[DebuggerStepThrough]
 	public static String? GetString( String folder, String key ) {
 		if ( folder.IsEmpty() ) {
-			throw new NullException( nameof( folder ) );
+			throw new ArgumentEmptyException( nameof( folder ) );
 		}
 
 		if ( key.IsEmpty() ) {
-			throw new NullException( nameof( key ) );
+			throw new ArgumentEmptyException( nameof( key ) );
 		}
 
 		try {
@@ -454,23 +483,25 @@ public static class AppRegistry {
 	}
 
 	/// <summary>
-	/// <para>Gets the value of the current user's software's company's application's folder's key.</para>
+	///     <para>Gets the value of the current user's software's company's application's folder's key.</para>
 	/// </summary>
 	/// <param name="folder"></param>
-	/// <param name="key"></param>
+	/// <param name="key">   </param>
 	/// <param name="subkey"></param>
-	[Pure]
+	/// <exception cref="ArgumentEmptyException"></exception>
+	/// <exception cref="NullException"></exception>
+	[NeedsTesting]
 	public static String? GetString( String folder, String key, String subkey ) {
 		if ( folder.IsEmpty() ) {
-			throw new NullException( nameof( folder ) );
+			throw new ArgumentEmptyException( nameof( folder ) );
 		}
 
 		if ( key.IsEmpty() ) {
-			throw new NullException( nameof( key ) );
+			throw new ArgumentEmptyException( nameof( key ) );
 		}
 
 		if ( subkey.IsEmpty() ) {
-			throw new NullException( nameof( subkey ) );
+			throw new ArgumentEmptyException( nameof( subkey ) );
 		}
 
 		try {
@@ -494,19 +525,20 @@ public static class AppRegistry {
 	}
 
 	/// <summary>
-	/// <para>Sets the <paramref name="value" /> of the current user's software's company's application's folder's key.</para>
+	///     <para>Sets the <paramref name="value" /> of the current user's software's company's application's folder's key.</para>
 	/// </summary>
 	/// <param name="folder"></param>
-	/// <param name="key"></param>
-	/// <param name="value"></param>
-	/// <param name="kind"></param>
+	/// <param name="key">   </param>
+	/// <param name="value"> </param>
+	/// <param name="kind">  </param>
+	/// <exception cref="ArgumentEmptyException"></exception>
 	public static Boolean Set( String folder, String key, Object? value, RegistryValueKind kind ) {
 		if ( folder.IsEmpty() ) {
-			throw new NullException( nameof( folder ) );
+			throw new ArgumentEmptyException( nameof( folder ) );
 		}
 
 		if ( key.IsEmpty() ) {
-			throw new NullException( nameof( key ) );
+			throw new ArgumentEmptyException( nameof( key ) );
 		}
 
 		using var regFolder = TheApplication.CreateSubKey( folder, RegistryKeyPermissionCheck.ReadWriteSubTree );
@@ -529,24 +561,25 @@ public static class AppRegistry {
 	}
 
 	/// <summary>
-	/// <para>Sets the <paramref name="value" /> of the current user's software's company's application's folder's key.</para>
+	///     <para>Sets the <paramref name="value" /> of the current user's software's company's application's folder's key.</para>
 	/// </summary>
 	/// <param name="folder"></param>
-	/// <param name="key"></param>
+	/// <param name="key">   </param>
 	/// <param name="subkey"></param>
-	/// <param name="value"></param>
-	/// <param name="kind"></param>
+	/// <param name="value"> </param>
+	/// <param name="kind">  </param>
+	/// <exception cref="ArgumentException"></exception>
 	public static Boolean Set<T>( String folder, String key, String subkey, T? value, RegistryValueKind kind ) {
 		if ( String.IsNullOrWhiteSpace( folder ) ) {
-			throw new NullException( nameof( folder ) );
+			throw new ArgumentException( "Value cannot be null or whitespace.", nameof( folder ) );
 		}
 
 		if ( String.IsNullOrWhiteSpace( key ) ) {
-			throw new NullException( nameof( key ) );
+			throw new ArgumentException( "Value cannot be null or whitespace.", nameof( key ) );
 		}
 
 		if ( String.IsNullOrWhiteSpace( subkey ) ) {
-			throw new NullException( nameof( subkey ) );
+			throw new ArgumentException( "Value cannot be null or whitespace.", nameof( subkey ) );
 		}
 
 		using var registryKey = TheApplication.CreateSubKey( folder, RegistryKeyPermissionCheck.ReadWriteSubTree );
@@ -571,26 +604,26 @@ public static class AppRegistry {
 	}
 
 	/// <summary>
-	/// <para>Sets the <paramref name="value" /> of the current user's software's company's application's folder's key.</para>
+	///     <para>Sets the <paramref name="value" /> of the current user's software's company's application's folder's key.</para>
 	/// </summary>
 	/// <param name="folder"></param>
-	/// <param name="key"></param>
-	/// <param name="value"></param>
+	/// <param name="key">   </param>
+	/// <param name="value"> </param>
 	public static void Set( String folder, String key, String value ) => Set( folder, key, value, RegistryValueKind.String );
 
 	/// <summary>
-	/// <para>Sets the <paramref name="value" /> of the current user's software's company's application's folder's key.</para>
+	///     <para>Sets the <paramref name="value" /> of the current user's software's company's application's folder's key.</para>
 	/// </summary>
 	/// <param name="folder"></param>
-	/// <param name="key"></param>
-	/// <param name="value"></param>
+	/// <param name="key">   </param>
+	/// <param name="value"> </param>
 	public static void Set( String folder, String key, Int32 value ) => Set( folder, key, value, RegistryValueKind.DWord );
 
 	/// <summary>
-	/// <para>Sets the <paramref name="value" /> of the current user's software's company's application's folder's key.</para>
+	///     <para>Sets the <paramref name="value" /> of the current user's software's company's application's folder's key.</para>
 	/// </summary>
 	/// <param name="folder"></param>
-	/// <param name="key"></param>
-	/// <param name="value"></param>
+	/// <param name="key">   </param>
+	/// <param name="value"> </param>
 	public static void Set( String folder, String key, Int64 value ) => Set( folder, key, value, RegistryValueKind.QWord );
 }

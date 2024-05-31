@@ -1,28 +1,29 @@
 ﻿// Copyright © Protiguous. All Rights Reserved.
 //
-// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories,
-// or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
+// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories, or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
 //
-// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten
-// by formatting. (We try to avoid it from happening, but it does accidentally happen.)
+// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten by formatting. (We try to avoid it from happening, but it does accidentally happen.)
 //
-// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to
-// those Authors. If you find your code unattributed in this source code, please let us know so we can properly attribute you
-// and include the proper license and/or copyright(s). If you want to use any of our code in a commercial project, you must
-// contact Protiguous@Protiguous.com for permission, license, and a quote.
+// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to those Authors.
+// If you find your code unattributed in this source code, please let us know so we can properly attribute you and include the proper license and/or copyright(s).
+// If you want to use any of our code in a commercial project, you must contact Protiguous@Protiguous.com for permission, license, and a quote.
 //
 // Donations, payments, and royalties are accepted via bitcoin: 1Mad8TxTqxKnMiHuZxArFvX8BuFEB9nqX2 and PayPal: Protiguous@Protiguous.com
 //
-// ====================================================================
-// Disclaimer:  Usage of the source code or binaries is AS-IS. No warranties are expressed, implied, or given. We are NOT
-// responsible for Anything You Do With Our Code. We are NOT responsible for Anything You Do With Our Executables. We are NOT
-// responsible for Anything You Do With Your Computer. ====================================================================
+//
+// Disclaimer:  Usage of the source code or binaries is AS-IS.
+// No warranties are expressed, implied, or given.
+// We are NOT responsible for Anything You Do With Our Code.
+// We are NOT responsible for Anything You Do With Our Executables.
+// We are NOT responsible for Anything You Do With Your Computer.
+//
 //
 // Contact us by email if you have any questions, helpful criticism, or if you would like to use our code in your project(s).
-// For business inquiries, please contact me at Protiguous@Protiguous.com. Our software can be found at
-// "https://Protiguous.com/Software/" Our GitHub address is "https://github.com/Protiguous".
+// For business inquiries, please contact me at Protiguous@Protiguous.com.
+// Our software can be found at "https://Protiguous.com/Software/"
+// Our GitHub address is "https://github.com/Protiguous".
 //
-// File "DetectSSD.cs" last formatted on 2021-11-30 at 7:20 PM by Protiguous.
+// File "DetectSSD.cs" last formatted on 2022-12-22 at 5:18 PM by Protiguous.
 
 namespace Librainian.OperatingSystem;
 
@@ -73,7 +74,7 @@ public static class DetectSSD {
 		return query_seek_penalty_desc.IncursSeekPenalty;
 	}
 
-	public static Boolean? IsDiskSSD( this Byte diskNumber ) => diskNumber.IncursSeekPenalty( out var seekPenaltySize ) == false && diskNumber.IsRotateDevice() == false;
+	public static Boolean? IsDiskSSD( this Byte diskNumber ) => ( diskNumber.IncursSeekPenalty( out var seekPenaltySize ) == false ) && ( diskNumber.IsRotateDevice() == false );
 
 	/// <summary>Method for nominal media rotation rate (Administrative privilege is required)</summary>
 	/// <param name="diskNumber"></param>
@@ -92,7 +93,7 @@ public static class DetectSSD {
 			NativeMethods.FILE_READ_ACCESS | NativeMethods.FILE_WRITE_ACCESS ); // From ntddscsi.h
 
 		var idQuery = new NativeMethods.ATAIdentifyDeviceQuery {
-			data = new UInt16[ 256 ]
+			data = new UInt16[256]
 		};
 
 		idQuery.header.Length = ( UInt16 )Marshal.SizeOf( idQuery.header );
@@ -100,9 +101,9 @@ public static class DetectSSD {
 		idQuery.header.DataTransferLength = ( UInt32 )( idQuery.data.Length * 2 ); // Size of "data" in bytes
 		idQuery.header.TimeOutValue = 3; // Sec
 		idQuery.header.DataBufferOffset = Marshal.OffsetOf( typeof( NativeMethods.ATAIdentifyDeviceQuery ), "data" );
-		idQuery.header.PreviousTaskFile = new Byte[ 8 ];
-		idQuery.header.CurrentTaskFile = new Byte[ 8 ];
-		idQuery.header.CurrentTaskFile[ 6 ] = 0xec; // ATA IDENTIFY DEVICE
+		idQuery.header.PreviousTaskFile = new Byte[8];
+		idQuery.header.CurrentTaskFile = new Byte[8];
+		idQuery.header.CurrentTaskFile[6] = 0xec; // ATA IDENTIFY DEVICE
 
 		var result = NativeMethods.DeviceIoControl( hDrive, ioctlAtaPassThrough, ref idQuery, ( UInt32 )Marshal.SizeOf( idQuery ), ref idQuery,
 			( UInt32 )Marshal.SizeOf( idQuery ), out var retvalSize, IntPtr.Zero );
@@ -110,7 +111,6 @@ public static class DetectSSD {
 		hDrive.Close();
 
 		if ( !result ) {
-
 			//Debug.WriteLine( "DeviceIoControl failed. " + PriNativeMethods.GetErrorMessage( Marshal.GetLastWin32Error() ) );
 			return default( Boolean? );
 		}
@@ -119,8 +119,7 @@ public static class DetectSSD {
 		const Int32 kNominalMediaRotRateWordIndex = 217;
 		const Int32 nonRotateDevice = 1;
 
-		if ( idQuery.data[ kNominalMediaRotRateWordIndex ] == nonRotateDevice ) {
-
+		if ( idQuery.data[kNominalMediaRotRateWordIndex] == nonRotateDevice ) {
 			//Debug.WriteLine( $"The disk #{diskNumber} is a NON-ROTATE device." );
 			return false;
 		}

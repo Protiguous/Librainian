@@ -1,28 +1,29 @@
 ﻿// Copyright © Protiguous. All Rights Reserved.
 //
-// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories,
-// or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
+// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories, or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
 //
-// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten
-// by formatting. (We try to avoid it from happening, but it does accidentally happen.)
+// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten by formatting. (We try to avoid it from happening, but it does accidentally happen.)
 //
-// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to
-// those Authors. If you find your code unattributed in this source code, please let us know so we can properly attribute you
-// and include the proper license and/or copyright(s). If you want to use any of our code in a commercial project, you must
-// contact Protiguous@Protiguous.com for permission, license, and a quote.
+// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to those Authors.
+// If you find your code unattributed in this source code, please let us know so we can properly attribute you and include the proper license and/or copyright(s).
+// If you want to use any of our code in a commercial project, you must contact Protiguous@Protiguous.com for permission, license, and a quote.
 //
 // Donations, payments, and royalties are accepted via bitcoin: 1Mad8TxTqxKnMiHuZxArFvX8BuFEB9nqX2 and PayPal: Protiguous@Protiguous.com
 //
 // ====================================================================
-// Disclaimer:  Usage of the source code or binaries is AS-IS. No warranties are expressed, implied, or given. We are NOT
-// responsible for Anything You Do With Our Code. We are NOT responsible for Anything You Do With Our Executables. We are NOT
-// responsible for Anything You Do With Your Computer. ====================================================================
+// Disclaimer:  Usage of the source code or binaries is AS-IS.
+// No warranties are expressed, implied, or given.
+// We are NOT responsible for Anything You Do With Our Code.
+// We are NOT responsible for Anything You Do With Our Executables.
+// We are NOT responsible for Anything You Do With Your Computer.
+// ====================================================================
 //
 // Contact us by email if you have any questions, helpful criticism, or if you would like to use our code in your project(s).
-// For business inquiries, please contact me at Protiguous@Protiguous.com. Our software can be found at
-// "https://Protiguous.com/Software/" Our GitHub address is "https://github.com/Protiguous".
+// For business inquiries, please contact me at Protiguous@Protiguous.com.
+// Our software can be found at "https://Protiguous.com/Software/"
+// Our GitHub address is "https://github.com/Protiguous".
 //
-// File "MathConstants.cs" last formatted on 2021-11-30 at 7:19 PM by Protiguous.
+// File "MathConstants.cs" last formatted on 2022-12-22 at 5:30 AM by Protiguous.
 
 namespace Librainian.Maths;
 
@@ -31,6 +32,32 @@ using System.Numerics;
 using Rationals;
 
 public static class MathConstants {
+
+	// Fast access for 10^n
+	internal static readonly Decimal[] PowersOf10 = {
+		1m, 10m, 100m, 1000m, 10000m, 100000m, 1000000m, 10000000m, 100000000m, 1000000000m,
+		10000000000m, 100000000000m, 1000000000000m, 10000000000000m, 100000000000000m, 1000000000000000m, 10000000000000000m, 100000000000000000m, 1000000000000000000m,
+		10000000000000000000m, 100000000000000000000m, 1000000000000000000000m, 10000000000000000000000m, 100000000000000000000000m, 1000000000000000000000000m,
+		10000000000000000000000000m, 100000000000000000000000000m, 1000000000000000000000000000m, 10000000000000000000000000000m
+	};
+
+	/// <summary>The e constant, also known as "Euler's number" or "Napier's constant"</summary>
+	/// <remarks>Full value is 2.718281828459045235360287471352662497757, see http://mathworld.wolfram.com/e.html</remarks>
+	public const Decimal E = 2.7182818284590452353602874714m;
+
+	/// <summary>The value of the natural logarithm of 10.</summary>
+	/// <remarks>
+	///     Full value is: 2.30258509299404568401799145468436420760110148862877297603332790096757
+	///     From: http://oeis.org/A002392/constant
+	/// </remarks>
+	public const Decimal Ln10 = 2.3025850929940456840179914547m;
+
+	/// <summary>The value of the natural logarithm of 2.</summary>
+	/// <remarks>
+	///     Full value is: .693147180559945309417232121458176568075500134360255254120680009493393621969694715605863326996418687
+	///     From: http://oeis.org/A002162/constant
+	/// </remarks>
+	public const Decimal Ln2 = 0.6931471805599453094172321215m;
 
 	public const Single NegativeOne = -1.0f;
 
@@ -44,9 +71,28 @@ public static class MathConstants {
 
 	public const Boolean On = true;
 
+	/// <summary>The pi (π) constant. Pi radians is equivalent to 180 degrees.</summary>
+	/// <remarks>See http://en.wikipedia.org/wiki/Pi</remarks>
+	public const Decimal Pi = 3.1415926535897932384626433833m;
+
+	/// <summary>π/2 - in radians is equivalent to 90 degrees.</summary>
+	public const Decimal PiHalf = 1.5707963267948966192313216916m;
+
+	/// <summary>π/4 - in radians is equivalent to 45 degrees.</summary>
+	public const Decimal PiQuarter = 0.7853981633974483096156608458m;
+
+	/// <summary>π/12 - in radians is equivalent to 15 degrees.</summary>
+	public const Decimal PiTwelfth = 0.2617993877991494365385536153m;
+
+	/// <summary>Smallest non-zero decimal value.</summary>
+	public const Decimal SmallestNonZeroDec = 0.0000000000000000000000000001m;
+
+	/// <summary>2π - in radians is equivalent to 360 degrees.</summary>
+	public const Decimal TwoPi = 6.2831853071795864769252867666m;
+
 	public const Boolean Yes = true;
 
-	public static readonly Double[] Logfactorialtable = {
+	public static readonly Lazy<Double[]> Logfactorialtable = new( new[] {
 		0.000000000000000, 0.000000000000000, 0.693147180559945, 1.791759469228055, 3.178053830347946, 4.787491742782046, 6.579251212010101, 8.525161361065415,
 		10.604602902745251, 12.801827480081469, 15.104412573075516, 17.502307845873887, 19.987214495661885, 22.552163853123421, 25.191221182738683, 27.899271383840894,
 		30.671860106080675, 33.505073450136891, 36.395445208033053, 39.339884187199495, 42.335616460753485, 45.380138898476908, 48.471181351835227, 51.606675567764377,
@@ -80,7 +126,7 @@ public static class MathConstants {
 		1068.055844343701400, 1073.532307895632800, 1079.012946818975000, 1084.497743752465600, 1089.986681478622400, 1095.479742921962700, 1100.976911147256000,
 		1106.478169357800900, 1111.983500893733000, 1117.492889230361000, 1123.006317976526100, 1128.523770872990800, 1134.045231790853000, 1139.570684729984800,
 		1145.100113817496100, 1150.633503306223700, 1156.170837573242400
-	};
+	} );
 
 	public static readonly BigInteger MaxiumDecimalValue = ( BigInteger )Decimal.MaxValue;
 
@@ -112,4 +158,18 @@ public static class MathConstants {
 		/// <summary>1,099,511,627,776</summary>
 		public const Int64 OneTeraByte = 0x10000000000;
 	}
+
+	// 180 degrees - see http://en.wikipedia.org/wiki/Pi
+
+	// 90 degrees
+
+	// 45 degrees
+
+	// 15 degrees
+
+	// 360 degrees
+
+	// aka new decimal(1, 0, 0, false, 28); //1e-28m
+    public const Double MinimumDecimalAsDouble = ( Double )Decimal.MinValue;
+
 }

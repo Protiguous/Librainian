@@ -1,30 +1,30 @@
 ﻿// Copyright © Protiguous. All Rights Reserved.
 //
-// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories,
-// or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
+// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories, or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
 //
-// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten
-// by formatting. (We try to avoid it from happening, but it does accidentally happen.)
+// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten by formatting. (We try to avoid it from happening, but it does accidentally happen.)
 //
-// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to
-// those Authors. If you find your code unattributed in this source code, please let us know so we can properly attribute you
-// and include the proper license and/or copyright(s). If you want to use any of our code in a commercial project, you must
-// contact Protiguous@Protiguous.com for permission, license, and a quote.
+// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to those Authors.
+// If you find your code unattributed in this source code, please let us know so we can properly attribute you and include the proper license and/or copyright(s).
+// If you want to use any of our code in a commercial project, you must contact Protiguous@Protiguous.com for permission, license, and a quote.
 //
 // Donations, payments, and royalties are accepted via bitcoin: 1Mad8TxTqxKnMiHuZxArFvX8BuFEB9nqX2 and PayPal: Protiguous@Protiguous.com
 //
-// ====================================================================
-// Disclaimer:  Usage of the source code or binaries is AS-IS. No warranties are expressed, implied, or given. We are NOT
-// responsible for Anything You Do With Our Code. We are NOT responsible for Anything You Do With Our Executables. We are NOT
-// responsible for Anything You Do With Your Computer. ====================================================================
+//
+// Disclaimer:  Usage of the source code or binaries is AS-IS.
+// No warranties are expressed, implied, or given.
+// We are NOT responsible for Anything You Do With Our Code.
+// We are NOT responsible for Anything You Do With Our Executables.
+// We are NOT responsible for Anything You Do With Your Computer.
+//
 //
 // Contact us by email if you have any questions, helpful criticism, or if you would like to use our code in your project(s).
-// For business inquiries, please contact me at Protiguous@Protiguous.com. Our software can be found at
-// "https://Protiguous.com/Software/" Our GitHub address is "https://github.com/Protiguous".
+// For business inquiries, please contact me at Protiguous@Protiguous.com.
+// Our software can be found at "https://Protiguous.com/Software/"
+// Our GitHub address is "https://github.com/Protiguous".
 //
-// File "MemMapCache.cs" last formatted on 2021-11-30 at 7:16 PM by Protiguous.
+// File "MemMapCache.cs" last formatted on 2022-12-22 at 5:15 PM by Protiguous.
 
-#nullable enable
 
 namespace Librainian.Databases.MMF;
 
@@ -46,9 +46,6 @@ public class MemMapCache<T> : ABetterClassDispose {
 	private const String Delim = "[!@#]";
 
 	private NetworkStream? _networkStream;
-
-	public MemMapCache() : base( nameof( MemMapCache<T> ) ) {
-	}
 
 	private BinaryFormatter _formatter { get; } = new();
 
@@ -80,7 +77,7 @@ public class MemMapCache<T> : ABetterClassDispose {
 
 	public T? Get( String key ) {
 		if ( String.IsNullOrWhiteSpace( key ) ) {
-			throw new NullException( nameof( key ) );
+			throw new ArgumentException( "Value cannot be null or whitespace.", nameof( key ) );
 		}
 
 		if ( !this.IsConnected ) {
@@ -88,12 +85,10 @@ public class MemMapCache<T> : ABetterClassDispose {
 		}
 
 		try {
-			if ( this._keyExpirations.ContainsKey( key ) ) {
-				if ( DateTime.UtcNow >= this._keyExpirations[ key ] ) {
-					this._keyExpirations.Remove( key );
+			if ( this._keyExpirations.ContainsKey( key ) && ( DateTime.UtcNow >= this._keyExpirations[key] ) ) {
+				this._keyExpirations.Remove( key );
 
-					return default( T );
-				}
+				return default( T );
 			}
 
 #pragma warning disable CA1416 // Validate platform compatibility
@@ -107,7 +102,6 @@ public class MemMapCache<T> : ABetterClassDispose {
 			return o is T o1 ? o1 : default( T );
 		}
 		catch ( SerializationException ) {
-
 			//throw;
 			return default( T );
 		}
@@ -123,11 +117,11 @@ public class MemMapCache<T> : ABetterClassDispose {
 	//ideal for Unit Testing of classes that depend upon this Library.
 	public void Set( String key, [DisallowNull] T obj ) {
 		if ( obj is null ) {
-			throw new NullException( nameof( obj ) );
+			throw new ArgumentEmptyException( nameof( obj ) );
 		}
 
 		if ( String.IsNullOrWhiteSpace( key ) ) {
-			throw new NullException( nameof( key ) );
+			throw new ArgumentException( "Value cannot be null or whitespace.", nameof( key ) );
 		}
 
 		this.Set( key, obj, this.ChunkSize, DateTime.MaxValue );
@@ -143,7 +137,7 @@ public class MemMapCache<T> : ABetterClassDispose {
 		}
 
 		if ( obj is null ) {
-			throw new NullException( nameof( obj ) );
+			throw new ArgumentEmptyException( nameof( obj ) );
 		}
 
 		if ( !this.IsConnected ) {
@@ -157,7 +151,7 @@ public class MemMapCache<T> : ABetterClassDispose {
 				this._keyExpirations.Add( key, expire );
 			}
 			else {
-				this._keyExpirations[ key ] = expire;
+				this._keyExpirations[key] = expire;
 			}
 
 #pragma warning disable CA1416 // Validate platform compatibility
@@ -179,12 +173,10 @@ public class MemMapCache<T> : ABetterClassDispose {
 			}
 		}
 		catch ( NotSupportedException exception ) {
-
 			//Console.WriteLine( "{0} is too small for {1}.", size, key );
 			exception.Log();
 		}
 		catch ( Exception exception ) {
-
 			//Console.WriteLine( "MemMapCache: Set Failed.\n\t" + ex.Message );
 			exception.Log();
 		}
@@ -192,11 +184,11 @@ public class MemMapCache<T> : ABetterClassDispose {
 
 	public void Set( String key, [DisallowNull] T obj, DateTime expire ) {
 		if ( obj is null ) {
-			throw new NullException( nameof( obj ) );
+			throw new ArgumentEmptyException( nameof( obj ) );
 		}
 
 		if ( String.IsNullOrWhiteSpace( key ) ) {
-			throw new NullException( nameof( key ) );
+			throw new ArgumentException( "Value cannot be null or whitespace.", nameof( key ) );
 		}
 
 		this.Set( key, obj, this.ChunkSize, expire );
@@ -204,11 +196,11 @@ public class MemMapCache<T> : ABetterClassDispose {
 
 	public void Set( String key, [DisallowNull] T obj, TimeSpan expire ) {
 		if ( obj is null ) {
-			throw new NullException( nameof( obj ) );
+			throw new ArgumentEmptyException( nameof( obj ) );
 		}
 
 		if ( String.IsNullOrWhiteSpace( key ) ) {
-			throw new NullException( nameof( key ) );
+			throw new ArgumentException( "Value cannot be null or whitespace.", nameof( key ) );
 		}
 
 		var expireDt = DateTime.Now.Add( expire );
@@ -217,11 +209,11 @@ public class MemMapCache<T> : ABetterClassDispose {
 
 	public void Set( String key, [DisallowNull] T obj, Int64 size ) {
 		if ( obj is null ) {
-			throw new NullException( nameof( obj ) );
+			throw new ArgumentEmptyException( nameof( obj ) );
 		}
 
 		if ( String.IsNullOrWhiteSpace( key ) ) {
-			throw new NullException( nameof( key ) );
+			throw new ArgumentException( "Value cannot be null or whitespace.", nameof( key ) );
 		}
 
 		this.Set( key, obj, size, DateTime.MaxValue );
@@ -229,7 +221,7 @@ public class MemMapCache<T> : ABetterClassDispose {
 
 	public T? TryGetThenSet( String key, Func<T>? cacheMiss ) {
 		if ( String.IsNullOrWhiteSpace( key ) ) {
-			throw new NullException( nameof( key ) );
+			throw new ArgumentException( "Value cannot be null or whitespace.", nameof( key ) );
 		}
 
 		return this.TryGetThenSet( key, DateTime.MaxValue, cacheMiss );
@@ -237,7 +229,7 @@ public class MemMapCache<T> : ABetterClassDispose {
 
 	public T? TryGetThenSet( String key, DateTime expire, Func<T>? cacheMiss ) {
 		if ( String.IsNullOrWhiteSpace( key ) ) {
-			throw new NullException( nameof( key ) );
+			throw new ArgumentException( "Value cannot be null or whitespace.", nameof( key ) );
 		}
 
 		var obj = this.Get( key );
@@ -261,7 +253,7 @@ public class MemMapCache<T> : ABetterClassDispose {
 
 	public T? TryGetThenSet( String key, TimeSpan expire, Func<T>? cacheMiss ) {
 		if ( String.IsNullOrWhiteSpace( key ) ) {
-			throw new NullException( nameof( key ) );
+			throw new ArgumentException( "Value cannot be null or whitespace.", nameof( key ) );
 		}
 
 		var expireDt = DateTime.Now.Add( expire );
@@ -271,7 +263,7 @@ public class MemMapCache<T> : ABetterClassDispose {
 
 	public T? TryGetThenSet( String key, Int64 size, TimeSpan expire, Func<T>? cacheMiss ) {
 		if ( String.IsNullOrWhiteSpace( key ) ) {
-			throw new NullException( nameof( key ) );
+			throw new ArgumentException( "Value cannot be null or whitespace.", nameof( key ) );
 		}
 
 		var expireDt = DateTime.Now.Add( expire );
@@ -281,7 +273,7 @@ public class MemMapCache<T> : ABetterClassDispose {
 
 	public T? TryGetThenSet( String key, Int64 size, DateTime expire, Func<T>? cacheMiss ) {
 		if ( String.IsNullOrWhiteSpace( key ) ) {
-			throw new NullException( nameof( key ) );
+			throw new ArgumentEmptyException( nameof( key ) );
 		}
 
 		var obj = this.Get( key );

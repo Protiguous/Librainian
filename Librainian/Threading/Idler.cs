@@ -1,28 +1,29 @@
 ﻿// Copyright © Protiguous. All Rights Reserved.
 //
-// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories,
-// or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
+// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories, or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
 //
-// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten
-// by formatting. (We try to avoid it from happening, but it does accidentally happen.)
+// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten by formatting. (We try to avoid it from happening, but it does accidentally happen.)
 //
-// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to
-// those Authors. If you find your code unattributed in this source code, please let us know so we can properly attribute you
-// and include the proper license and/or copyright(s). If you want to use any of our code in a commercial project, you must
-// contact Protiguous@Protiguous.com for permission, license, and a quote.
+// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to those Authors.
+// If you find your code unattributed in this source code, please let us know so we can properly attribute you and include the proper license and/or copyright(s).
+// If you want to use any of our code in a commercial project, you must contact Protiguous@Protiguous.com for permission, license, and a quote.
 //
 // Donations, payments, and royalties are accepted via bitcoin: 1Mad8TxTqxKnMiHuZxArFvX8BuFEB9nqX2 and PayPal: Protiguous@Protiguous.com
 //
-// ====================================================================
-// Disclaimer:  Usage of the source code or binaries is AS-IS. No warranties are expressed, implied, or given. We are NOT
-// responsible for Anything You Do With Our Code. We are NOT responsible for Anything You Do With Our Executables. We are NOT
-// responsible for Anything You Do With Your Computer. ====================================================================
+//
+// Disclaimer:  Usage of the source code or binaries is AS-IS.
+// No warranties are expressed, implied, or given.
+// We are NOT responsible for Anything You Do With Our Code.
+// We are NOT responsible for Anything You Do With Our Executables.
+// We are NOT responsible for Anything You Do With Your Computer.
+//
 //
 // Contact us by email if you have any questions, helpful criticism, or if you would like to use our code in your project(s).
-// For business inquiries, please contact me at Protiguous@Protiguous.com. Our software can be found at
-// "https://Protiguous.com/Software/" Our GitHub address is "https://github.com/Protiguous".
+// For business inquiries, please contact me at Protiguous@Protiguous.com.
+// Our software can be found at "https://Protiguous.com/Software/"
+// Our GitHub address is "https://github.com/Protiguous".
 //
-// File "Idler.cs" last formatted on 2021-11-30 at 7:22 PM by Protiguous.
+// File "Idler.cs" last formatted on 2022-12-22 at 5:20 PM by Protiguous.
 
 namespace Librainian.Threading;
 
@@ -36,6 +37,7 @@ using Collections.Sets;
 using Exceptions;
 using Extensions;
 using Logging;
+using Utilities;
 using Utilities.Disposables;
 
 public enum JobStatus {
@@ -59,15 +61,15 @@ public interface IIdler {
 	Boolean Any();
 
 	/// <summary>
-	/// Run any remaining jobs.
-	/// <para>Will exit while loop if <see cref="CancellationToken" /> is signaled to cancel.</para>
+	///     Run any remaining jobs.
+	///     <para>Will exit while loop if <see cref="CancellationToken" /> is signaled to cancel.</para>
 	/// </summary>
 	void Finish();
 }
 
 public class Idler : ABetterClassDispose, IIdler {
 
-	public Idler( CancellationToken cancellationToken ) : base( nameof( Idler ) ) {
+	public Idler( CancellationToken cancellationToken ) {
 		this.Token = cancellationToken;
 
 		//this.Jobs.CollectionChanged += ( sender, args ) => this.NextJob();
@@ -117,16 +119,18 @@ public class Idler : ABetterClassDispose, IIdler {
 	/// <summary>Add an <paramref name="action" /> as a job to be ran on the next <see cref="Application.Idle" /> event.</summary>
 	/// <param name="name"></param>
 	/// <param name="action"></param>
+	/// <exception cref="ArgumentEmptyException"></exception>
+	/// <exception cref="ArgumentException"></exception>
 	public void Add( String name, Action action ) {
 		if ( action is null ) {
-			throw new NullException( nameof( action ) );
+			throw new ArgumentEmptyException( nameof( action ) );
 		}
 
 		if ( String.IsNullOrWhiteSpace( name ) ) {
-			throw new NullException( nameof( name ) );
+			throw new ArgumentException( "Value cannot be null or whitespace.", nameof( name ) );
 		}
 
-		Error.Trap( () => this.Jobs.TryAdd( name, action ) );
+		ErrorTrapper.Trap( () => this.Jobs.TryAdd( name, action ) );
 	}
 
 	public Boolean Any() => this.Jobs.Any();
@@ -134,8 +138,8 @@ public class Idler : ABetterClassDispose, IIdler {
 	public override void DisposeManaged() => this.RemoveHandler();
 
 	/// <summary>
-	/// Run any remaining jobs.
-	/// <para>Will exit prematurely if <see cref="Token" /> is signaled to cancel.</para>
+	///     Run any remaining jobs.
+	///     <para>Will exit prematurely if <see cref="Token" /> is signaled to cancel.</para>
 	/// </summary>
 	public void Finish() {
 		while ( this.Any() && !this.Token.IsCancellationRequested ) {

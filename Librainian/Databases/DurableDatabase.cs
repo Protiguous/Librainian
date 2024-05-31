@@ -1,30 +1,30 @@
 ﻿// Copyright © Protiguous. All Rights Reserved.
 //
-// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories,
-// or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
+// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories, or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
 //
-// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten
-// by formatting. (We try to avoid it from happening, but it does accidentally happen.)
+// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten by formatting. (We try to avoid it from happening, but it does accidentally happen.)
 //
-// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to
-// those Authors. If you find your code unattributed in this source code, please let us know so we can properly attribute you
-// and include the proper license and/or copyright(s). If you want to use any of our code in a commercial project, you must
-// contact Protiguous@Protiguous.com for permission, license, and a quote.
+// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to those Authors.
+// If you find your code unattributed in this source code, please let us know so we can properly attribute you and include the proper license and/or copyright(s).
+// If you want to use any of our code in a commercial project, you must contact Protiguous@Protiguous.com for permission, license, and a quote.
 //
 // Donations, payments, and royalties are accepted via bitcoin: 1Mad8TxTqxKnMiHuZxArFvX8BuFEB9nqX2 and PayPal: Protiguous@Protiguous.com
 //
-// ====================================================================
-// Disclaimer:  Usage of the source code or binaries is AS-IS. No warranties are expressed, implied, or given. We are NOT
-// responsible for Anything You Do With Our Code. We are NOT responsible for Anything You Do With Our Executables. We are NOT
-// responsible for Anything You Do With Your Computer. ====================================================================
+//
+// Disclaimer:  Usage of the source code or binaries is AS-IS.
+// No warranties are expressed, implied, or given.
+// We are NOT responsible for Anything You Do With Our Code.
+// We are NOT responsible for Anything You Do With Our Executables.
+// We are NOT responsible for Anything You Do With Your Computer.
+//
 //
 // Contact us by email if you have any questions, helpful criticism, or if you would like to use our code in your project(s).
-// For business inquiries, please contact me at Protiguous@Protiguous.com. Our software can be found at
-// "https://Protiguous.com/Software/" Our GitHub address is "https://github.com/Protiguous".
+// For business inquiries, please contact me at Protiguous@Protiguous.com.
+// Our software can be found at "https://Protiguous.com/Software/"
+// Our GitHub address is "https://github.com/Protiguous".
 //
-// File "DurableDatabase.cs" last formatted on 2021-11-30 at 7:16 PM by Protiguous.
+// File "DurableDatabase.cs" last formatted on 2022-12-22 at 5:15 PM by Protiguous.
 
-#nullable enable
 
 namespace Librainian.Databases;
 
@@ -39,49 +39,15 @@ using Extensions;
 using Logging;
 using Maths;
 using Microsoft.Data.SqlClient;
+using Utilities;
 using Utilities.Disposables;
 
 public class DurableDatabase : ABetterClassDispose {
-
-	/// <summary>A database connection attempts to stay connected in the event of an unwanted disconnect.</summary>
-	/// <param name="connectionString"></param>
-	/// <param name="retries"></param>
-	/// <exception cref="InvalidOperationException"></exception>
-	/// <remarks>
-	/// This has not been tested if it makes a noticable difference versus SQL Server connection pooling. It probably doesn't
-	/// help, as experience shows a database connection should be as short as possible.
-	/// </remarks>
-	public DurableDatabase( String connectionString, UInt16 retries ) : base( nameof( DurableDatabase ) ) {
-		if ( String.IsNullOrWhiteSpace( connectionString ) ) {
-			throw new NullException( nameof( connectionString ) );
-		}
-
-		this.Retries = retries;
-		this.ConnectionString = connectionString;
-
-		this.SqlConnections = new ThreadLocal<SqlConnection>( () => {
-			var connection = new SqlConnection( this.ConnectionString );
-			connection.StateChange += this.SqlConnection_StateChange;
-
-			return connection;
-		}, true );
-
-		var test = this.OpenConnection(); //try/start the current thread's open;
-
-		if ( test == null ) {
-			var builder = new SqlConnectionStringBuilder( this.ConnectionString );
-
-			throw new InvalidOperationException( $"Unable to connect to {builder.DataSource}" );
-		}
-	}
-
 	private String ConnectionString { get; }
 
 	private UInt16 Retries { get; }
 
 	private ThreadLocal<SqlConnection> SqlConnections { get; }
-
-	public CancellationTokenSource CancelConnection { get; } = new();
 
 	private SqlConnection? OpenConnection() {
 		var sqlConnectionsValue = this.SqlConnections.Value;
@@ -170,6 +136,41 @@ public class DurableDatabase : ABetterClassDispose {
 		}
 	}
 
+	/// <summary>A database connection attempts to stay connected in the event of an unwanted disconnect.</summary>
+	/// <param name="connectionString"></param>
+	/// <param name="retries"></param>
+	/// <exception cref="InvalidOperationException"></exception>
+	/// <remarks>
+	///     This has not been tested if it makes a noticable difference versus SQL Server connection pooling. It probably
+	///     doesn't help, as experience shows a
+	///     database connection should be as short as possible.
+	/// </remarks>
+	public DurableDatabase( String connectionString, UInt16 retries ) {
+		if ( String.IsNullOrWhiteSpace( connectionString ) ) {
+			throw new ArgumentException( "Value cannot be null or whitespace.", nameof( connectionString ) );
+		}
+
+		this.Retries = retries;
+		this.ConnectionString = connectionString;
+
+		this.SqlConnections = new ThreadLocal<SqlConnection>( () => {
+			var connection = new SqlConnection( this.ConnectionString );
+			connection.StateChange += this.SqlConnection_StateChange;
+
+			return connection;
+		}, true );
+
+		var test = this.OpenConnection(); //try/start the current thread's open;
+
+		if ( test == null ) {
+			var builder = new SqlConnectionStringBuilder( this.ConnectionString );
+
+			throw new InvalidOperationException( $"Unable to connect to {builder.DataSource}" );
+		}
+	}
+
+	public CancellationTokenSource CancelConnection { get; } = new();
+
 	public override void DisposeManaged() {
 		if ( !this.CancelConnection.IsCancellationRequested ) {
 			this.CancelConnection.Cancel();
@@ -183,46 +184,49 @@ public class DurableDatabase : ABetterClassDispose {
 			// ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
 			switch ( connection.State ) {
 				case ConnectionState.Open: {
-					connection.Close();
+						connection.Close();
 
-					break;
-				}
+						break;
+					}
 
 				case ConnectionState.Closed: {
-					break;
-				}
+						break;
+					}
 
 				case ConnectionState.Connecting: {
-					connection.Close();
+						connection.Close();
 
-					break;
-				}
+						break;
+					}
 
 				case ConnectionState.Executing: {
-					connection.Close();
+						connection.Close();
 
-					break;
-				}
+						break;
+					}
 
 				case ConnectionState.Fetching: {
-					connection.Close();
+						connection.Close();
 
-					break;
-				}
+						break;
+					}
 
 				case ConnectionState.Broken: {
-					connection.Close();
+						connection.Close();
 
-					break;
-				}
+						break;
+					}
 			}
 		}
 	}
 
 	/// <summary>Opens and then closes a <see cref="SqlConnection" />.</summary>
+	/// <param name="query"></param>
+	/// <param name="parameters"></param>
+	/// <exception cref="ArgumentEmptyException"></exception>
 	public Int32? ExecuteNonQuery( String query, params SqlParameter[]? parameters ) {
 		if ( String.IsNullOrWhiteSpace( query ) ) {
-			throw new NullException( nameof( query ) );
+			throw new ArgumentEmptyException( nameof( query ) );
 		}
 
 		try {
@@ -254,7 +258,7 @@ public class DurableDatabase : ABetterClassDispose {
 
 	public Int32? ExecuteNonQuery( String query, Int32 retries, params SqlParameter[]? parameters ) {
 		if ( String.IsNullOrWhiteSpace( query ) ) {
-			throw new NullException( nameof( query ) );
+			throw new ArgumentEmptyException( nameof( query ) );
 		}
 
 		TryAgain:
@@ -271,7 +275,6 @@ public class DurableDatabase : ABetterClassDispose {
 			return command.ExecuteNonQuery();
 		}
 		catch ( InvalidOperationException ) {
-
 			//timeout probably
 			retries--;
 
@@ -291,7 +294,7 @@ public class DurableDatabase : ABetterClassDispose {
 
 	public Boolean ExecuteNonQuery( String query ) {
 		if ( String.IsNullOrWhiteSpace( query ) ) {
-			throw new NullException( nameof( query ) );
+			throw new ArgumentEmptyException( nameof( query ) );
 		}
 
 		try {
@@ -318,7 +321,7 @@ public class DurableDatabase : ABetterClassDispose {
 
 	public async Task<Int32?> ExecuteNonQueryAsync( String query, CommandType commandType, params SqlParameter[]? parameters ) {
 		if ( String.IsNullOrWhiteSpace( query ) ) {
-			throw new NullException( nameof( query ) );
+			throw new ArgumentEmptyException( nameof( query ) );
 		}
 
 		try {
@@ -348,9 +351,10 @@ public class DurableDatabase : ABetterClassDispose {
 	/// <param name="commandType"></param>
 	/// <param name="table"></param>
 	/// <param name="parameters"></param>
+	/// <exception cref="ArgumentEmptyException"></exception>
 	public Boolean ExecuteReader( String query, CommandType commandType, out DataTable table, params SqlParameter[]? parameters ) {
 		if ( String.IsNullOrWhiteSpace( query ) ) {
-			throw new NullException( nameof( query ) );
+			throw new ArgumentEmptyException( nameof( query ) );
 		}
 
 		using DataTable local = new();
@@ -395,9 +399,10 @@ public class DurableDatabase : ABetterClassDispose {
 	/// <param name="query"></param>
 	/// <param name="commandType"></param>
 	/// <param name="parameters"></param>
+	/// <exception cref="ArgumentEmptyException"></exception>
 	public DataTable ExecuteReader( String query, CommandType commandType, params SqlParameter[]? parameters ) {
 		if ( String.IsNullOrWhiteSpace( query ) ) {
-			throw new NullException( nameof( query ) );
+			throw new ArgumentEmptyException( nameof( query ) );
 		}
 
 		var table = new DataTable();
@@ -432,12 +437,14 @@ public class DurableDatabase : ABetterClassDispose {
 		return table;
 	}
 
+	/// <summary></summary>
 	/// <param name="query"></param>
 	/// <param name="commandType"></param>
 	/// <param name="parameters"></param>
+	/// <exception cref="ArgumentEmptyException"></exception>
 	public async Task<DataTableReader?> ExecuteReaderAsyncDataReader( String? query, CommandType commandType, params SqlParameter[]? parameters ) {
 		if ( String.IsNullOrWhiteSpace( query ) ) {
-			throw new NullException( nameof( query ) );
+			throw new ArgumentEmptyException( nameof( query ) );
 		}
 
 		try {
@@ -452,7 +459,7 @@ public class DurableDatabase : ABetterClassDispose {
 				}
 
 				var reader = await command.ExecuteReaderAsync().ConfigureAwait( false );
-				await using var _ = reader.ConfigureAwait( false );
+				reader.ConfigureAwait( false );
 				table = reader.ToDataTable();
 			}
 
@@ -476,7 +483,7 @@ public class DurableDatabase : ABetterClassDispose {
 			var command = new SqlCommand( query, this.OpenConnection() ) {
 				CommandType = commandType
 			};
-			await using var _ = command.ConfigureAwait( false );
+			command.ConfigureAwait( false );
 
 			if ( parameters != null ) {
 				command.Parameters?.AddRange( parameters );
@@ -505,7 +512,7 @@ public class DurableDatabase : ABetterClassDispose {
 	}
 
 	/// <summary>
-	/// <para>Returns the first column of the first row.</para>
+	///     <para>Returns the first column of the first row.</para>
 	/// </summary>
 	/// <param name="query"></param>
 	/// <param name="commandType"></param>
@@ -522,7 +529,7 @@ public class DurableDatabase : ABetterClassDispose {
 
 			var scalar = command.ExecuteScalar();
 
-			if ( scalar == null || scalar == DBNull.Value || Convert.IsDBNull( scalar ) ) {
+			if ( ( scalar == null ) || ( scalar == DBNull.Value ) || Convert.IsDBNull( scalar ) ) {
 				return (Status.Success, default( TResult ));
 			}
 
@@ -547,14 +554,15 @@ public class DurableDatabase : ABetterClassDispose {
 	}
 
 	/// <summary>
-	/// <para>Returns the first column of the first row.</para>
+	///     <para>Returns the first column of the first row.</para>
 	/// </summary>
 	/// <param name="query"></param>
 	/// <param name="commandType"></param>
 	/// <param name="parameters"></param>
+	/// <exception cref="ArgumentEmptyException"></exception>
 	public async Task<(Status status, TResult result)> ExecuteScalarAsync<TResult>( String query, CommandType commandType, params SqlParameter[]? parameters ) {
 		if ( String.IsNullOrWhiteSpace( query ) ) {
-			throw new NullException( nameof( query ) );
+			throw new ArgumentEmptyException( nameof( query ) );
 		}
 
 		try {
@@ -562,7 +570,7 @@ public class DurableDatabase : ABetterClassDispose {
 				CommandType = commandType,
 				CommandTimeout = 0
 			};
-			await using var _ = command.ConfigureAwait( false );
+			command.ConfigureAwait( false );
 
 			if ( parameters != null ) {
 				command.Parameters?.AddRange( parameters );
@@ -582,7 +590,7 @@ public class DurableDatabase : ABetterClassDispose {
 				throw;
 			}
 
-			if ( scalar == null || scalar == DBNull.Value || Convert.IsDBNull( scalar ) ) {
+			if ( ( scalar == null ) || ( scalar == DBNull.Value ) || Convert.IsDBNull( scalar ) ) {
 				return (Status.Success, default( TResult ));
 			}
 
@@ -597,7 +605,6 @@ public class DurableDatabase : ABetterClassDispose {
 			return (Status.Success, ( TResult )Convert.ChangeType( scalar, typeof( TResult ) ));
 		}
 		catch ( InvalidCastException exception ) {
-
 			//TIP: check for SQLServer returning a Double when you expect a Single (float in SQL).
 			exception.Log();
 		}

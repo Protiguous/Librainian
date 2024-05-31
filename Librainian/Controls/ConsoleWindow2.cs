@@ -1,42 +1,42 @@
 ﻿// Copyright © Protiguous. All Rights Reserved.
 //
-// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories,
-// or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
+// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries,
+// repositories, or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
 //
-// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten
-// by formatting. (We try to avoid it from happening, but it does accidentally happen.)
+// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has
+// been overwritten by formatting. (We try to avoid it from happening, but it does accidentally happen.)
 //
-// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to
-// those Authors. If you find your code unattributed in this source code, please let us know so we can properly attribute you
-// and include the proper license and/or copyright(s). If you want to use any of our code in a commercial project, you must
-// contact Protiguous@Protiguous.com for permission, license, and a quote.
+// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to those Authors.
+// If you find your code unattributed in this source code, please let us know so we can properly attribute you and include the proper licenses and/or copyrights.
+// If you want to use any of our code in a commercial project, you must contact Protiguous@Protiguous.com for permission, license, and a quote.
 //
 // Donations, payments, and royalties are accepted via bitcoin: 1Mad8TxTqxKnMiHuZxArFvX8BuFEB9nqX2 and PayPal: Protiguous@Protiguous.com
 //
 // ====================================================================
-// Disclaimer:  Usage of the source code or binaries is AS-IS. No warranties are expressed, implied, or given. We are NOT
-// responsible for Anything You Do With Our Code. We are NOT responsible for Anything You Do With Our Executables. We are NOT
-// responsible for Anything You Do With Your Computer. ====================================================================
+// Disclaimer:  Usage of the source code or binaries is AS-IS.
+// No warranties are expressed, implied, or given.
+// We are NOT responsible for Anything You Do With Our Code.
+// We are NOT responsible for Anything You Do With Our Executables.
+// We are NOT responsible for Anything You Do With Your Computer.
+// ====================================================================
 //
 // Contact us by email if you have any questions, helpful criticism, or if you would like to use our code in your project(s).
-// For business inquiries, please contact me at Protiguous@Protiguous.com. Our software can be found at
-// "https://Protiguous.com/Software/" Our GitHub address is "https://github.com/Protiguous".
+// For business inquiries, please contact me at Protiguous@Protiguous.com.
+// Our software can be found at "https://Protiguous.com/Software/"
+// Our GitHub address is "https://github.com/Protiguous".
 //
-// File "ConsoleWindow2.cs" last formatted on 2021-11-30 at 7:16 PM by Protiguous.
+// File "ConsoleWindow2.cs" last formatted on 2022-02-08 at 7:38 AM by Protiguous.
 
 namespace Librainian.Controls;
 
 using System;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 using Logging;
 
-[SuppressMessage( "ReSharper", "InconsistentNaming" )]
 public class ConsoleWindow2 {
 
 	private const Int32 MY_CODE_PAGE = 437;
@@ -71,7 +71,7 @@ public class ConsoleWindow2 {
 	[DllImport( "kernel32.dll", EntryPoint = nameof( AllocConsole ), SetLastError = true, CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall )]
 	private static extern Int32 AllocConsole();
 
-	[DllImport( "kernel32.dll", SetLastError = true, CharSet = CharSet.Auto )]
+	[DllImport( "kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode )]
 	private static extern IntPtr CreateFile(
 		String lpFileName,
 		[MarshalAs( UnmanagedType.U4 )] DesiredAccess dwDesiredAccess,
@@ -139,7 +139,7 @@ public class ConsoleWindow2 {
 	public static extern Boolean SetConsoleScreenBufferSize( IntPtr hConsoleOutput, COORD size );
 
 	public static void Show( Int32 bufferWidth = -1, Boolean breakRedirection = true, Int32 bufferHeight = 1600, Int32 screenNum = -1 /*-1 = Any but primary*/ ) {
-		_ = AllocConsole();
+		AllocConsole();
 		var stdOut = InvalidHandleValue;
 		if ( breakRedirection ) {
 			UnredirectConsole( out stdOut, out var stdIn, out var stdErr );
@@ -152,11 +152,13 @@ public class ConsoleWindow2 {
 		Screen? screen = null;
 		try {
 			screen = screenNum switch {
-				< 0 => Screen.AllScreens.FirstOrDefault( s => !s.Primary ),
+				< 0 => Array.Find( Screen.AllScreens, s => !s.Primary ),
 				var _ => Screen.AllScreens[ Math.Min( screenNum, Screen.AllScreens.Length - 1 ) ]
 			};
 		}
-		catch ( Exception ) { }
+		catch ( Exception exception ) {
+			exception.Log();
+		}
 
 		if ( bufferWidth == -1 ) {
 			if ( screen == null ) {

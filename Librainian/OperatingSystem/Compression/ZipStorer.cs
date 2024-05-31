@@ -1,30 +1,32 @@
 ﻿// Copyright © Protiguous. All Rights Reserved.
 //
-// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories,
-// or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
+// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries,
+// repositories, or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
 //
-// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten
-// by formatting. (We try to avoid it from happening, but it does accidentally happen.)
+// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has
+// been overwritten by formatting. (We try to avoid it from happening, but it does accidentally happen.)
 //
-// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to
-// those Authors. If you find your code unattributed in this source code, please let us know so we can properly attribute you
-// and include the proper license and/or copyright(s). If you want to use any of our code in a commercial project, you must
-// contact Protiguous@Protiguous.com for permission, license, and a quote.
+// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to those Authors.
+// If you find your code unattributed in this source code, please let us know so we can properly attribute you and include the proper licenses and/or copyrights.
+// If you want to use any of our code in a commercial project, you must contact Protiguous@Protiguous.com for permission, license, and a quote.
 //
 // Donations, payments, and royalties are accepted via bitcoin: 1Mad8TxTqxKnMiHuZxArFvX8BuFEB9nqX2 and PayPal: Protiguous@Protiguous.com
 //
 // ====================================================================
-// Disclaimer:  Usage of the source code or binaries is AS-IS. No warranties are expressed, implied, or given. We are NOT
-// responsible for Anything You Do With Our Code. We are NOT responsible for Anything You Do With Our Executables. We are NOT
-// responsible for Anything You Do With Your Computer. ====================================================================
+// Disclaimer:  Usage of the source code or binaries is AS-IS.
+// No warranties are expressed, implied, or given.
+// We are NOT responsible for Anything You Do With Our Code.
+// We are NOT responsible for Anything You Do With Our Executables.
+// We are NOT responsible for Anything You Do With Your Computer.
+// ====================================================================
 //
 // Contact us by email if you have any questions, helpful criticism, or if you would like to use our code in your project(s).
-// For business inquiries, please contact me at Protiguous@Protiguous.com. Our software can be found at
-// "https://Protiguous.com/Software/" Our GitHub address is "https://github.com/Protiguous".
+// For business inquiries, please contact me at Protiguous@Protiguous.com.
+// Our software can be found at "https://Protiguous.com/Software/"
+// Our GitHub address is "https://github.com/Protiguous".
 //
-// File "ZipStorer.cs" last formatted on 2021-11-30 at 7:20 PM by Protiguous.
+// File "ZipStorer.cs" last formatted on 2022-02-10 at 8:06 AM by Protiguous.
 
-#nullable enable
 
 namespace Librainian.OperatingSystem.Compression;
 
@@ -66,53 +68,12 @@ public class ZipStorer : ABetterClassDispose {
 	// Stream object of storage file
 	private Stream? _zipFileStream;
 
-	// Static constructor. Just invoked once in order to create the CRC32 lookup table.
-	static ZipStorer() {
-
-		// Generate CRC32 table
-		CrcTable = new UInt32[ 256 ];
-
-		for ( var i = 0; i < CrcTable.Length; i++ ) {
-			var c = ( UInt32 )i;
-
-			for ( var j = 0; j < 8; j++ ) {
-				if ( ( c & 1 ) != 0 ) {
-					c = 0b11101101101110001000001100100000 ^ ( c >> 1 );
-				}
-				else {
-					c >>= 1;
-				}
-			}
-
-			CrcTable[ i ] = c;
-		}
-	}
-
-	public ZipStorer() : base( nameof( ZipStorer ) ) {
-	}
-
-	/// <summary>Compression method enumeration</summary>
-	public enum Compression {
-
-		/// <summary>Uncompressed storage</summary>
-		Store = 0,
-
-		/// <summary>Deflate compression method</summary>
-		Deflate = 8
-	}
-
-	/// <summary>True if UTF8 encoding for filename and comments, false if default (CP 437)</summary>
-	public Boolean EncodeUtf8 { get; }
-
-	/// <summary>Force deflate algorithm even if it inflates the stored file. Off by default.</summary>
-	public Boolean ForceDeflating { get; }
-
 	private static UInt32 DateTimeToDosTime( DateTime dt ) =>
-		( UInt32 )( ( dt.Second / 2 ) | ( dt.Minute << 5 ) | ( dt.Hour << 11 ) | ( dt.Day << 16 ) | ( dt.Month << 21 ) | ( ( dt.Year - 1980 ) << 25 ) );
+			( UInt32 )( ( dt.Second / 2 ) | ( dt.Minute << 5 ) | ( dt.Hour << 11 ) | ( dt.Day << 16 ) | ( dt.Month << 21 ) | ( ( dt.Year - 1980 ) << 25 ) );
 
 	private static DateTime DosTimeToDateTime( UInt32 dt ) =>
-		new( ( Int32 )( dt >> 25 ) + 1980, ( Int32 )( dt >> 21 ) & 15, ( Int32 )( dt >> 16 ) & 31, ( Int32 )( dt >> 11 ) & 31, ( Int32 )( dt >> 5 ) & 63,
-			( Int32 )( dt & 31 ) * 2 );
+			new( ( Int32 )( dt >> 25 ) + 1980, ( Int32 )( dt >> 21 ) & 15, ( Int32 )( dt >> 16 ) & 31, ( Int32 )( dt >> 11 ) & 31, ( Int32 )( dt >> 5 ) & 63,
+				( Int32 )( dt & 31 ) * 2 );
 
 	// Replaces backslashes with slashes to store in zip header
 	private static String NormalizedFilename( String _filename ) {
@@ -129,7 +90,7 @@ public class ZipStorer : ABetterClassDispose {
 
 	// Calculate the file offset by reading the corresponding local header
 	private UInt32 GetFileOffset( UInt32 headerOffset ) {
-		var buffer = new Byte[ 2 ];
+		var buffer = new Byte[2];
 
 		this._zipFileStream.Seek( headerOffset + 26, SeekOrigin.Begin );
 		this._zipFileStream.Read( buffer, 0, 2 );
@@ -167,13 +128,13 @@ public class ZipStorer : ABetterClassDispose {
 					var commentSize = br.ReadUInt16();
 
 					// check if comment field is the very last data in file
-					if ( this._zipFileStream.Position + commentSize != this._zipFileStream.Length ) {
+					if ( ( this._zipFileStream.Position + commentSize ) != this._zipFileStream.Length ) {
 						return false;
 					}
 
 					// Copy entire central directory to a memory buffer
 					this._existingFiles = entries;
-					this._centralDirImage = new Byte[ centralSize ];
+					this._centralDirImage = new Byte[centralSize];
 					this._zipFileStream.Seek( centralDirOffset, SeekOrigin.Begin );
 					this._zipFileStream.Read( this._centralDirImage, 0, centralSize );
 
@@ -185,7 +146,6 @@ public class ZipStorer : ABetterClassDispose {
 			} while ( this._zipFileStream.Position > 0 );
 		}
 		catch {
-
 			// ignored
 		}
 
@@ -194,7 +154,7 @@ public class ZipStorer : ABetterClassDispose {
 
 	// Copies all source file into storage file
 	private void Store( ref ZipFileEntry zfe, Stream source ) {
-		var buffer = new Byte[ 16384 ];
+		var buffer = new Byte[16384];
 		Int32 bytesRead;
 		UInt32 totalRead = 0;
 
@@ -213,7 +173,7 @@ public class ZipStorer : ABetterClassDispose {
 				outStream.Write( buffer, 0, bytesRead );
 
 				for ( UInt32 i = 0; i < bytesRead; i++ ) {
-					zfe.Crc32 = CrcTable[ ( zfe.Crc32 ^ buffer[ i ] ) & 0xFF ] ^ ( zfe.Crc32 >> 8 );
+					zfe.Crc32 = CrcTable[( zfe.Crc32 ^ buffer[i] ) & 0xFF] ^ ( zfe.Crc32 >> 8 );
 				}
 			}
 		} while ( bytesRead == buffer.Length );
@@ -229,8 +189,7 @@ public class ZipStorer : ABetterClassDispose {
 		zfe.CompressedSize = ( UInt32 )( this._zipFileStream.Position - posStart );
 
 		// Verify for real compression
-		if ( zfe.Method == Compression.Deflate && !this.ForceDeflating && source.CanSeek && zfe.CompressedSize > zfe.FileSize ) {
-
+		if ( ( zfe.Method == Compression.Deflate ) && !this.ForceDeflating && source.CanSeek && ( zfe.CompressedSize > zfe.FileSize ) ) {
 			// Start operation again with Store algorithm
 			zfe.Method = Compression.Store;
 			this._zipFileStream.Position = posStart;
@@ -326,6 +285,43 @@ public class ZipStorer : ABetterClassDispose {
 		zfe.HeaderSize = ( UInt32 )( this._zipFileStream.Position - pos );
 	}
 
+	// Static constructor. Just invoked once in order to create the CRC32 lookup table.
+	static ZipStorer() {
+		// Generate CRC32 table
+		CrcTable = new UInt32[256];
+
+		for ( var i = 0; i < CrcTable.Length; i++ ) {
+			var c = ( UInt32 )i;
+
+			for ( var j = 0; j < 8; j++ ) {
+				if ( ( c & 1 ) != 0 ) {
+					c = 0b11101101101110001000001100100000 ^ ( c >> 1 );
+				}
+				else {
+					c >>= 1;
+				}
+			}
+
+			CrcTable[i] = c;
+		}
+	}
+
+	/// <summary>Compression method enumeration</summary>
+	public enum Compression {
+
+		/// <summary>Uncompressed storage</summary>
+		Store = 0,
+
+		/// <summary>Deflate compression method</summary>
+		Deflate = 8
+	}
+
+	/// <summary>True if UTF8 encoding for filename and comments, false if default (CP 437)</summary>
+	public Boolean EncodeUtf8 { get; }
+
+	/// <summary>Force deflate algorithm even if it inflates the stored file. Off by default.</summary>
+	public Boolean ForceDeflating { get; }
+
 	/// <summary>Method to create a new storage file</summary>
 	/// <param name="filename">Full path of Zip file to create</param>
 	/// <param name="comment">General comment for Zip file</param>
@@ -371,8 +367,10 @@ public class ZipStorer : ABetterClassDispose {
 	/// <param name="stream">Already opened stream with zip contents</param>
 	/// <param name="access">File access mode for stream operations</param>
 	/// <returns>A valid ZipStorer object</returns>
+	/// <exception cref="InvalidOperationException"></exception>
+	/// <exception cref="InvalidDataException"></exception>
 	public static ZipStorer Open( Stream stream, FileAccess access ) {
-		if ( !stream.CanSeek && access != FileAccess.Read ) {
+		if ( !stream.CanSeek && ( access != FileAccess.Read ) ) {
 			throw new InvalidOperationException( "Stream cannot seek" );
 		}
 
@@ -395,6 +393,7 @@ public class ZipStorer : ABetterClassDispose {
 	/// <param name="zfes">List of Entries to remove from storage</param>
 	/// <returns>True if success, false if not</returns>
 	/// <remarks>This method only works for storage of type FileStream</remarks>
+	/// <exception cref="InvalidOperationException"></exception>
 	public static Boolean RemoveEntries( ref ZipStorer zip, List<ZipFileEntry>? zfes ) {
 		if ( zip._zipFileStream is not FileStream ) {
 			throw new InvalidOperationException( "RemoveEntries is allowed just over streams of type FileStream" );
@@ -411,10 +410,8 @@ public class ZipStorer : ABetterClassDispose {
 			var tempZip = Create( tempZipName, String.Empty );
 
 			foreach ( var zfe in fullList ) {
-				if ( !zfes.Contains( zfe ) ) {
-					if ( zip.ExtractFile( zfe, tempEntryName ) ) {
-						tempZip.AddFile( zfe.Method, tempEntryName, zfe.FilenameInZip, zfe.Comment );
-					}
+				if ( !zfes.Contains( zfe ) && zip.ExtractFile( zfe, tempEntryName ) ) {
+					tempZip.AddFile( zfe.Method, tempEntryName, zfe.FilenameInZip, zfe.Comment );
 				}
 			}
 
@@ -447,6 +444,7 @@ public class ZipStorer : ABetterClassDispose {
 	/// <param name="pathname">Full path of file to add to Zip storage</param>
 	/// <param name="filenameInZip">Filename and path as desired in Zip directory</param>
 	/// <param name="comment">Comment for stored file</param>
+	/// <exception cref="InvalidOperationException"></exception>
 	public void AddFile( Compression method, String pathname, String filenameInZip, String? comment ) {
 		if ( this._access == FileAccess.Read ) {
 			throw new InvalidOperationException( "Writing is not allowed" );
@@ -463,6 +461,7 @@ public class ZipStorer : ABetterClassDispose {
 	/// <param name="source">Stream object containing the data to store in Zip</param>
 	/// <param name="modTime">Modification time of the data to store</param>
 	/// <param name="comment">Comment for stored file</param>
+	/// <exception cref="InvalidOperationException"></exception>
 	public void AddStream( Compression method, String filenameInZip, Stream source, DateTime modTime, String? comment ) {
 		if ( this._access == FileAccess.Read ) {
 			throw new InvalidOperationException( "Writing is not allowed" );
@@ -489,8 +488,8 @@ public class ZipStorer : ABetterClassDispose {
 			ModifyTime = modTime
 		};
 
-		// Even though we write the header now, it will have to be rewritten, since we don't know compressed size or crc. to be
-		// updated later offset within file of the start of this local record
+		// Even though we write the header now, it will have to be rewritten, since we don't know compressed size or crc. to be updated later offset within
+		// file of the start of this local record
 
 		// Write local header
 		this.WriteLocalHeader( ref zfe );
@@ -547,15 +546,16 @@ public class ZipStorer : ABetterClassDispose {
 	/// <param name="filename">Name of file to store uncompressed data</param>
 	/// <returns>True if success, false if not.</returns>
 	/// <remarks>Unique compression methods are Store and Deflate</remarks>
+	/// <exception cref="ArgumentEmptyException"></exception>
 	public Boolean ExtractFile( ZipFileEntry zfe, String filename ) {
 		if ( filename is null ) {
-			throw new NullException( nameof( filename ) );
+			throw new ArgumentEmptyException( nameof( filename ) );
 		}
 
 		// Make sure the parent directory exists
 		var path = Path.GetDirectoryName( filename );
 
-		if ( path != null && !Directory.Exists( path ) ) {
+		if ( ( path != null ) && !Directory.Exists( path ) ) {
 			Directory.CreateDirectory( path );
 		}
 
@@ -585,13 +585,14 @@ public class ZipStorer : ABetterClassDispose {
 	/// <param name="stream">Stream to store the uncompressed data</param>
 	/// <returns>True if success, false if not.</returns>
 	/// <remarks>Unique compression methods are Store and Deflate</remarks>
+	/// <exception cref="InvalidOperationException"></exception>
 	public Boolean ExtractFile( ZipFileEntry zfe, Stream stream ) {
 		if ( !stream.CanWrite ) {
 			throw new InvalidOperationException( "Stream cannot be written" );
 		}
 
 		// check signature
-		var signature = new Byte[ 4 ];
+		var signature = new Byte[4];
 		this._zipFileStream?.Seek( zfe.HeaderOffset, SeekOrigin.Begin );
 		this._zipFileStream?.Read( signature, 0, 4 );
 
@@ -618,7 +619,7 @@ public class ZipStorer : ABetterClassDispose {
 		}
 
 		// Buffered copy
-		var buffer = new Byte[ 16384 ];
+		var buffer = new Byte[16384];
 		this._zipFileStream.Seek( zfe.FileOffset, SeekOrigin.Begin );
 		var bytesPending = zfe.FileSize;
 
@@ -639,6 +640,7 @@ public class ZipStorer : ABetterClassDispose {
 
 	/// <summary>Read all the file records in the central directory</summary>
 	/// <returns>List of all entries in directory</returns>
+	/// <exception cref="InvalidOperationException"></exception>
 	public List<ZipFileEntry> ReadCentralDir() {
 		if ( this._centralDirImage is null ) {
 			throw new InvalidOperationException( "Central directory currently does not exist" );
@@ -732,81 +734,81 @@ public class ZipStorer : ABetterClassDispose {
 	}
 
 	/* Local file header:
-		local file header signature     4 bytes  (0x04034b50)
-		version needed to extract       2 bytes
-		general purpose bit flag        2 bytes
-		compression method              2 bytes
-		last mod file time              2 bytes
-		last mod file date              2 bytes
-		crc-32                          4 bytes
-		compressed size                 4 bytes
-		uncompressed size               4 bytes
-		filename length                 2 bytes
-		extra field length              2 bytes
+        local file header signature     4 bytes  (0x04034b50)
+        version needed to extract       2 bytes
+        general purpose bit flag        2 bytes
+        compression method              2 bytes
+        last mod file time              2 bytes
+        last mod file date              2 bytes
+        crc-32                          4 bytes
+        compressed size                 4 bytes
+        uncompressed size               4 bytes
+        filename length                 2 bytes
+        extra field length              2 bytes
 
-		filename (variable size)
-		extra field (variable size)
-	*/
+        filename (variable size)
+        extra field (variable size)
+    */
 	/* Central directory's File header:
-		central file header signature   4 bytes  (0x02014b50)
-		version made by                 2 bytes
-		version needed to extract       2 bytes
-		general purpose bit flag        2 bytes
-		compression method              2 bytes
-		last mod file time              2 bytes
-		last mod file date              2 bytes
-		crc-32                          4 bytes
-		compressed size                 4 bytes
-		uncompressed size               4 bytes
-		filename length                 2 bytes
-		extra field length              2 bytes
-		file comment length             2 bytes
-		disk number start               2 bytes
-		internal file attributes        2 bytes
-		external file attributes        4 bytes
-		relative offset of local header 4 bytes
+        central file header signature   4 bytes  (0x02014b50)
+        version made by                 2 bytes
+        version needed to extract       2 bytes
+        general purpose bit flag        2 bytes
+        compression method              2 bytes
+        last mod file time              2 bytes
+        last mod file date              2 bytes
+        crc-32                          4 bytes
+        compressed size                 4 bytes
+        uncompressed size               4 bytes
+        filename length                 2 bytes
+        extra field length              2 bytes
+        file comment length             2 bytes
+        disk number start               2 bytes
+        internal file attributes        2 bytes
+        external file attributes        4 bytes
+        relative offset of local header 4 bytes
 
-		filename (variable size)
-		extra field (variable size)
-		file comment (variable size)
-	*/
+        filename (variable size)
+        extra field (variable size)
+        file comment (variable size)
+    */
 	/* End of central dir record:
-		end of central dir signature    4 bytes  (0x06054b50)
-		number of this disk             2 bytes
-		number of the disk with the
-		start of the central directory  2 bytes
-		total number of entries in
-		the central dir on this disk    2 bytes
-		total number of entries in
-		the central dir                 2 bytes
-		size of the central directory   4 bytes
-		offset of start of central
-		directory with respect to
-		the starting disk number        4 bytes
-		zipfile comment length          2 bytes
-		zipfile comment (variable size)
-	*/
+        end of central dir signature    4 bytes  (0x06054b50)
+        number of this disk             2 bytes
+        number of the disk with the
+        start of the central directory  2 bytes
+        total number of entries in
+        the central dir on this disk    2 bytes
+        total number of entries in
+        the central dir                 2 bytes
+        size of the central directory   4 bytes
+        offset of start of central
+        directory with respect to
+        the starting disk number        4 bytes
+        zipfile comment length          2 bytes
+        zipfile comment (variable size)
+    */
 	/* DOS Date and time:
-		MS-DOS date. The date is a packed value with the following format. Bits Description
-			0-4 Day of the month (1–31)
-			5-8 Month (1 = January, 2 = February, and so on)
-			9-15 Year offset from 1980 (add 1980 to get actual year)
-		MS-DOS time. The time is a packed value with the following format. Bits Description
-			0-4 Second divided by 2
-			5-10 Minute (0–59)
-			11-15 Hour (0–23 on a 24-hour clock)
-	*/
+        MS-DOS date. The date is a packed value with the following format. Bits Description
+            0-4 Day of the month (1–31)
+            5-8 Month (1 = January, 2 = February, and so on)
+            9-15 Year offset from 1980 (add 1980 to get actual year)
+        MS-DOS time. The time is a packed value with the following format. Bits Description
+            0-4 Second divided by 2
+            5-10 Minute (0–59)
+            11-15 Hour (0–23 on a 24-hour clock)
+    */
 
 	/* CRC32 algorithm
-	  The 'magic number' for the CRC is 0xdebb20e3.
-	  The proper CRC pre and post conditioning
-	  is used, meaning that the CRC register is
-	  pre-conditioned with all ones (a starting value
-	  of 0xffffffff) and the value is post-conditioned by
-	  taking the one's complement of the CRC residual.
-	  If bit 3 of the general purpose flag is set, this
-	  field is set to zero in the local header and the correct
-	  value is put in the data descriptor and in the central
-	  directory.
-	*/
+      The 'magic number' for the CRC is 0xdebb20e3.
+      The proper CRC pre and post conditioning
+      is used, meaning that the CRC register is
+      pre-conditioned with all ones (a starting value
+      of 0xffffffff) and the value is post-conditioned by
+      taking the one's complement of the CRC residual.
+      If bit 3 of the general purpose flag is set, this
+      field is set to zero in the local header and the correct
+      value is put in the data descriptor and in the central
+      directory.
+    */
 }

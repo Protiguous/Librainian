@@ -1,88 +1,102 @@
 ﻿// Copyright © Protiguous. All Rights Reserved.
 //
-// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories,
-// or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
+// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries,
+// repositories, or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
 //
-// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten
-// by formatting. (We try to avoid it from happening, but it does accidentally happen.)
+// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has
+// been overwritten by formatting. (We try to avoid it from happening, but it does accidentally happen.)
 //
-// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to
-// those Authors. If you find your code unattributed in this source code, please let us know so we can properly attribute you
-// and include the proper license and/or copyright(s). If you want to use any of our code in a commercial project, you must
-// contact Protiguous@Protiguous.com for permission, license, and a quote.
+// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to those Authors.
+// If you find your code unattributed in this source code, please let us know so we can properly attribute you and include the proper licenses and/or copyrights.
+// If you want to use any of our code in a commercial project, you must contact Protiguous@Protiguous.com for permission, license, and a quote.
 //
 // Donations, payments, and royalties are accepted via bitcoin: 1Mad8TxTqxKnMiHuZxArFvX8BuFEB9nqX2 and PayPal: Protiguous@Protiguous.com
 //
 // ====================================================================
-// Disclaimer:  Usage of the source code or binaries is AS-IS. No warranties are expressed, implied, or given. We are NOT
-// responsible for Anything You Do With Our Code. We are NOT responsible for Anything You Do With Our Executables. We are NOT
-// responsible for Anything You Do With Your Computer. ====================================================================
+// Disclaimer:  Usage of the source code or binaries is AS-IS.
+// No warranties are expressed, implied, or given.
+// We are NOT responsible for Anything You Do With Our Code.
+// We are NOT responsible for Anything You Do With Our Executables.
+// We are NOT responsible for Anything You Do With Your Computer.
+// ====================================================================
 //
 // Contact us by email if you have any questions, helpful criticism, or if you would like to use our code in your project(s).
-// For business inquiries, please contact me at Protiguous@Protiguous.com. Our software can be found at
-// "https://Protiguous.com/Software/" Our GitHub address is "https://github.com/Protiguous".
+// For business inquiries, please contact me at Protiguous@Protiguous.com.
+// Our software can be found at "https://Protiguous.com/Software/"
+// Our GitHub address is "https://github.com/Protiguous".
 //
-// File "Logging.cs" last formatted on 2021-11-30 at 7:18 PM by Protiguous.
+// File "Logging.cs" last formatted on 2022-02-08 at 6:04 AM by Protiguous.
 
-#nullable enable
 
 namespace Librainian.Logging;
 
 using System;
 using System.Diagnostics;
 using System.Drawing;
+using System.Globalization;
+using System.Linq;
 using Microsoft.Extensions.Logging;
 using Parsing;
 
-public static class Logging {
+//using Microsoft.Extensions.Logging.Console;
 
+public static class Logging {
 	//See Also: Microsoft.Extensions.Logging.Console
 
-	//private static readonly ILogger<Type>? _logger;
+	//public static void ConfigureServices( this IServiceProvider services ) {
+	//	services.AddSimpleConsole();
+	//}
+
+	//public static void ConfigureServices( this IServiceProvider services ) {
+	//	services.AddSimpleConsole();
+	//}
+
+	private static readonly ILogger<Type>? logger;	//TODO Figure out how to actually use depend injection
+
+	private static readonly Boolean IsUsingNUnit = AppDomain.CurrentDomain.GetAssemblies()
+													 .Any( static assembly => assembly.FullName?.StartsWith( "nunit.framework", true, CultureInfo.InvariantCulture ) ==
+																			  true );
+
+	public static Boolean IsRunningFromNUnit() => IsUsingNUnit;
 
 	/// <summary>
-	/// <para>Write to debug the first 50 chars of the object we broke on.</para>
-	/// <para>Then write to debug the reason we broke on.</para>
-	/// <para>Then Debugger.Break if a Debugger is attached.</para>
-	/// <remarks>This method is Conditional on Debug.</remarks>
+	///     <para>Prints the <paramref name="breakReason" /></para>
+	///     <para>Then calls <see cref="Debugger.Break" />.</para>
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
-	/// <param name="brokeOn"></param>
+	/// <param name="self"></param>
 	/// <param name="breakReason"></param>
 	[DebuggerStepThrough]
 	[Conditional( "DEBUG" )]
-	public static void Break<T>( this T? brokeOn, String? breakReason = null ) {
-		if ( brokeOn is not null ) {
-			$"Break on object: {brokeOn.ToString().Left( 50 )}".DebugLine();
-		}
-
-		if ( breakReason is not null ) {
-			$"Break reason: {breakReason}".LogTimeMessage();
+	public static void Break<T>( this T self, String? breakReason = null ) {
+		if ( !Debugger.IsAttached ) {
 			return;
 		}
 
-		if ( Debugger.IsAttached ) {
-			Debugger.Break();
+		if ( breakReason is not null ) {
+			$"Break: {breakReason}".DebugWriteLine();
+		}
+
+		$"{self}".DebugWriteLine();
+
+		Debugger.Break();
+	}
+
+	[DebuggerStepThrough]
+	[Conditional( "DEBUG" )]
+	public static void BreakIf( this Boolean? condition, String message, String? breakReason = null ) {
+		if ( condition == true ) {
+			message.Break( breakReason );
 		}
 	}
 
 	[DebuggerStepThrough]
 	[Conditional( "DEBUG" )]
-	public static void BreakIf( this Boolean condition, String? message = null ) => condition.BreakIfTrue( message );
+	public static void BreakIfFalse( this Boolean? condition, String message, String? breakReason = null ) => ( !condition ).BreakIf( message, breakReason );
 
 	[DebuggerStepThrough]
-	public static void BreakIfFalse( this Boolean condition, String? message = null ) {
-		if ( !condition ) {
-			message.Break( $"{nameof( condition )} was false." );
-		}
-	}
-
-	[DebuggerStepThrough]
-	public static void BreakIfTrue( this Boolean condition, String? message = null ) {
-		if ( condition ) {
-			message.Break( $"{nameof( condition )} was true." );
-		}
-	}
+	[Conditional( "DEBUG" )]
+	public static void BreakIfTrue( this Boolean? condition, String message, String? breakReason = null ) => condition.BreakIf( message, breakReason );
 
 	[DebuggerStepThrough]
 	public static (Color fore, Color back) Colors( this LogLevel loggingLevel ) =>
@@ -97,30 +111,40 @@ public static class Logging {
 			var _ => throw new ArgumentOutOfRangeException( nameof( loggingLevel ), loggingLevel, null )
 		};
 
-	/// <summary>Write line to <see cref="System.Diagnostics.Debug" />.</summary>
+	/// <summary>Write to <see cref="Debug" />.</summary>
 	/// <typeparam name="T"></typeparam>
+	/// <param name="self"></param>
 	[DebuggerStepThrough]
-	public static void DebugLine<T>( this T? self ) => Debug.WriteLine( self );
+	[Conditional( "DEBUG" )]
+	public static void DebugWrite<T>( this T self ) => Debug.Write( self );
 
-	/// <summary>Write to <see cref="System.Diagnostics.Debug" />.</summary>
+	/// <summary>Write line to <see cref="Debug" />.</summary>
 	/// <typeparam name="T"></typeparam>
+	/// <param name="self"></param>
 	[DebuggerStepThrough]
-	public static void DebugNoLine<T>( this T? self ) => Debug.Write( self );
+	[Conditional( "DEBUG" )]
+	public static void DebugWriteLine<T>( this T self ) => Debug.WriteLine( self );
 
-	/// <summary>Write line to <see cref="System.Diagnostics.Debug" />.</summary>
+	/// <summary>Write to <see cref="Debug" />.</summary>
 	/// <typeparam name="T"></typeparam>
+	/// <param name="self"></param>
+	[Conditional( "DEBUG" )]
 	[DebuggerStepThrough]
-	public static void Error<T>( this T? self ) => self.DebugLine();
+	public static void Error<T>( this T self ) => self.DebugWriteLine();
 
-	/// <summary>Write line to <see cref="System.Diagnostics.Debug" />.</summary>
+	/// <summary>Write to <see cref="Debug" />.</summary>
 	/// <typeparam name="T"></typeparam>
+	/// <param name="self"></param>
 	[DebuggerStepThrough]
-	public static void Fatal<T>( this T? self ) => self.DebugLine();
+	[Conditional( "DEBUG" )]
+	public static void Fatal<T>( this T self ) => self.DebugWriteLine();
 
-	/// <summary>Write to <see cref="System.Diagnostics.Debug" />.</summary>
+	/// <summary>Write to <see cref="Debug" />.</summary>
 	/// <typeparam name="T"></typeparam>
+	/// <param name="self"></param>
+	[Conditional( "DEBUG" )]
 	[DebuggerStepThrough]
-	public static void Info<T>( this T? self ) => self.DebugLine();
+	public static void Info<T>( this T self ) => self.DebugWriteLine();
 
 	[DebuggerStepThrough]
 	public static String LevelName( this LogLevel loggingLevel ) =>
@@ -136,75 +160,39 @@ public static class Logging {
 		};
 
 	[DebuggerStepThrough]
-	public static Exception Log<T>( this T? obj, BreakOrDontBreak? breakinto = null ) where T : Exception {
-		if ( obj is Exception exception ) {
-			exception.ToStringDemystified().LogTimeMessage( breakinto );
-			return exception;
-		}
+	public static Exception Log<T>( this T exception, BreakOrDontBreak breakinto = BreakOrDontBreak.Break, String? breakReason = null ) where T : Exception {
+		var message = exception.ToStringDemystified();
+		message.LogTimeMessage();
 
-		if ( breakinto == BreakOrDontBreak.Break && Debugger.IsAttached ) {
-			Debugger.Break();
-		}
+		if ( breakinto == BreakOrDontBreak.Break  ) {
+            message.Break( breakReason );
+        }
 
-		return new Exception( obj?.ToString() );
+		return exception;
 	}
 
-	/*
-
-	/// <summary>
-	/// Write <param name="self"></param> as JSON to debug.
-	/// <para>Append <paramref name="more" /> if it has text.</para>
-	/// </summary>
-	/// <typeparam name="TT"></typeparam>
-	/// <typeparam name="TM"></typeparam>
-	/// <param name="self"></param>
-	/// <param name="more"></param>
-	/// <param name="asJSON"></param>
-	[DebuggerStepThrough]
-	public static TT? Log<TT, TM>( this TT? self, TM? more, Boolean asJSON = false ) {
-		var o = asJSON ? $"{self.ToJSON( Formatting.Indented )}" : self?.ToString();
-
-		o.DebugLine();
-
-		if ( more is null ) {
-			$"Error={self.SmartQuote()}".BreakIfDebug();
-		}
-		else {
-			$"Error={self.SmartQuote()}; {more.ToJSON( Formatting.Indented )}".BreakIfDebug();
-		}
-
-		return self;
-	}
-	*/
-
+	
 	/// <summary>Prefix <paramref name="message" /> with the datetime and write out to the attached debugger and/or trace.</summary>
 	/// <param name="message"></param>
-	/// <param name="breakinto"></param>
 	[Conditional( "DEBUG" )]
 	[Conditional( "TRACE" )]
 	[DebuggerStepThrough]
-	public static void LogTimeMessage( this String? message, BreakOrDontBreak? breakinto = BreakOrDontBreak.DontBreak ) {
-		$"[{DateTime.Now:t}] {message ?? Symbols.Null}".DebugLine();
-
-		if ( breakinto == BreakOrDontBreak.Break && Debugger.IsAttached ) {
-			Debugger.Break();
-		}
-	}
+	public static void LogTimeMessage( this String? message ) => $"[{DateTime.Now:t}] {message ?? Symbols.Null}".DebugWriteLine();
 
 	[Conditional( "DEBUG" )]
 	[DebuggerStepThrough]
 	public static void TimeDebug( this String message, Boolean newline = true, Boolean showThread = false ) {
 		if ( newline ) {
-			Debug.WriteLine( showThread ? $"[{DateTime.UtcNow:s}].({Environment.CurrentManagedThreadId}) {message}" : $"[{DateTime.UtcNow:s}] {message}" );
+			DebugWriteLine( showThread ? $"[{DateTime.UtcNow:s}].({Environment.CurrentManagedThreadId}) {message}" : $"[{DateTime.UtcNow:s}] {message}" );
 		}
 		else {
-			Debug.Write( message );
+			DebugWrite( message );
 		}
 	}
 
 	/// <summary>
-	/// Write a message to System.Diagnostics.Trace.
-	/// <para>See also <see cref="TraceLine" />.</para>
+	///     Write a message to System.Diagnostics.Trace.
+	///     <para>See also <see cref="TraceWriteLine" />.</para>
 	/// </summary>
 	/// <param name="message"></param>
 	[Conditional( "TRACE" )]
@@ -212,19 +200,19 @@ public static class Logging {
 	public static void Trace( this String message ) => System.Diagnostics.Trace.Write( message );
 
 	/// <summary>
-	/// Write a message to System.Diagnostics.TraceLine.
-	/// <para>See also <see cref="Trace" />.</para>
+	///     Write a message to System.Diagnostics.TraceLine.
+	///     <para>See also <see cref="Trace" />.</para>
 	/// </summary>
 	/// <param name="message"></param>
 	[Conditional( "TRACE" )]
 	[DebuggerStepThrough]
-	public static void TraceLine( this String message ) => System.Diagnostics.Trace.WriteLine( message );
+	public static void TraceWriteLine( this String message ) => System.Diagnostics.Trace.WriteLine( message );
 
 	[Conditional( "TRACE" )]
 	[DebuggerStepThrough]
 	public static void TraceWithTime( this String message, Boolean newline = true, Boolean showThread = false ) {
 		if ( newline ) {
-			( showThread ? $"[{DateTime.UtcNow:s}].({Environment.CurrentManagedThreadId}) {message}" : $"[{DateTime.UtcNow:s}] {message}" ).TraceLine();
+			( showThread ? $"[{DateTime.UtcNow:s}].({Environment.CurrentManagedThreadId}) {message}" : $"[{DateTime.UtcNow:s}] {message}" ).TraceWriteLine();
 		}
 		else {
 			message.Trace();
@@ -233,5 +221,16 @@ public static class Logging {
 
 	[Conditional( "VERBOSE" )]
 	[DebuggerStepThrough]
-	public static void Verbose( this String message ) => System.Diagnostics.Trace.WriteLine( message );
+	public static void Verbose( this String? message ) {
+		if ( message is null ) {
+			return;
+		}
+
+		if ( Debugger.IsAttached ) {
+			DebugWriteLine( message );
+		}
+		else {
+			TraceWriteLine( message );
+		}
+	}
 }

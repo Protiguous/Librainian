@@ -1,30 +1,30 @@
-// Copyright Â© Protiguous. All Rights Reserved.
+// Copyright © Protiguous. All Rights Reserved.
 //
-// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories,
-// or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
+// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories, or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
 //
-// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten
-// by formatting. (We try to avoid it from happening, but it does accidentally happen.)
+// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten by formatting. (We try to avoid it from happening, but it does accidentally happen.)
 //
-// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to
-// those Authors. If you find your code unattributed in this source code, please let us know so we can properly attribute you
-// and include the proper license and/or copyright(s). If you want to use any of our code in a commercial project, you must
-// contact Protiguous@Protiguous.com for permission, license, and a quote.
+// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to those Authors.
+// If you find your code unattributed in this source code, please let us know so we can properly attribute you and include the proper license and/or copyright(s).
+// If you want to use any of our code in a commercial project, you must contact Protiguous@Protiguous.com for permission, license, and a quote.
 //
 // Donations, payments, and royalties are accepted via bitcoin: 1Mad8TxTqxKnMiHuZxArFvX8BuFEB9nqX2 and PayPal: Protiguous@Protiguous.com
 //
-// ====================================================================
-// Disclaimer:  Usage of the source code or binaries is AS-IS. No warranties are expressed, implied, or given. We are NOT
-// responsible for Anything You Do With Our Code. We are NOT responsible for Anything You Do With Our Executables. We are NOT
-// responsible for Anything You Do With Your Computer. ====================================================================
+//
+// Disclaimer:  Usage of the source code or binaries is AS-IS.
+// No warranties are expressed, implied, or given.
+// We are NOT responsible for Anything You Do With Our Code.
+// We are NOT responsible for Anything You Do With Our Executables.
+// We are NOT responsible for Anything You Do With Your Computer.
+//
 //
 // Contact us by email if you have any questions, helpful criticism, or if you would like to use our code in your project(s).
-// For business inquiries, please contact me at Protiguous@Protiguous.com. Our software can be found at
-// "https://Protiguous.com/Software/" Our GitHub address is "https://github.com/Protiguous".
+// For business inquiries, please contact me at Protiguous@Protiguous.com.
+// Our software can be found at "https://Protiguous.com/Software/"
+// Our GitHub address is "https://github.com/Protiguous".
 //
-// File "Types.cs" last formatted on 2021-11-30 at 7:17 PM by Protiguous.
+// File "Types.cs" last formatted on 2022-12-22 at 5:15 PM by Protiguous.
 
-#nullable enable
 
 namespace Librainian.Extensions;
 
@@ -40,7 +40,6 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using Exceptions;
-using JetBrains.Annotations;
 using Logging;
 
 public static class Types {
@@ -49,13 +48,16 @@ public static class Types {
 
 	private delegate Object ObjectActivator();
 
-	public static Lazy<Assembly[]> CurrentDomainGetAssemblies { get; } = new( () => AppDomain.CurrentDomain.GetAssemblies() );
+	public static Lazy<Assembly[]> CurrentDomainGetAssemblies { get; } = new(static () => AppDomain.CurrentDomain.GetAssemblies() );
 
+	/// <summary>
+	/// //TODO Replace with 
+	/// </summary>
 	public static ConcurrentDictionary<Type, IList<Type>> EnumerableOfTypeCache { get; } = new();
 
 	public static Boolean CanAssignValue( this PropertyInfo p, Object? value ) {
 		if ( p is null ) {
-			throw new NullException( nameof( p ) );
+			throw new ArgumentEmptyException( nameof( p ) );
 		}
 
 		return value is null ? p.IsNullable() : p.PropertyType.IsInstanceOfType( value );
@@ -87,25 +89,26 @@ public static class Types {
 		catch ( FieldAccessException exception ) {
 			exception.Log();
 		}
-		catch ( NullException exception ) {
+		catch ( ArgumentException exception ) {
 			exception.Log();
 		}
 	}
 
 	/// <summary>
-	/// Copy the value of each field of the <paramref name="source" /> to the matching field in the <paramref
-	/// name="destination" /> .
+	///     Copy the value of each field of the <paramref name="source" /> to the matching field in the
+	///     <paramref name="destination" /> .
 	/// </summary>
 	/// <typeparam name="TSource"></typeparam>
-	/// <param name="source"></param>
+	/// <param name="source">     </param>
 	/// <param name="destination"></param>
+	/// <exception cref="ArgumentEmptyException"></exception>
 	public static Boolean CopyFields<TSource>( [DisallowNull] this TSource source, [DisallowNull] TSource destination ) {
 		if ( source is null ) {
-			throw new NullException( nameof( source ) );
+			throw new ArgumentEmptyException( nameof( source ) );
 		}
 
 		if ( destination is null ) {
-			throw new NullException( nameof( destination ) );
+			throw new ArgumentEmptyException( nameof( destination ) );
 		}
 
 		try {
@@ -124,11 +127,11 @@ public static class Types {
 	}
 
 	/// <summary>
-	/// Copy the value of each get property of the <paramref name="source" /> to each set property of the <paramref
-	/// name="destination" /> .
+	///     Copy the value of each get property of the <paramref name="source" /> to each set property of the
+	///     <paramref name="destination" /> .
 	/// </summary>
 	/// <typeparam name="TSource"></typeparam>
-	/// <param name="source"></param>
+	/// <param name="source">     </param>
 	/// <param name="destination"></param>
 	public static Boolean CopyProperties<TSource>( this TSource? source, TSource? destination ) {
 		try {
@@ -148,15 +151,15 @@ public static class Types {
 
 	public static void CopyProperty<TSource>( [DisallowNull] this TSource source, [DisallowNull] TSource destination, PropertyInfo prop ) {
 		if ( source is null ) {
-			throw new NullException( nameof( source ) );
+			throw new ArgumentEmptyException( nameof( source ) );
 		}
 
 		if ( destination is null ) {
-			throw new NullException( nameof( destination ) );
+			throw new ArgumentEmptyException( nameof( destination ) );
 		}
 
 		if ( prop is null ) {
-			throw new NullException( nameof( prop ) );
+			throw new ArgumentEmptyException( nameof( prop ) );
 		}
 
 		try {
@@ -175,20 +178,24 @@ public static class Types {
 		catch ( FieldAccessException exception ) {
 			exception.Log();
 		}
-		catch ( NullException exception ) {
+		catch ( ArgumentException exception ) {
 			exception.Log();
 		}
 	}
 
 	/// <summary>
-	/// <para>Copy each field in the <paramref name="source" /> to the matching field in the <paramref name="destination" />.</para>
-	/// <para>then</para>
-	/// <para>
-	/// Copy each property in the <paramref name="source" /> to the matching property in the <paramref name="destination" />.
-	/// </para>
+	///     <para>
+	///         Copy each field in the <paramref name="source" /> to the matching field in the
+	///         <paramref name="destination" />.
+	///     </para>
+	///     <para>then</para>
+	///     <para>
+	///         Copy each property in the <paramref name="source" /> to the matching property in the
+	///         <paramref name="destination" />.
+	///     </para>
 	/// </summary>
 	/// <typeparam name="TSource"></typeparam>
-	/// <param name="source"></param>
+	/// <param name="source">     </param>
 	/// <param name="destination"></param>
 	public static Boolean DeepClone<TSource>( this TSource? source, TSource? destination ) {
 		if ( ReferenceEquals( source, destination ) ) {
@@ -234,7 +241,7 @@ public static class Types {
 			list = Assembly.GetAssembly( typeof( T ) )?.GetTypes().ToList();
 
 			if ( list is not null ) {
-				EnumerableOfTypeCache[ typeof( T ) ] = list;
+				EnumerableOfTypeCache[typeof( T )] = list;
 			}
 		}
 
@@ -261,22 +268,24 @@ public static class Types {
 
 	/// <summary>Get all <see cref="GetSealedClassesDerivedFrom" /><paramref name="baseType" />.</summary>
 	/// <param name="baseType"></param>
+	/// <exception cref="ArgumentEmptyException"></exception>
 	public static IEnumerable<Type> GetSealedClassesDerivedFrom( this Type? baseType ) {
 		if ( baseType is null ) {
-			throw new NullException( nameof( baseType ) );
+			throw new ArgumentEmptyException( nameof( baseType ) );
 		}
 
 		return baseType.Assembly.GetTypes().Where( type => type.IsAssignableFrom( baseType ) && type.IsSealed );
 	}
 
 	/// <summary>
-	/// Get all <see cref="Type" /> from <see cref="AppDomain.CurrentDomain" /> that should be able to be created via <see
-	/// cref="Activator.CreateInstance(Type,BindingFlags,Binder,System.Object[],CultureInfo) " />.
+	///     Get all <see cref="Type" /> from <see cref="AppDomain.CurrentDomain" /> that should be able to be created via
+	///     <see cref="Activator.CreateInstance(Type,BindingFlags,Binder,System.Object[],CultureInfo) " />.
 	/// </summary>
 	/// <param name="baseType"></param>
+	/// <exception cref="ArgumentEmptyException"></exception>
 	public static IEnumerable<Type> GetTypesDerivedFrom( this Type? baseType ) {
 		if ( baseType is null ) {
-			throw new NullException( nameof( baseType ) );
+			throw new ArgumentEmptyException( nameof( baseType ) );
 		}
 
 		foreach ( var assembly in CurrentDomainGetAssemblies.Value ) {
@@ -290,21 +299,24 @@ public static class Types {
 
 	public static Boolean HasDefaultConstructor( this Type? type ) {
 		if ( type is null ) {
-			throw new NullException( nameof( type ) );
+			throw new ArgumentEmptyException( nameof( type ) );
 		}
 
-		return type.IsValueType || type.GetConstructor( Type.EmptyTypes ) != null;
+		return type.IsValueType || ( type.GetConstructor( Type.EmptyTypes ) != null );
 	}
 
 	/// <summary>
-	/// Returns whether or not objects of this type can be copied byte-for-byte in to another part of the system memory without
-	/// potential segmentation faults (i.e. the type contains no managed references such as <see cref="String" /> s). This
-	/// function will always return <c>false</c> for non- <see cref="ValueType" /> s.
+	///     Returns whether or not objects of this type can be copied byte-for-byte in to another part of the system memory
+	///     without potential segmentation faults (i.e. the type contains no managed references such as <see cref="String" />
+	///     s).
+	///     This function will always return <c>false</c> for non- <see cref="ValueType" /> s.
 	/// </summary>
+	/// <param name="self"></param>
 	/// <returns>True if the type can be copied (blitted), or false if not.</returns>
+	/// <exception cref="ArgumentEmptyException"></exception>
 	public static Boolean IsBlittable( this Type? self ) {
 		if ( self is null ) {
-			throw new NullException( nameof( self ) );
+			throw new ArgumentEmptyException( nameof( self ) );
 		}
 
 		if ( self.IsValueType ) {
@@ -319,7 +331,9 @@ public static class Types {
 		return self.IsExplicitLayout || self.IsLayoutSequential;
 	}
 
-	/// <summary>only quickly/simply tested. Seems to work.. is it useful now that we have pattern matching?</summary>
+	/// <summary>
+	///     only quickly/simply tested. Seems to work.. is it useful now that we have pattern matching?
+	/// </summary>
 	/// <typeparam name="TType"></typeparam>
 	/// <param name="_"></param>
 	/// <param name="c"></param>
@@ -339,23 +353,25 @@ public static class Types {
 
 	public static Boolean IsNullable( this PropertyInfo p ) => p.PropertyType.IsNullable();
 
-	public static Boolean IsNullable( this Type t ) => !t.IsValueType || Nullable.GetUnderlyingType( t ) != null;
+	public static Boolean IsNullable( this Type t ) => !t.IsValueType || ( Nullable.GetUnderlyingType( t ) != null );
 
 	/// <summary>Ascertains if the given type is a numeric type (e.g. <see cref="Int32" />).</summary>
+	/// <param name="self"></param>
 	/// <returns>True if the type represents a numeric type, false if not.</returns>
 	public static Boolean IsNumeric( this Type self ) =>
-		self == typeof( Double ) || self == typeof( Single ) || self == typeof( Int64 ) || self == typeof( Int16 ) || self == typeof( Byte ) || self == typeof( SByte ) ||
-		self == typeof( UInt32 ) || self == typeof( UInt64 ) || self == typeof( UInt16 ) || self == typeof( Decimal ) || self == typeof( Int32 );
+		( self == typeof( Double ) ) || ( self == typeof( Single ) ) || ( self == typeof( Int64 ) ) || ( self == typeof( Int16 ) ) || ( self == typeof( Byte ) ) || ( self == typeof( SByte ) ) ||
+		( self == typeof( UInt32 ) ) || ( self == typeof( UInt64 ) ) || ( self == typeof( UInt16 ) ) || ( self == typeof( Decimal ) ) || ( self == typeof( Int32 ) );
 
 	/// <summary>Ascertains if the given type is a numeric type (e.g. <see cref="Int32" />).</summary>
+	/// <param name="self"></param>
 	/// <returns>True if the type represents a numeric type, false if not.</returns>
 	public static Boolean IsNumeric<T>( [DisallowNull] this T self ) =>
 		self is Int32 or Double or Single or Int64 or Int16 or Byte or SByte or UInt32 or UInt64 or UInt16 or Decimal;
 
 	/// <summary>
-	/// <para>Checks a type to see if it derives from a raw generic (e.g. List[[]])</para>
+	///     <para>Checks a type to see if it derives from a raw generic (e.g. List[[]])</para>
 	/// </summary>
-	/// <param name="type"></param>
+	/// <param name="type">   </param>
 	/// <param name="generic"></param>
 	public static Boolean IsSubclassOfRawGeneric( this Type? type, Type? generic ) {
 		while ( type != typeof( Object ) ) {
@@ -373,14 +389,14 @@ public static class Types {
 		return false;
 	}
 
-	public static Boolean MergeDictionaries<TSource>( [ItemCanBeNull] this IDictionary sourceValue, FieldInfo field, TSource? destination ) {
+	public static Boolean MergeDictionaries<TSource>( this IDictionary sourceValue, FieldInfo field, TSource? destination ) {
 		if ( field.GetValue( destination ) is not IDictionary destAsDictionary ) {
 			return false;
 		}
 
 		foreach ( DictionaryEntry pair in sourceValue ) {
 			try {
-				destAsDictionary[ pair.Key ] = pair.Value;
+				destAsDictionary[pair.Key] = pair.Value;
 			}
 			catch ( Exception exception ) {
 				exception.Log();
@@ -400,6 +416,7 @@ public static class Types {
 	/// <summary>Alternate method of creating an object of type. Not proven to be faster than new().</summary>
 	/// <typeparam name="T"></typeparam>
 	/// <param name="type"></param>
+	/// <exception cref="InvalidOperationException"></exception>
 	public static T Newby<T>( this Type type ) where T : class {
 		if ( !ObjectActivators.TryGetValue( type, out var activator ) ) {
 			var dynamicMethod = new DynamicMethod( "CreateInstance", type, Type.EmptyTypes, true );
@@ -453,7 +470,7 @@ public static class Types {
 		var type = typeof( T );
 
 		// If the type is nullable and the result should be null, set a null value.
-		if ( type.IsNullable() && value == DBNull.Value ) {
+		if ( type.IsNullable() && ( value == DBNull.Value ) ) {
 			result = default( T );
 
 			return true;
@@ -463,7 +480,6 @@ public static class Types {
 		var underlyingType = Nullable.GetUnderlyingType( type ) ?? type;
 
 		try {
-
 			// Just one edge case you might want to handle.
 			if ( underlyingType == typeof( Guid ) ) {
 				value = value switch {
@@ -485,7 +501,7 @@ public static class Types {
 	}
 
 	/*
-            public static String GetName<T>( [CanBeNull] this Expression<Func<T>> propertyExpression ) {
+            public static String GetName<T>( [NeedsTesting] this Expression<Func<T>> propertyExpression ) {
                 if ( null == propertyExpression ) {
                     return String.Empty;
                 }
@@ -512,26 +528,24 @@ public static class Types {
 	//}
 	/*
 
-            /// <summary></summary>
+            /// <summary>
+            /// </summary>
             /// <typeparam name="T"></typeparam>
             /// <param name="getMethod"></param>
             /// <returns></returns>
-            /// <see cref="http://stackoverflow.com/a/557711" />
+            /// <see cref="http://stackoverflow.com/a/557711"/>
             public static T GetProperty<T>( MethodBase getMethod ) {
                 if ( !getMethod.Name.StartsWith( "get_" ) ) {
-                    throw new NullException(
+                    throw new ArgumentException(
                         "GetProperty must be called from a property" );
                 }
                 return GetValue<T>( getMethod.Name.Substring( 4 ) );
             }
     */
 
-	// case TypeCode.Double: return sizeof( Single ); case TypeCode.Single: return sizeof( UInt64 ); case TypeCode.UInt64:
-	// return sizeof( Int64 ); case TypeCode.Int64: return sizeof( UInt32 ); case TypeCode.UInt32: return sizeof( Int32 ); case
-	// TypeCode.Int32: return sizeof( UInt16 ); case TypeCode.UInt16: return sizeof( Int16 ); case TypeCode.Int16: return
-	// sizeof( Byte ); case TypeCode.Byte: return sizeof( SByte ); case TypeCode.SByte: return sizeof( Char ); case
-	// TypeCode.Char: return sizeof( Boolean ); case TypeCode.Boolean: switch ( typeCode ) { var typeCode = Type.GetTypeCode(
-	// type ); var type = typeof( T );
+	// case TypeCode.Double: return sizeof( Single ); case TypeCode.Single: return sizeof( UInt64 ); case TypeCode.UInt64: return sizeof( Int64 ); case TypeCode.Int64: return sizeof( UInt32 ); case TypeCode.UInt32:
+	// return sizeof( Int32 ); case TypeCode.Int32: return sizeof( UInt16 ); case TypeCode.UInt16: return sizeof( Int16 ); case TypeCode.Int16: return sizeof( Byte ); case TypeCode.Byte: return sizeof( SByte ); case
+	// TypeCode.SByte: return sizeof( Char ); case TypeCode.Char: return sizeof( Boolean ); case TypeCode.Boolean: switch ( typeCode ) { var typeCode = Type.GetTypeCode( type ); var type = typeof( T );
 
 	//public static Int32 SizeOf<T>() where T : struct {
 	//            return sizeof( Double );

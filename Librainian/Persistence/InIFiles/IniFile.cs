@@ -1,53 +1,53 @@
-// Copyright Â© Protiguous. All Rights Reserved.
+// Copyright © Protiguous. All Rights Reserved.
 //
-// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories,
-// or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
+// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries,
+// repositories, or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
 //
-// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten
-// by formatting. (We try to avoid it from happening, but it does accidentally happen.)
+// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has
+// been overwritten by formatting. (We try to avoid it from happening, but it does accidentally happen.)
 //
-// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to
-// those Authors. If you find your code unattributed in this source code, please let us know so we can properly attribute you
-// and include the proper license and/or copyright(s). If you want to use any of our code in a commercial project, you must
-// contact Protiguous@Protiguous.com for permission, license, and a quote.
+// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to those Authors.
+// If you find your code unattributed in this source code, please let us know so we can properly attribute you and include the proper licenses and/or copyrights.
+// If you want to use any of our code in a commercial project, you must contact Protiguous@Protiguous.com for permission, license, and a quote.
 //
 // Donations, payments, and royalties are accepted via bitcoin: 1Mad8TxTqxKnMiHuZxArFvX8BuFEB9nqX2 and PayPal: Protiguous@Protiguous.com
 //
 // ====================================================================
-// Disclaimer:  Usage of the source code or binaries is AS-IS. No warranties are expressed, implied, or given. We are NOT
-// responsible for Anything You Do With Our Code. We are NOT responsible for Anything You Do With Our Executables. We are NOT
-// responsible for Anything You Do With Your Computer. ====================================================================
+// Disclaimer:  Usage of the source code or binaries is AS-IS.
+// No warranties are expressed, implied, or given.
+// We are NOT responsible for Anything You Do With Our Code.
+// We are NOT responsible for Anything You Do With Our Executables.
+// We are NOT responsible for Anything You Do With Your Computer.
+// ====================================================================
 //
 // Contact us by email if you have any questions, helpful criticism, or if you would like to use our code in your project(s).
-// For business inquiries, please contact me at Protiguous@Protiguous.com. Our software can be found at
-// "https://Protiguous.com/Software/" Our GitHub address is "https://github.com/Protiguous".
+// For business inquiries, please contact me at Protiguous@Protiguous.com.
+// Our software can be found at "https://Protiguous.com/Software/"
+// Our GitHub address is "https://github.com/Protiguous".
 //
-// File "IniFile.cs" last formatted on 2021-11-30 at 7:22 PM by Protiguous.
+// File "IniFile.cs" last formatted on 2022-04-07 at 12:23 PM by Protiguous.
 
-#nullable enable
 
 namespace Librainian.Persistence.InIFiles;
 
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Text;
 using Exceptions;
 using FileSystem;
-using JetBrains.Annotations;
 using Logging;
 using Maths;
 using Newtonsoft.Json;
 using Parsing;
 using PooledAwait;
+using Utilities;
 
 /// <summary>
-/// A human readable/editable text <see cref="Document" /> with <see cref="KeyValuePair{TKey,TValue}" /> under common <see
-/// cref="Sections" />.
+///     A human readable/editable text <see cref="DocumentFile" /> with <see cref="KeyValuePair{TKey,TValue}" /> under
+///     common
+///     <see
+///         cref="Sections" />
+///     .
 /// </summary>
 /// <remarks>TODO Needs extensive unit testing.</remarks>
 [JsonObject]
@@ -69,12 +69,12 @@ public class IniFile {
 	public const String SectionEnd = "]";
 
 	[DebuggerStepThrough]
-	public IniFile( IDocument document ) {
-		if ( document is null ) {
-			throw new NullException( nameof( document ) );
+	public IniFile( IDocumentFile documentFile ) {
+		if ( documentFile is null ) {
+			throw new NullException( nameof( documentFile ) );
 		}
 
-		var _ = this.Add( document, CancellationToken.None );
+		_ = this.Add( documentFile, CancellationToken.None );
 	}
 
 	public IniFile( String data, CancellationToken cancellationToken ) {
@@ -83,11 +83,11 @@ public class IniFile {
 		}
 
 		//cheat: write out to temp file, read in, then delete temp file
-		var document = Document.GetTempDocument();
+		var document = DocumentFile.GetTempDocument();
 
 		try {
-			var _ = document.AppendText( data, cancellationToken );
-			var __ = this.Add( document, cancellationToken );
+			document.AppendText( data, cancellationToken );
+			_ = this.Add( document, cancellationToken );
 		}
 		finally {
 			document.Delete( cancellationToken );
@@ -98,16 +98,16 @@ public class IniFile {
 	}
 
 	[JsonProperty]
-	private ConcurrentDictionary<String, IniSection> Data {
+	private ConcurrentDictionary<String, IniSection?> Data {
 		[DebuggerStepThrough]
 		get;
 	} = new();
 
 	public IEnumerable<String> Sections => this.Data.Keys;
 
-	public IniSection? this[ String? section ] {
+	public IniSection? this[String? section] {
 		[DebuggerStepThrough]
-		[CanBeNull]
+		[NeedsTesting]
 		get {
 			if ( String.IsNullOrEmpty( section ) ) {
 				return default( IniSection? );
@@ -130,20 +130,19 @@ public class IniFile {
 			}
 
 			if ( this.Data.ContainsKey( section ) ) {
-
 				//TODO merge, not overwrite
-				this.Data[ section ] = value;
+				this.Data[section] = value;
 
 				return;
 			}
 
-			this.Data[ section ] = value;
+			this.Data[section] = value;
 		}
 	}
 
-	public String? this[ String? section, String? key ] {
+	public String? this[String? section, String? key] {
 		[DebuggerStepThrough]
-		[CanBeNull]
+		[NeedsTesting]
 		get {
 			if ( String.IsNullOrEmpty( section ) ) {
 				return default( String? );
@@ -157,10 +156,10 @@ public class IniFile {
 				return default( String? );
 			}
 
-			return this.Data[ section ].FirstOrDefault( line => line.Key.Like( key ) )?.Value;
+			return this.Data[section]?.FirstOrDefault( line => line.Key.Like( key ) )?.Value ?? default( String? );
 		}
 
-		[CanBeNull]
+		[NeedsTesting]
 		[DebuggerStepThrough]
 		set {
 			if ( String.IsNullOrEmpty( section ) ) {
@@ -188,11 +187,36 @@ public class IniFile {
 
 		lock ( this.Data ) {
 			if ( !this.Data.ContainsKey( section ) ) {
-				this.Data[ section ] = new IniSection();
+				this.Data[section] = new IniSection();
 			}
 
-			return this.Data[ section ];
+			return this.Data[section];
 		}
+	}
+
+	private Int32 FindKVLine( String line, String section, Int32 counter ) {
+		if ( line is null ) {
+			throw new NullException( nameof( line ) );
+		}
+
+		if ( String.IsNullOrWhiteSpace( section ) ) {
+			throw new NullException( nameof( section ) );
+		}
+
+		if ( line.Contains( IniLine.PairSeparator, StringComparison.OrdinalIgnoreCase ) ) {
+			var pos = line.IndexOf( IniLine.PairSeparator, StringComparison.OrdinalIgnoreCase );
+			var key = line[..pos].Trimmed();
+
+			if ( !String.IsNullOrEmpty( key ) ) {
+				var value = line[( pos + IniLine.PairSeparator.Length )..].Trimmed();
+
+				if ( this.Add( section, key, value ) ) {
+					counter++;
+				}
+			}
+		}
+
+		return counter;
 	}
 
 	private Boolean FoundComment( String line, String section ) {
@@ -211,29 +235,74 @@ public class IniFile {
 		return false;
 	}
 
-	private Int32 FindKVLine( String line, String section, Int32 counter ) {
-		if ( line is null ) {
-			throw new NullException( nameof( line ) );
+	private Boolean WriteSection( IDocumentFile documentFile, String section ) {
+		if ( documentFile is null ) {
+			throw new NullException( nameof( documentFile ) );
 		}
 
-		if ( String.IsNullOrWhiteSpace( section ) ) {
+		if ( section is null ) {
 			throw new NullException( nameof( section ) );
 		}
 
-		if ( line.Contains( IniLine.PairSeparator, StringComparison.OrdinalIgnoreCase ) ) {
-			var pos = line.IndexOf( IniLine.PairSeparator, StringComparison.OrdinalIgnoreCase );
-			var key = line[ ..pos ].Trimmed();
-
-			if ( !String.IsNullOrEmpty( key ) ) {
-				var value = line[ ( pos + IniLine.PairSeparator.Length ).. ].Trimmed();
-
-				if ( this.Add( section, key, value ) ) {
-					counter++;
-				}
-			}
+		if ( !this.Data.TryGetValue( section, out var dict ) ) {
+			return false; //section not found
 		}
 
-		return counter;
+		try {
+			using var writer = File.AppendText( documentFile.FullPath );
+
+			writer.WriteLine( Encode( section ) );
+
+			foreach ( var pair in dict.OrderBy( pair => pair.Key ) ) {
+				writer.WriteLine( Encode( pair ) );
+			}
+
+			writer.WriteLine( String.Empty );
+
+			return true;
+		}
+		catch ( Exception exception ) {
+			exception.Log();
+		}
+
+		return false;
+	}
+
+	private async Task<Boolean> WriteSectionAsync( IDocumentFile documentFile, String section, CancellationToken cancellationToken ) {
+		if ( documentFile is null ) {
+			throw new NullException( nameof( documentFile ) );
+		}
+
+		if ( section is null ) {
+			throw new NullException( nameof( section ) );
+		}
+
+		try {
+			if ( !this.Data.TryGetValue( section, out var dict ) ) {
+				return false; //section not found
+			}
+
+			var sb = new StringBuilder();
+
+			sb.Append( Encode( section ) );
+
+			foreach ( var pair in dict.OrderBy( pair => pair.Key ) ) {
+				if ( cancellationToken.IsCancellationRequested ) {
+					return false;
+				}
+
+				sb.Append( Encode( pair ) );
+			}
+
+			await File.AppendAllTextAsync( documentFile.FullPath, sb.ToString(), cancellationToken ).ConfigureAwait( false );
+
+			return true;
+		}
+		catch ( Exception exception ) {
+			exception.Log();
+		}
+
+		return false;
 	}
 
 	public static LineType GuessLineType( String line ) {
@@ -248,7 +317,7 @@ public class IniFile {
 		return line.Contains( IniLine.PairSeparator, StringComparison.CurrentCultureIgnoreCase ) ? LineType.KVP : LineType.Unknown;
 	}
 
-	public static String MakeLineType( LineType lineType, String key, String? value = default ) {
+	public static String MakeLineType( LineType lineType, String key, String? value = default( String? ) ) {
 		key = key.Trimmed() ?? String.Empty;
 
 		if ( lineType == LineType.Unknown ) {
@@ -271,90 +340,26 @@ public class IniFile {
 	}
 
 	/*
-	private static Boolean FoundSection( [CanBeNull] String? line, [CanBeNull] out String? section ) {
-		section = default;
+    private static Boolean FoundSection( [NeedsTesting] String? line, [NeedsTesting] out String? section ) {
+        section = default;
 
-		line = line.Trimmed();
+        line = line.Trimmed();
 
-		if ( String.IsNullOrEmpty( line ) ) {
-			return false;
-		}
+        if ( String.IsNullOrEmpty( line ) ) {
+            return false;
+        }
 
-		if ( line.StartsWith( SectionBegin ) && line.EndsWith( SectionEnd ) ) {
-			section = line.Substring( SectionBegin.Length, line.Length - ( SectionBegin.Length + SectionEnd.Length ) ).Trimmed();
+        if ( line.StartsWith( SectionBegin ) && line.EndsWith( SectionEnd ) ) {
+            section = line.Substring( SectionBegin.Length, line.Length - ( SectionBegin.Length + SectionEnd.Length ) ).Trimmed();
 
-			if ( !String.IsNullOrEmpty( section ) ) {
-				return true;
-			}
-		}
+            if ( !String.IsNullOrEmpty( section ) ) {
+                return true;
+            }
+        }
 
-		return false;
-	}
-	*/
-
-	private Boolean WriteSection( IDocument document, String section ) {
-		if ( document is null ) {
-			throw new NullException( nameof( document ) );
-		}
-
-		if ( section is null ) {
-			throw new NullException( nameof( section ) );
-		}
-
-		if ( !this.Data.TryGetValue( section, out var dict ) ) {
-			return false; //section not found
-		}
-
-		try {
-			using var writer = File.AppendText( document.FullPath );
-
-			writer.WriteLine( Encode( section ) );
-
-			foreach ( var pair in dict.OrderBy( pair => pair.Key ) ) {
-				writer.WriteLine( Encode( pair ) );
-			}
-
-			writer.WriteLine( String.Empty );
-
-			return true;
-		}
-		catch ( Exception exception ) {
-			exception.Log();
-		}
-
-		return false;
-	}
-
-	private async Task<Boolean> WriteSectionAsync( IDocument document, String section, CancellationToken cancellationToken ) {
-		if ( document is null ) {
-			throw new NullException( nameof( document ) );
-		}
-
-		if ( section is null ) {
-			throw new NullException( nameof( section ) );
-		}
-
-		try {
-			if ( !this.Data.TryGetValue( section, out var dict ) ) {
-				return false; //section not found
-			}
-
-			await using var writer = File.AppendText( document.FullPath );
-
-			await writer.WriteLineAsync( Encode( section ) ).ConfigureAwait( false );
-
-			foreach ( var pair in dict.OrderBy( pair => pair.Key ) ) {
-				await writer.WriteLineAsync( Encode( pair ) ).ConfigureAwait( false );
-			}
-
-			return true;
-		}
-		catch ( Exception exception ) {
-			exception.Log();
-		}
-
-		return false;
-	}
+        return false;
+    }
+    */
 
 	public Boolean Add( String? section, String key, String? value ) {
 		var sect = section.Trimmed() ?? String.Empty;
@@ -392,31 +397,29 @@ public class IniFile {
 	}
 
 	[DebuggerStepThrough]
-	public async PooledValueTask<Boolean> Add( IDocument document, CancellationToken cancellationToken ) {
-		if ( document is null ) {
-			throw new NullException( nameof( document ) );
+	public async PooledValueTask<Boolean> Add( IDocumentFile documentFile, CancellationToken cancellationToken ) {
+		if ( documentFile is null ) {
+			throw new NullException( nameof( documentFile ) );
 		}
 
-		if ( !await document.Exists( cancellationToken ).ConfigureAwait( false ) ) {
+		if ( !await documentFile.Exists( cancellationToken ).ConfigureAwait( false ) ) {
 			return false;
 		}
 
 		try {
-			var lines = File.ReadLines( document.FullPath ).Where( line => !String.IsNullOrWhiteSpace( line ) );
+			var lines = File.ReadLines( documentFile.FullPath ).Where( line => !String.IsNullOrWhiteSpace( line ) );
 
 			this.Add( lines );
 
 			return true;
 		}
 		catch ( IOException exception ) {
-
 			//file in use by another app
 			exception.Log();
 
 			return false;
 		}
 		catch ( OutOfMemoryException exception ) {
-
 			//file is big-huge! As my daughter would say.
 			exception.Log();
 
@@ -431,11 +434,7 @@ public class IniFile {
 
 		text = text.Replace( Environment.NewLine, "\n" );
 
-#if NET48
-			var lines = text.Split( "\n", StringSplitOptions.RemoveEmptyEntries );
-#else
 		var lines = text.Split( '\n', StringSplitOptions.RemoveEmptyEntries );
-#endif
 
 		this.Add( lines );
 	}
@@ -445,42 +444,41 @@ public class IniFile {
 			throw new NullException( nameof( lines ) );
 		}
 
-		String? currentSection = default;
+		String? currentSection = default( String? );
 
 		foreach ( var line in lines ) {
 			var lineType = GuessLineType( line );
 
 			switch ( lineType ) {
 				case LineType.Unknown: {
-
-					//TODO Do nothing? or add to "bottom" of the "top" of lines, ie Global-Comments-No-Section
-					break;
-				}
-
-				case LineType.Comment: {
-					this.Add( currentSection ?? String.Empty, line, null );
-
-					break;
-				}
-
-				case LineType.Section: {
-					currentSection = line.Substring( SectionBegin.Length, line.Length - ( SectionBegin.Length + SectionEnd.Length ) ).Trimmed();
-
-					break;
-				}
-
-				case LineType.KVP: {
-					var pos = line.IndexOf( IniLine.PairSeparator, StringComparison.OrdinalIgnoreCase );
-					var key = line[ ..pos ].Trimmed();
-
-					if ( !String.IsNullOrEmpty( key ) ) {
-						var value = line[ ( pos + IniLine.PairSeparator.Length ).. ].Trimmed();
-
-						this.Add( currentSection, key, value );
+						//TODO Do nothing? or add to "bottom" of the "top" of lines, ie Global-Comments-No-Section
+						break;
 					}
 
-					break;
-				}
+				case LineType.Comment: {
+						this.Add( currentSection ?? String.Empty, line, null );
+
+						break;
+					}
+
+				case LineType.Section: {
+						currentSection = line.Substring( SectionBegin.Length, line.Length - ( SectionBegin.Length + SectionEnd.Length ) ).Trimmed();
+
+						break;
+					}
+
+				case LineType.KVP: {
+						var pos = line.IndexOf( IniLine.PairSeparator, StringComparison.OrdinalIgnoreCase );
+						var key = line[..pos].Trimmed();
+
+						if ( !String.IsNullOrEmpty( key ) ) {
+							var value = line[( pos + IniLine.PairSeparator.Length )..].Trimmed();
+
+							this.Add( currentSection, key, value );
+						}
+
+						break;
+					}
 
 				default:
 					throw new ArgumentOutOfRangeException( nameof( lines ) );
@@ -490,7 +488,7 @@ public class IniFile {
 
 	/// <summary>Return the entire structure as a JSON formatted String.</summary>
 	public String AsJSON() {
-		var tempDocument = Document.GetTempDocument();
+		var tempDocument = DocumentFile.GetTempDocument();
 
 		var writer = File.CreateText( tempDocument.FullPath );
 
@@ -513,17 +511,18 @@ public class IniFile {
 	}
 
 	/// <summary>Save the data to the specified document, overwriting it by default.</summary>
-	/// <param name="document"></param>
+	/// <param name="documentFile"></param>
 	/// <param name="cancellationToken"></param>
 	/// <param name="overwrite"></param>
-	public async Task<Boolean> Save( IDocument document, CancellationToken cancellationToken, Boolean overwrite = true ) {
-		if ( document is null ) {
-			throw new NullException( nameof( document ) );
+	/// <exception cref="NullException"></exception>
+	public async Task<Boolean> Save( IDocumentFile documentFile, CancellationToken cancellationToken, Boolean overwrite = true ) {
+		if ( documentFile is null ) {
+			throw new NullException( nameof( documentFile ) );
 		}
 
-		if ( await document.Exists( cancellationToken ).ConfigureAwait( false ) ) {
+		if ( await documentFile.Exists( cancellationToken ).ConfigureAwait( false ) ) {
 			if ( overwrite ) {
-				await document.Delete( cancellationToken ).ConfigureAwait( false );
+				await documentFile.Delete( cancellationToken ).ConfigureAwait( false );
 			}
 			else {
 				return false;
@@ -531,7 +530,7 @@ public class IniFile {
 		}
 
 		await foreach ( var section in this.Data.Keys.OrderBy( section => section ).ToAsyncEnumerable().WithCancellation( cancellationToken ).ConfigureAwait( false ) ) {
-			await this.WriteSectionAsync( document, section, cancellationToken ).ConfigureAwait( false );
+			await this.WriteSectionAsync( documentFile, section, cancellationToken ).ConfigureAwait( false );
 		}
 
 		return true;
@@ -557,7 +556,7 @@ public class IniFile {
 		}
 
 		if ( this.Data.ContainsKey( section ) ) {
-			return this.Data[ section ].Remove( key );
+			return this.Data[section].Remove( key );
 		}
 
 		return false;

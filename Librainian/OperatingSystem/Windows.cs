@@ -1,15 +1,17 @@
 ﻿// Copyright © Protiguous. All Rights Reserved.
-// 
-// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories, or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
-// 
-// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten by formatting. (We try to avoid it from happening, but it does accidentally happen.)
-// 
+//
+// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries,
+// repositories, or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
+//
+// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has
+// been overwritten by formatting. (We try to avoid it from happening, but it does accidentally happen.)
+//
 // Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to those Authors.
-// If you find your code unattributed in this source code, please let us know so we can properly attribute you and include the proper license and/or copyright(s).
+// If you find your code unattributed in this source code, please let us know so we can properly attribute you and include the proper licenses and/or copyrights.
 // If you want to use any of our code in a commercial project, you must contact Protiguous@Protiguous.com for permission, license, and a quote.
-// 
+//
 // Donations, payments, and royalties are accepted via bitcoin: 1Mad8TxTqxKnMiHuZxArFvX8BuFEB9nqX2 and PayPal: Protiguous@Protiguous.com
-// 
+//
 // ====================================================================
 // Disclaimer:  Usage of the source code or binaries is AS-IS.
 // No warranties are expressed, implied, or given.
@@ -17,15 +19,14 @@
 // We are NOT responsible for Anything You Do With Our Executables.
 // We are NOT responsible for Anything You Do With Your Computer.
 // ====================================================================
-// 
+//
 // Contact us by email if you have any questions, helpful criticism, or if you would like to use our code in your project(s).
 // For business inquiries, please contact me at Protiguous@Protiguous.com.
 // Our software can be found at "https://Protiguous.com/Software/"
 // Our GitHub address is "https://github.com/Protiguous".
-// 
-// File "Windows.cs" last formatted on 2021-12-02 at 7:30 AM by Protiguous.
+//
+// File "Windows.cs" last formatted on 2022-02-16 at 2:25 PM by Protiguous.
 
-#nullable enable
 
 namespace Librainian.OperatingSystem;
 
@@ -53,23 +54,23 @@ public static class Windows {
 		';'
 	};
 
-	public static readonly Lazy<Folder> WindowsFolder = new(() => {
-		var path = Environment.GetFolderPath( Environment.SpecialFolder.Windows );
-
-		var folder = FluffFolder( path );
+	public static readonly Lazy<Folder> WindowsFolder = new( () => {
+		var folder = FluffFolder( Environment.GetFolderPath( Environment.SpecialFolder.Windows ) );
 
 		if ( folder is null ) {
-			throw new FolderNotFoundException( new Folder( path ) );
+			throw new DirectoryNotFoundException( "Unable to locate Windows folder." );
 		}
 
 		return folder;
-	}, true);
+	}, true );
 
-	public static readonly Lazy<Folder?> WindowsSystem32Folder = new(() => FluffFolder( Path.Combine( WindowsFolder.Value.FullPath, "System32" ) ), true);
+	public static readonly Lazy<Folder?> WindowsSystem32Folder = new( () => FluffFolder( Path.Combine( WindowsFolder.Value.FullPath, "System32" ) ), true );
 
-	public static Lazy<Document?> CommandPrompt { get; } = new(() => FluffDocument( Path.Combine( WindowsSystem32Folder.Value.FullPath, "cmd.exe" ) ), true);
+	public static Lazy<DocumentFile?> CommandPrompt { get; } = new( () => FluffDocument( Path.Combine( WindowsSystem32Folder.Value.FullPath, "cmd.exe" ) ), true );
 
 	/// <summary>Cleans and sorts the Windows <see cref="Environment" /> path variable.</summary>
+	/// <param name="reportToConsole"></param>
+	/// <param name="cancellationToken"></param>
 	public static async Task CleanUpPath( Boolean reportToConsole, CancellationToken cancellationToken ) {
 		if ( reportToConsole ) {
 			"Attempting to verify and fix the PATH environment.".Info();
@@ -96,7 +97,7 @@ public static class Windows {
 		var pathsData = new ConcurrentDictionary<String, Folder>( Environment.ProcessorCount, justpaths.Count );
 
 		foreach ( var s in justpaths ) {
-			pathsData[ s ] = new Folder( s );
+			pathsData[s] = new Folder( s );
 		}
 
 		if ( reportToConsole ) {
@@ -110,11 +111,10 @@ public static class Windows {
 		}
 
 		foreach ( var pair in pathsData ) {
-			if ( !await pair.Value.EnumerateFolders( "*", SearchOption.TopDirectoryOnly, cancellationToken ).AnyAsync( cancellationToken ).ConfigureAwait( false ) ) {
-				if ( !await pair.Value.EnumerateDocuments( "*.*", cancellationToken ).AnyAsync( cancellationToken ).ConfigureAwait( false ) ) {
-					if ( pathsData.TryRemove( pair.Key, out var dummy ) && reportToConsole ) {
-						$"Removing empty folder {dummy.FullPath} from PATH".Info();
-					}
+			if ( !await pair.Value.EnumerateFolders( "*", SearchOption.TopDirectoryOnly, cancellationToken ).AnyAsync( cancellationToken ).ConfigureAwait( false ) &&
+				 !await pair.Value.EnumerateDocuments( "*.*", cancellationToken ).AnyAsync( cancellationToken ).ConfigureAwait( false ) ) {
+				if ( pathsData.TryRemove( pair.Key, out var dummy ) && reportToConsole ) {
+					$"Removing empty folder {dummy.FullPath} from PATH".Info();
 				}
 			}
 		}
@@ -182,7 +182,7 @@ public static class Windows {
 					return false;
 				}
 
-				process.WaitForExit( ( Int32 ) Minutes.One.ToSeconds().ToMilliseconds().Value );
+				process.WaitForExit( ( Int32 )Minutes.One.ToSeconds().ToMilliseconds().Value );
 				"success.".Info();
 
 				return true;
@@ -194,13 +194,13 @@ public static class Windows {
 			return false;
 		} );
 
-	public static Task<Process?> ExecuteProcessAsync( Document filename, Folder workingFolder, String? arguments, Boolean elevate ) {
+	public static Task<Process?> ExecuteProcessAsync( DocumentFile filename, Folder workingFolder, String? arguments, Boolean elevate ) {
 		if ( filename == null ) {
-			throw new NullException( nameof( filename ) );
+			throw new ArgumentEmptyException( nameof( filename ) );
 		}
 
 		if ( workingFolder == null ) {
-			throw new NullException( nameof( workingFolder ) );
+			throw new ArgumentEmptyException( nameof( workingFolder ) );
 		}
 
 		return Task.Run( () => {
@@ -232,12 +232,12 @@ public static class Windows {
 		} );
 	}
 
-	public static Document? FluffDocument( String fullname, String? okayMessage = null, String? errorMessage = null ) {
+	public static DocumentFile? FluffDocument( String fullname, String? okayMessage = null, String? errorMessage = null ) {
 		if ( !String.IsNullOrEmpty( okayMessage ) ) {
 			$"Finding {fullname}...".Info();
 		}
 
-		using var mainDocument = new Document( fullname );
+		using var mainDocument = new DocumentFile( fullname );
 
 		if ( mainDocument.GetExists() ) {
 			okayMessage.Info();
@@ -247,19 +247,19 @@ public static class Windows {
 
 		errorMessage.Error();
 
-		return default( Document? );
+		return default( DocumentFile? );
 	}
 
 	public static Folder? FluffFolder( String fullname, String? okayMessage = null, String? errorMessage = null ) {
 		if ( String.IsNullOrWhiteSpace( fullname ) ) {
-			throw new NullException( nameof( fullname ) );
+			throw new ArgumentException( "Value cannot be null or whitespace.", nameof( fullname ) );
 		}
 
 		if ( !String.IsNullOrEmpty( okayMessage ) ) {
 			$"Finding {fullname}...".Info();
 		}
 
-		var document = new Document( fullname );
+		var document = new DocumentFile( fullname );
 		if ( document.ContainingingFolder() is Folder folder ) {
 			return folder;
 		}
@@ -320,16 +320,16 @@ public static class Windows {
 
 	public static class Utilities {
 
-		public static Lazy<Document?> IrfanView64 { get; } =
-			new(() => FluffDocument( Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.ProgramFiles ) + @"\IrfanView\", "i_view64.exe" ) ), true);
+		public static Lazy<DocumentFile?> IrfanView64 { get; } =
+			new( () => FluffDocument( Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.ProgramFiles ) + @"\IrfanView\", "i_view64.exe" ) ), true );
 
-		public static async Task<Process?>? TryConvert_WithIrfanviewAsync( Document inDocument, Document outDocument ) {
-			if ( inDocument == null ) {
-				throw new NullException( nameof( inDocument ) );
+		public static async Task<Process?>? TryConvert_WithIrfanviewAsync( DocumentFile inDocumentFile, DocumentFile outDocumentFile ) {
+			if ( inDocumentFile == null ) {
+				throw new ArgumentEmptyException( nameof( inDocumentFile ) );
 			}
 
-			if ( outDocument == null ) {
-				throw new NullException( nameof( outDocument ) );
+			if ( outDocumentFile == null ) {
+				throw new ArgumentEmptyException( nameof( outDocumentFile ) );
 			}
 
 			var irfan = IrfanView64.Value;
@@ -342,7 +342,7 @@ public static class Windows {
 			}
 
 			try {
-				var arguments = $" {inDocument.FullPath.Quoted()} /convert={outDocument.FullPath.Quoted()} ";
+				var arguments = $" {inDocumentFile.FullPath.Quoted()} /convert={outDocumentFile.FullPath.Quoted()} ";
 
 				var proc = new ProcessStartInfo {
 					UseShellExecute = false,
@@ -366,7 +366,5 @@ public static class Windows {
 
 			return default( Process? );
 		}
-
 	}
-
 }

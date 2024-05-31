@@ -1,30 +1,30 @@
 ﻿// Copyright © Protiguous. All Rights Reserved.
 //
-// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories,
-// or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
+// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories, or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
 //
-// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten
-// by formatting. (We try to avoid it from happening, but it does accidentally happen.)
+// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten by formatting. (We try to avoid it from happening, but it does accidentally happen.)
 //
-// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to
-// those Authors. If you find your code unattributed in this source code, please let us know so we can properly attribute you
-// and include the proper license and/or copyright(s). If you want to use any of our code in a commercial project, you must
-// contact Protiguous@Protiguous.com for permission, license, and a quote.
+// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to those Authors.
+// If you find your code unattributed in this source code, please let us know so we can properly attribute you and include the proper license and/or copyright(s).
+// If you want to use any of our code in a commercial project, you must contact Protiguous@Protiguous.com for permission, license, and a quote.
 //
 // Donations, payments, and royalties are accepted via bitcoin: 1Mad8TxTqxKnMiHuZxArFvX8BuFEB9nqX2 and PayPal: Protiguous@Protiguous.com
 //
-// ====================================================================
-// Disclaimer:  Usage of the source code or binaries is AS-IS. No warranties are expressed, implied, or given. We are NOT
-// responsible for Anything You Do With Our Code. We are NOT responsible for Anything You Do With Our Executables. We are NOT
-// responsible for Anything You Do With Your Computer. ====================================================================
+//
+// Disclaimer:  Usage of the source code or binaries is AS-IS.
+// No warranties are expressed, implied, or given.
+// We are NOT responsible for Anything You Do With Our Code.
+// We are NOT responsible for Anything You Do With Our Executables.
+// We are NOT responsible for Anything You Do With Your Computer.
+//
 //
 // Contact us by email if you have any questions, helpful criticism, or if you would like to use our code in your project(s).
-// For business inquiries, please contact me at Protiguous@Protiguous.com. Our software can be found at
-// "https://Protiguous.com/Software/" Our GitHub address is "https://github.com/Protiguous".
+// For business inquiries, please contact me at Protiguous@Protiguous.com.
+// Our software can be found at "https://Protiguous.com/Software/"
+// Our GitHub address is "https://github.com/Protiguous".
 //
-// File "PersistTable.cs" last formatted on 2021-11-30 at 7:22 PM by Protiguous.
+// File "PersistTable.cs" last formatted on 2022-12-22 at 5:20 PM by Protiguous.
 
-#nullable enable
 
 namespace Librainian.Persistence;
 
@@ -36,10 +36,8 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Azos.Serialization.Arow;
 using Exceptions;
 using FileSystem;
-using JetBrains.Annotations;
 using Logging;
 using Maths;
 using Measurement.Time;
@@ -48,11 +46,14 @@ using Microsoft.Isam.Esent.Collections.Generic;
 using Newtonsoft.Json;
 using OperatingSystem.Compression;
 using Parsing;
+using Utilities;
 using Utilities.Disposables;
-using static System.Environment;
 
 /// <summary>
-/// <para>Allows the <see cref="PersistentDictionary{TKey,TValue}" /> class to persist almost any object by using Newtonsoft.Json.</para>
+///     <para>
+///         Allows the <see cref="PersistentDictionary{TKey,TValue}" /> class to persist almost any object by using
+///         Newtonsoft.Json.
+///     </para>
 /// </summary>
 /// <see cref="http://managedesent.codeplex.com/wikipage?title=PersistentDictionaryDocumentation" />
 /// <remarks>//TODO This class is in severe need of unit testing.</remarks>
@@ -60,10 +61,31 @@ using static System.Environment;
 [JsonObject]
 public class PersistTable<TKey, TValue> : ABetterClassDispose, IDictionary<TKey, TValue?> where TKey : IComparable<TKey> {
 
-	public PersistTable( SpecialFolder specialFolder, String tableName ) : this( new Folder( specialFolder, null, tableName ) ) {
+	[JsonProperty]
+	private PersistentDictionary<TKey, String?> Dictionary { get; }
+
+	/// <summary>Return true if we can read/write in the <see cref="Folder" /> .</summary>
+	/// <param name="cancellationToken"></param>
+	private async Task<Boolean> TestForReadWriteAccess( CancellationToken cancellationToken ) {
+		try {
+			using var document = this.Folder.TryGetTempDocument();
+
+			var text = Randem.NextString( 64, true, true, true, true );
+			await document.AppendText( text, cancellationToken ).ConfigureAwait( false );
+
+			await document.TryDeleting( Seconds.Ten, cancellationToken ).ConfigureAwait( false );
+
+			return true;
+		}
+		catch { }
+
+		return false;
 	}
 
-	public PersistTable( SpecialFolder specialFolder, String? subFolder, String tableName ) : this( new Folder( specialFolder, subFolder, tableName ) ) {
+	public PersistTable( Environment.SpecialFolder specialFolder, String tableName ) : this( new Folder( specialFolder, null, tableName ) ) {
+	}
+
+	public PersistTable( Environment.SpecialFolder specialFolder, String? subFolder, String tableName ) : this( new Folder( specialFolder, subFolder, tableName ) ) {
 	}
 
 	public PersistTable( Folder folder, String tableName ) : this( Path.Combine( folder.FullPath, tableName ) ) {
@@ -72,20 +94,16 @@ public class PersistTable<TKey, TValue> : ABetterClassDispose, IDictionary<TKey,
 	public PersistTable( Folder folder, String subFolder, String tableName ) : this( Path.Combine( folder.FullPath, subFolder, tableName ) ) {
 	}
 
-	public PersistTable( Folder folder, Boolean testForReadWriteAccess = false ) : base( nameof( PersistTable<TKey, TValue> ) ) {
+	public PersistTable( Folder folder, Boolean testForReadWriteAccess = false ) {
 		try {
-			this.Folder = folder ?? throw new NullException( nameof( folder ) );
+			this.Folder = folder ?? throw new ArgumentEmptyException( nameof( folder ) );
 
+			this.Folder.Info.Create();
 			this.Folder.Info.Refresh();
 
 			if ( !this.Folder.Info.Exists ) {
-				this.Folder.Create( CancellationToken.None).GetAwaiter().GetResult();
-				this.Folder.Refresh( CancellationToken.None ).GetAwaiter().GetResult();
-				if ( !this.Folder.Info.Exists ) {
-					throw new FolderNotFoundException( this.Folder );
-				}
+				throw new DirectoryNotFoundException( $"Unable to find or create the folder `{this.Folder.FullPath}`." );
 			}
-
 
 			var customConfig = new DatabaseConfig {
 				CreatePathIfNotExist = true,
@@ -99,15 +117,14 @@ public class PersistTable<TKey, TValue> : ABetterClassDispose, IDictionary<TKey,
 			}
 		}
 		catch ( Exception exception ) {
-			throw exception.Log();
+			exception.Log();
+
+			throw;
 		}
 	}
 
 	public PersistTable( String fullpath ) : this( new Folder( fullpath ) ) {
 	}
-
-	[JsonProperty]
-	private PersistentDictionary<TKey, String?> Dictionary { get; }
 
 	public Int32 Count => this.Dictionary.Count;
 
@@ -119,6 +136,7 @@ public class PersistTable<TKey, TValue> : ABetterClassDispose, IDictionary<TKey,
 	public ICollection<TKey> Keys => this.Dictionary.Keys ?? throw new InvalidOperationException();
 
 	/// <summary>This deserializes the list of values.. I have a feeling this cannot be very fast.</summary>
+	/// <exception cref="InvalidOperationException"></exception>
 	public ICollection<TValue?> Values =>
 		( ICollection<TValue?> )( this.Dictionary.Values ?? throw new InvalidOperationException() ).Select( value => {
 			if ( value != null ) {
@@ -128,15 +146,16 @@ public class PersistTable<TKey, TValue> : ABetterClassDispose, IDictionary<TKey,
 			return default( TValue? ); //BUG is this intended?
 		} );
 
+	/// <summary></summary>
 	/// <param name="key"></param>
-	public TValue? this[ TKey? key ] {
-		[CanBeNull]
+	public TValue? this[TKey? key] {
+		[NeedsTesting]
 		get {
 			if ( key is null ) {
 				return default( TValue? ); //intended. null key returns default
 			}
 
-			if ( this.Dictionary.TryGetValue( key, out var storedValue ) && storedValue != null ) {
+			if ( this.Dictionary.TryGetValue( key, out var storedValue ) && ( storedValue != null ) ) {
 				return storedValue.FromCompressedBase64().FromJSON<TValue>();
 			}
 
@@ -154,30 +173,13 @@ public class PersistTable<TKey, TValue> : ABetterClassDispose, IDictionary<TKey,
 				return;
 			}
 
-			this.Dictionary[ key ] = value.ToJSON()?.ToCompressedBase64();
+			this.Dictionary[key] = value.ToJSON()?.ToCompressedBase64();
 		}
 	}
 
-	/// <summary>Return true if we can read/write in the <see cref="Folder" /> .</summary>
-	private async Task<Boolean> TestForReadWriteAccess( CancellationToken cancellationToken ) {
-		try {
-			using var document = this.Folder.TryGetTempDocument();
+	public void Add( TKey key, TValue? value ) => this[key] = value;
 
-			var text = Randem.NextString( 64, true, true, true, true );
-			await document.AppendText( text, cancellationToken ).ConfigureAwait( false );
-
-			await document.TryDeleting( Seconds.Ten, cancellationToken ).ConfigureAwait( false );
-
-			return true;
-		}
-		catch { }
-
-		return false;
-	}
-
-	public void Add( TKey key, TValue? value ) => this[ key ] = value;
-
-	public void Add( KeyValuePair<TKey, TValue?> item ) => this[ item.Key ] = item.Value;
+	public void Add( KeyValuePair<TKey, TValue?> item ) => this[item.Key] = item.Value;
 
 	public void Clear() => this.Dictionary.Clear();
 
@@ -214,13 +216,9 @@ public class PersistTable<TKey, TValue> : ABetterClassDispose, IDictionary<TKey,
 
 	public IEnumerator<KeyValuePair<TKey, TValue?>> GetEnumerator() => this.Items().GetEnumerator();
 
-	/// <summary>Returns an enumerator that iterates through a collection.</summary>
-	/// <returns>An <see cref="IEnumerator" /> object that can be used to iterate through the collection.</returns>
-	IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
-
 	public async Task Initialize( CancellationToken cancellationToken ) {
 		if ( !await this.Folder.Create( cancellationToken ).ConfigureAwait( false ) ) {
-			throw new FolderNotFoundException( this.Folder );
+			throw new DirectoryNotFoundException( $"Unable to find or create the folder {this.Folder.FullPath.SmartQuote()}." );
 		}
 	}
 
@@ -250,32 +248,34 @@ public class PersistTable<TKey, TValue> : ABetterClassDispose, IDictionary<TKey,
 
 	public void TryAdd( TKey key, TValue? value ) {
 		if ( key is null ) {
-			throw new NullException( nameof( key ) );
+			throw new ArgumentEmptyException( nameof( key ) );
 		}
 
 		if ( !this.Dictionary.ContainsKey( key ) ) {
-			this[ key ] = value;
+			this[key] = value;
 		}
 	}
 
 	/// <summary>Gets the value associated with the specified key.</summary>
 	/// <returns>
-	/// true if the object that implements <see cref="IDictionary" /> contains an element with the specified key; otherwise, false.
+	///     true if the object that implements <see cref="IDictionary" /> contains an element with the specified key;
+	///     otherwise, false.
 	/// </returns>
 	/// <param name="key">The key whose value to get.</param>
 	/// <param name="value">
-	/// When this method returns, the value associated with the specified key, if the key is found; otherwise, the default
-	/// value for the type of the <paramref name="value" /> parameter. This parameter is passed uninitialized.
+	///     When this method returns, the value associated with the specified key, if the key is found; otherwise, the default
+	///     value for the type of the
+	///     <paramref name="value" /> parameter. This parameter is passed uninitialized.
 	/// </param>
-	/// <exception cref="NullException"><paramref name="key" /> is null.</exception>
+	/// <exception cref="ArgumentEmptyException"><paramref name="key" /> is null.</exception>
 	public Boolean TryGetValue( TKey key, out TValue? value ) {
 		if ( key is null ) {
-			throw new NullException( nameof( key ) );
+			throw new ArgumentEmptyException( nameof( key ) );
 		}
 
 		value = default( TValue );
 
-		if ( this.Dictionary.TryGetValue( key, out var storedValue ) && storedValue != null ) {
+		if ( this.Dictionary.TryGetValue( key, out var storedValue ) && ( storedValue != null ) ) {
 			value = storedValue.FromCompressedBase64().FromJSON<TValue>();
 
 			return true;
@@ -286,9 +286,13 @@ public class PersistTable<TKey, TValue> : ABetterClassDispose, IDictionary<TKey,
 
 	public Boolean TryRemove( TKey key ) {
 		if ( key is null ) {
-			throw new NullException( nameof( key ) );
+			throw new ArgumentEmptyException( nameof( key ) );
 		}
 
 		return this.Dictionary.ContainsKey( key ) && this.Dictionary.Remove( key );
 	}
+
+	/// <summary>Returns an enumerator that iterates through a collection.</summary>
+	/// <returns>An <see cref="IEnumerator" /> object that can be used to iterate through the collection.</returns>
+	IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 }

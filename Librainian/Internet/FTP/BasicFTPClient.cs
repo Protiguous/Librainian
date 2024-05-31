@@ -1,30 +1,30 @@
 ﻿// Copyright © Protiguous. All Rights Reserved.
 //
-// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories,
-// or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
+// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories, or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
 //
-// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten
-// by formatting. (We try to avoid it from happening, but it does accidentally happen.)
+// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten by formatting. (We try to avoid it from happening, but it does accidentally happen.)
 //
-// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to
-// those Authors. If you find your code unattributed in this source code, please let us know so we can properly attribute you
-// and include the proper license and/or copyright(s). If you want to use any of our code in a commercial project, you must
-// contact Protiguous@Protiguous.com for permission, license, and a quote.
+// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to those Authors.
+// If you find your code unattributed in this source code, please let us know so we can properly attribute you and include the proper license and/or copyright(s).
+// If you want to use any of our code in a commercial project, you must contact Protiguous@Protiguous.com for permission, license, and a quote.
 //
 // Donations, payments, and royalties are accepted via bitcoin: 1Mad8TxTqxKnMiHuZxArFvX8BuFEB9nqX2 and PayPal: Protiguous@Protiguous.com
 //
-// ====================================================================
-// Disclaimer:  Usage of the source code or binaries is AS-IS. No warranties are expressed, implied, or given. We are NOT
-// responsible for Anything You Do With Our Code. We are NOT responsible for Anything You Do With Our Executables. We are NOT
-// responsible for Anything You Do With Your Computer. ====================================================================
+//
+// Disclaimer:  Usage of the source code or binaries is AS-IS.
+// No warranties are expressed, implied, or given.
+// We are NOT responsible for Anything You Do With Our Code.
+// We are NOT responsible for Anything You Do With Our Executables.
+// We are NOT responsible for Anything You Do With Your Computer.
+//
 //
 // Contact us by email if you have any questions, helpful criticism, or if you would like to use our code in your project(s).
-// For business inquiries, please contact me at Protiguous@Protiguous.com. Our software can be found at
-// "https://Protiguous.com/Software/" Our GitHub address is "https://github.com/Protiguous".
+// For business inquiries, please contact me at Protiguous@Protiguous.com.
+// Our software can be found at "https://Protiguous.com/Software/"
+// Our GitHub address is "https://github.com/Protiguous".
 //
-// File "BasicFTPClient.cs" last formatted on 2021-11-30 at 7:18 PM by Protiguous.
+// File "BasicFTPClient.cs" last formatted on 2022-12-22 at 5:16 PM by Protiguous.
 
-#nullable enable
 
 namespace Librainian.Internet.FTP;
 
@@ -44,15 +44,15 @@ public class BasicFtpClient {
 
 	public BasicFtpClient( String theUser, String thePassword, String theHost ) {
 		if ( String.IsNullOrWhiteSpace( theUser ) ) {
-			throw new NullException( nameof( theUser ) );
+			throw new ArgumentException( "Value cannot be null or whitespace.", nameof( theUser ) );
 		}
 
 		if ( String.IsNullOrWhiteSpace( thePassword ) ) {
-			throw new NullException( nameof( thePassword ) );
+			throw new ArgumentException( "Value cannot be null or whitespace.", nameof( thePassword ) );
 		}
 
 		if ( String.IsNullOrWhiteSpace( theHost ) ) {
-			throw new NullException( nameof( theHost ) );
+			throw new ArgumentException( "Value cannot be null or whitespace.", nameof( theHost ) );
 		}
 
 		this.Username = theUser;
@@ -71,19 +71,21 @@ public class BasicFtpClient {
 
 	private Uri BuildServerUri( String path ) {
 		if ( String.IsNullOrWhiteSpace( path ) ) {
-			throw new NullException( nameof( path ) );
+			throw new ArgumentException( "Value cannot be null or whitespace.", nameof( path ) );
 		}
 
 		return new Uri( $"ftp://{this.Host}:{this.Port}/{path}" );
 	}
 
 	/// <summary>
-	/// This method downloads the given file name from the FTP Server and returns a byte array containing its contents. Throws
-	/// a WebException on encountering a network error.
+	///     This method downloads the given file name from the FTP Server and returns a byte array containing its contents.
+	///     Throws a WebException on encountering a network error.
 	/// </summary>
+	/// <param name="path"></param>
+	/// <exception cref="ArgumentException"></exception>
 	public Byte[] DownloadData( String path ) {
 		if ( String.IsNullOrWhiteSpace( path ) ) {
-			throw new NullException( nameof( path ) );
+			throw new ArgumentException( "Value cannot be null or whitespace.", nameof( path ) );
 		}
 
 		// Get the object used to communicate with the Server.
@@ -96,16 +98,19 @@ public class BasicFtpClient {
 	}
 
 	/// <summary>
-	/// This method downloads the FTP file specified by "ftppath" and saves it to "destfile". Throws a WebException on
-	/// encountering a network error.
+	///     This method downloads the FTP file specified by "ftppath" and saves it to "destfile". Throws a WebException on
+	///     encountering a network error.
 	/// </summary>
+	/// <param name="ftppath"></param>
+	/// <param name="destfile"></param>
+	/// <exception cref="ArgumentException"></exception>
 	public void DownloadFile( String ftppath, String destfile ) {
 		if ( String.IsNullOrWhiteSpace( ftppath ) ) {
-			throw new NullException( nameof( ftppath ) );
+			throw new ArgumentException( "Value cannot be null or whitespace.", nameof( ftppath ) );
 		}
 
 		if ( String.IsNullOrWhiteSpace( destfile ) ) {
-			throw new NullException( nameof( destfile ) );
+			throw new ArgumentException( "Value cannot be null or whitespace.", nameof( destfile ) );
 		}
 
 		// Download the data
@@ -119,17 +124,21 @@ public class BasicFtpClient {
 		fs.Close();
 	}
 
-	/// <summary>Upload a byte[] to the FTP Server</summary>
+	/// <summary>
+	///     Upload a byte[] to the FTP Server
+	/// </summary>
 	/// <param name="path">Path on the FTP Server (upload/myfile.txt)</param>
 	/// <param name="data">A byte[] containing the data to upload</param>
 	/// <returns>The Server response in a byte[]</returns>
+	/// <exception cref="ArgumentException"></exception>
+	/// <exception cref="ArgumentEmptyException"><paramref name="data"/></exception>
 	public Byte[] UploadData( String path, Byte[] data ) {
 		if ( String.IsNullOrWhiteSpace( path ) ) {
-			throw new NullException( nameof( path ) );
+			throw new ArgumentException( "Value cannot be null or whitespace.", nameof( path ) );
 		}
 
 		if ( data == null ) {
-			throw new NullException( nameof( data ) );
+			throw new ArgumentEmptyException( nameof( data ) );
 		}
 
 		// Get the object used to communicate with the Server.
@@ -141,13 +150,16 @@ public class BasicFtpClient {
 		return request.UploadData( this.BuildServerUri( path ), data );
 	}
 
-	/// <summary>Load a file from disk and upload it to the FTP Server</summary>
+	/// <summary>
+	///     Load a file from disk and upload it to the FTP Server
+	/// </summary>
 	/// <param name="ftppath">Path on the FTP Server (/upload/myfile.txt)</param>
 	/// <param name="srcfile">File on the local harddisk to upload</param>
 	/// <returns>The Server response in a byte[]</returns>
+	/// <exception cref="ArgumentException"></exception>
 	public Byte[] UploadFile( String ftppath, String srcfile ) {
 		if ( String.IsNullOrWhiteSpace( ftppath ) ) {
-			throw new NullException( nameof( ftppath ) );
+			throw new ArgumentException( "Value cannot be null or whitespace.", nameof( ftppath ) );
 		}
 
 		// Read the data from disk

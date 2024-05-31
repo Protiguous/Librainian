@@ -1,30 +1,30 @@
 ﻿// Copyright © Protiguous. All Rights Reserved.
 //
-// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories,
-// or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
+// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories, or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
 //
-// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten
-// by formatting. (We try to avoid it from happening, but it does accidentally happen.)
+// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten by formatting. (We try to avoid it from happening, but it does accidentally happen.)
 //
-// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to
-// those Authors. If you find your code unattributed in this source code, please let us know so we can properly attribute you
-// and include the proper license and/or copyright(s). If you want to use any of our code in a commercial project, you must
-// contact Protiguous@Protiguous.com for permission, license, and a quote.
+// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to those Authors.
+// If you find your code unattributed in this source code, please let us know so we can properly attribute you and include the proper license and/or copyright(s).
+// If you want to use any of our code in a commercial project, you must contact Protiguous@Protiguous.com for permission, license, and a quote.
 //
 // Donations, payments, and royalties are accepted via bitcoin: 1Mad8TxTqxKnMiHuZxArFvX8BuFEB9nqX2 and PayPal: Protiguous@Protiguous.com
 //
 // ====================================================================
-// Disclaimer:  Usage of the source code or binaries is AS-IS. No warranties are expressed, implied, or given. We are NOT
-// responsible for Anything You Do With Our Code. We are NOT responsible for Anything You Do With Our Executables. We are NOT
-// responsible for Anything You Do With Your Computer. ====================================================================
+// Disclaimer:  Usage of the source code or binaries is AS-IS.
+// No warranties are expressed, implied, or given.
+// We are NOT responsible for Anything You Do With Our Code.
+// We are NOT responsible for Anything You Do With Our Executables.
+// We are NOT responsible for Anything You Do With Your Computer.
+// ====================================================================
 //
 // Contact us by email if you have any questions, helpful criticism, or if you would like to use our code in your project(s).
-// For business inquiries, please contact me at Protiguous@Protiguous.com. Our software can be found at
-// "https://Protiguous.com/Software/" Our GitHub address is "https://github.com/Protiguous".
+// For business inquiries, please contact me at Protiguous@Protiguous.com.
+// Our software can be found at "https://Protiguous.Software/"
+// Our GitHub address is "https://github.com/Protiguous".
 //
-// File "BigDecimal_NeedsWorkForSmallNumbers.cs" last formatted on 2021-11-30 at 7:18 PM by Protiguous.
+// File "BigDecimal_NeedsWorkForSmallNumbers.cs" last touched on 2021-05-14 at 7:58 AM by Protiguous.
 
-#nullable enable
 
 namespace Librainian.Maths.Bigger;
 
@@ -35,9 +35,10 @@ using System.Numerics;
 using Exceptions;
 
 /// <summary>
-/// Arbitrary precision decimal. All operations are exact, except for division. Division never determines more digits than the
-/// given precision. Based on code by Jan Christoph Bernack (http://stackoverflow.com/a/4524254 or jc.bernack at
-/// googlemail.com) Modified and extended by Adam White https://csharpcodewhisperer.blogspot.com
+///     Arbitrary precision decimal.
+///     All operations are exact, except for division. Division never determines more digits than the given precision.
+///     Based on code by Jan Christoph Bernack (http://stackoverflow.com/a/4524254 or jc.bernack at googlemail.com)
+///     Modified and extended by Adam White https://csharpcodewhisperer.blogspot.com
 /// </summary>
 public readonly struct BigDecimal_NeedsWorkForSmallNumbers : IComparable, IComparable<BigDecimal_NeedsWorkForSmallNumbers>, ICloneable<BigDecimal_NeedsWorkForSmallNumbers> {
 
@@ -45,28 +46,78 @@ public readonly struct BigDecimal_NeedsWorkForSmallNumbers : IComparable, ICompa
 
 	private const String NumericCharacters = "-0.1234567890";
 
-	public BigDecimal_NeedsWorkForSmallNumbers( Decimal value ) : this( new BigInteger( value ), 0 ) {
-	}
+	private static NumberFormatInfo BigDecimalNumberFormatInfo => CultureInfo.InvariantCulture.NumberFormat;
 
-	public BigDecimal_NeedsWorkForSmallNumbers( Int32 value ) : this( new BigInteger( value ), 0 ) {
-	}
+	private static BigInteger TenInt => new( 10 );
 
-	public BigDecimal_NeedsWorkForSmallNumbers( Int64 value ) : this( ( BigInteger )value ) {
-	}
+	public static BigDecimal_NeedsWorkForSmallNumbers One => new( 1 );
 
-	public BigDecimal_NeedsWorkForSmallNumbers( UInt64 value ) : this( ( BigInteger )value ) {
-	}
+	public static BigDecimal_NeedsWorkForSmallNumbers OneHalf => 0.5d;
+
+	public static BigDecimal_NeedsWorkForSmallNumbers Pi =>
+		new( BigInteger.Parse(
+				"314159265358979323846264338327950288419716939937510582097494459230781640628620899862803482534211706798214808651328230664709384460955058223172535940812848111745028410270193852110555964462294895493038196" )
+			, 1 );
+
+	public static BigDecimal_NeedsWorkForSmallNumbers Ten => new( 10, 0 );
+
+	public static BigDecimal_NeedsWorkForSmallNumbers Zero => new( 0 );
+
+	public Int32 DecimalPlaces => this.SignifigantDigits + this.Exponent;
+
+	public Int32 Exponent { get; }
+
+	/// <summary>
+	///     This method returns true if the BigDecimal_NeedsWorkForSmallNumbers is greater than zero, false otherwise.
+	/// </summary>
+	public Boolean IsPositve => !this.IsZero && !this.IsNegative;
+
+	public Int32 Length => GetSignifigantDigits( this.Mantissa ) + this.Exponent;
+
+	public BigInteger Mantissa { get; }
+
+	public SByte Sign => this.GetSign();
+
+	public Int32 SignifigantDigits => GetSignifigantDigits( this.Mantissa );
+
+	public BigInteger WholeValue => this.GetWholePart();
+
+	public static BigDecimal_NeedsWorkForSmallNumbers E =>
+		new( BigInteger.Parse(
+				"271828182845904523536028747135266249775724709369995957496696762772407663035354759457138217852516642749193200305992181741359662904357290033429526059563073813232862794349076323382988075319525101901157383" )
+			, 1 );
+
+	public static BigDecimal_NeedsWorkForSmallNumbers MinusOne => new( BigInteger.MinusOne, 0 );
+
+	/// <summary>
+	///     This method returns true if the BigDecimal_NeedsWorkForSmallNumbers is less than zero, false otherwise.
+	/// </summary>
+	public Boolean IsNegative => this.Mantissa.Sign < 0;
+
+	/// <summary>
+	///     This method returns true if the BigDecimal_NeedsWorkForSmallNumbers is equal to zero, false otherwise.
+	/// </summary>
+	public Boolean IsZero => this.Mantissa.IsZero;
+
+	public BigDecimal_NeedsWorkForSmallNumbers( Decimal value ) : this( new BigInteger( value ), 0 ) { }
+
+	public BigDecimal_NeedsWorkForSmallNumbers( Int32 value ) : this( new BigInteger( value ), 0 ) { }
+
+	public BigDecimal_NeedsWorkForSmallNumbers( Int64 value ) : this( ( BigInteger )value ) { }
+
+	public BigDecimal_NeedsWorkForSmallNumbers( UInt64 value ) : this( ( BigInteger )value ) { }
 
 	public BigDecimal_NeedsWorkForSmallNumbers( BigInteger mantissa, Int32 exponent = 0 ) {
 		this.Mantissa = mantissa; //TODO Why was .Clone() tacked on here?
 		this.Exponent = exponent;
 	}
 
-	/// <summary></summary>
+	/// <summary>
+	/// </summary>
 	/// <param name="value"></param>
 	/// <exception cref="OverflowException"></exception>
 	/// <exception cref="NotFiniteNumberException"></exception>
-	/// <exception cref="NullException"></exception>
+	/// <exception cref="ArgumentEmptyException"></exception>
 	/// <exception cref="FormatException"></exception>
 	public BigDecimal_NeedsWorkForSmallNumbers( Double value ) {
 		if ( Double.IsInfinity( value ) ) {
@@ -90,60 +141,11 @@ public readonly struct BigDecimal_NeedsWorkForSmallNumbers : IComparable, ICompa
 		this.Exponent = exponent;
 	}
 
-	private static NumberFormatInfo BigDecimalNumberFormatInfo => CultureInfo.InvariantCulture.NumberFormat;
-
-	private static BigInteger TenInt => new( 10 );
-
-	public static BigDecimal_NeedsWorkForSmallNumbers E =>
-		new(
-			BigInteger.Parse(
-				"271828182845904523536028747135266249775724709369995957496696762772407663035354759457138217852516642749193200305992181741359662904357290033429526059563073813232862794349076323382988075319525101901157383" ),
-			1 );
-
-	public static BigDecimal_NeedsWorkForSmallNumbers MinusOne => new( BigInteger.MinusOne, 0 );
-
-	public static BigDecimal_NeedsWorkForSmallNumbers One => new( 1 );
-
-	public static BigDecimal_NeedsWorkForSmallNumbers OneHalf => 0.5d;
-
-	public static BigDecimal_NeedsWorkForSmallNumbers Pi =>
-		new(
-			BigInteger.Parse(
-				"314159265358979323846264338327950288419716939937510582097494459230781640628620899862803482534211706798214808651328230664709384460955058223172535940812848111745028410270193852110555964462294895493038196" ),
-			1 );
-
-	public static BigDecimal_NeedsWorkForSmallNumbers Ten => new( 10, 0 );
-
-	public static BigDecimal_NeedsWorkForSmallNumbers Zero => new( 0 );
-
-	public Int32 DecimalPlaces => this.SignifigantDigits + this.Exponent;
-
-	public Int32 Exponent { get; }
-
-	/// <summary>This method returns true if the BigDecimal_NeedsWorkForSmallNumbers is less than zero, false otherwise.</summary>
-	public Boolean IsNegative => this.Mantissa.Sign < 0;
-
-	/// <summary>This method returns true if the BigDecimal_NeedsWorkForSmallNumbers is greater than zero, false otherwise.</summary>
-	public Boolean IsPositve => !this.IsZero && !this.IsNegative;
-
-	/// <summary>This method returns true if the BigDecimal_NeedsWorkForSmallNumbers is equal to zero, false otherwise.</summary>
-	public Boolean IsZero => this.Mantissa.IsZero;
-
-	public Int32 Length => GetSignifigantDigits( this.Mantissa ) + this.Exponent;
-
-	public BigInteger Mantissa { get; }
-
-	public SByte Sign => this.GetSign();
-
-	public Int32 SignifigantDigits => GetSignifigantDigits( this.Mantissa );
-
-	public BigInteger WholeValue => this.GetWholePart();
-
 	/// <summary>
-	/// Returns the mantissa of value, aligned to the exponent of reference. Assumes the exponent of value is larger than of reference.
+	///     Returns the mantissa of value, aligned to the exponent of reference. Assumes the exponent of value is larger than
+	///     of reference.
 	/// </summary>
-	private static BigInteger AlignExponent( BigDecimal_NeedsWorkForSmallNumbers value, BigDecimal_NeedsWorkForSmallNumbers reference ) =>
-		value.Mantissa * BigInteger.Pow( TenInt, value.Exponent - reference.Exponent );
+	private static BigInteger AlignExponent( BigDecimal_NeedsWorkForSmallNumbers value, BigDecimal_NeedsWorkForSmallNumbers reference ) => value.Mantissa * BigInteger.Pow( TenInt, value.Exponent - reference.Exponent );
 
 	private static Int32 GetDecimalIndex( BigInteger mantissa, Int32 exponent ) {
 		var mantissaLength = mantissa.GetLength();
@@ -175,7 +177,7 @@ public readonly struct BigDecimal_NeedsWorkForSmallNumbers : IComparable, ICompa
 
 	private static String ToString( BigInteger mantissa, Int32 exponent, IFormatProvider provider ) {
 		if ( provider == null ) {
-			throw new NullException( nameof( provider ) );
+			throw new ArgumentEmptyException( nameof( provider ) );
 		}
 
 		var formatProvider = NumberFormatInfo.GetInstance( provider );
@@ -189,26 +191,26 @@ public readonly struct BigDecimal_NeedsWorkForSmallNumbers : IComparable, ICompa
 		if ( negativeExponent ) {
 			if ( absExp > result.Length ) {
 				var zerosToAdd = Math.Abs( absExp - result.Length );
-				var zeroString = String.Join( String.Empty, Enumerable.Repeat( formatProvider.NativeDigits[ 0 ], zerosToAdd ) );
+				var zeroString = String.Join( String.Empty, Enumerable.Repeat( formatProvider.NativeDigits[0], zerosToAdd ) );
 				result = zeroString + result;
 				result = result.Insert( 0, formatProvider.NumberDecimalSeparator );
-				result = result.Insert( 0, formatProvider.NativeDigits[ 0 ] ?? throw new InvalidOperationException() );
+				result = result.Insert( 0, formatProvider.NativeDigits[0] ?? throw new InvalidOperationException() );
 			}
 			else {
 				var indexOfRadixPoint = Math.Abs( absExp - result.Length );
 				result = result.Insert( indexOfRadixPoint, formatProvider.NumberDecimalSeparator );
 				if ( indexOfRadixPoint == 0 ) {
-					result = result.Insert( 0, formatProvider.NativeDigits[ 0 ] ?? throw new InvalidOperationException() );
+					result = result.Insert( 0, formatProvider.NativeDigits[0] ?? throw new InvalidOperationException() );
 				}
 			}
 
 			result = result.TrimEnd( '0' );
 			if ( result.Last().ToString() == formatProvider.NumberDecimalSeparator ) {
-				result = result[ ..^1 ];
+				result = result[..^1];
 			}
 		}
 		else {
-			var zeroString = String.Join( String.Empty, Enumerable.Repeat( formatProvider.NativeDigits[ 0 ], absExp ) );
+			var zeroString = String.Join( String.Empty, Enumerable.Repeat( formatProvider.NativeDigits[0], absExp ) );
 			result += zeroString;
 		}
 
@@ -239,7 +241,7 @@ public readonly struct BigDecimal_NeedsWorkForSmallNumbers : IComparable, ICompa
 		var mantissa = this.Mantissa.ToString();
 		var length = mantissa.Length + this.Exponent;
 		if ( length == 0 ) {
-			if ( Int32.TryParse( mantissa[ 0 ].ToString(), out var tenthsPlace ) ) {
+			if ( Int32.TryParse( mantissa[0].ToString(), out var tenthsPlace ) ) {
 				return tenthsPlace < 5 ? ( SByte )0 : ( SByte )1;
 			}
 
@@ -249,17 +251,20 @@ public readonly struct BigDecimal_NeedsWorkForSmallNumbers : IComparable, ICompa
 		return length > 0 ? ( SByte )1 : ( SByte )0;
 	}
 
-	/// <summary>Returns the absolute value of the BigDecimal_NeedsWorkForSmallNumbers</summary>
+	/// <summary>
+	///     Returns the absolute value of the BigDecimal_NeedsWorkForSmallNumbers
+	/// </summary>
 	public static BigDecimal_NeedsWorkForSmallNumbers Abs( BigDecimal_NeedsWorkForSmallNumbers value ) => value.IsNegative ? value * -1 : value;
 
-	/// <summary>Adds two BigDecimal_NeedsWorkForSmallNumbers values.</summary>
+	/// <summary>
+	///     Adds two BigDecimal_NeedsWorkForSmallNumbers values.
+	/// </summary>
 	public static BigDecimal_NeedsWorkForSmallNumbers Add( BigDecimal_NeedsWorkForSmallNumbers left, BigDecimal_NeedsWorkForSmallNumbers right ) =>
 		left.Exponent > right.Exponent ? new BigDecimal_NeedsWorkForSmallNumbers( AlignExponent( left, right ) + right.Mantissa, right.Exponent ) :
 			new BigDecimal_NeedsWorkForSmallNumbers( AlignExponent( right, left ) + left.Mantissa, left.Exponent );
 
 	/// <summary>
-	/// Rounds a BigDecimal_NeedsWorkForSmallNumbers to an integer value. The BigDecimal_NeedsWorkForSmallNumbers argument is
-	/// rounded towards positive infinity.
+	///     Rounds a BigDecimal_NeedsWorkForSmallNumbers to an integer value. The BigDecimal_NeedsWorkForSmallNumbers argument is rounded towards positive infinity.
 	/// </summary>
 	public static BigDecimal_NeedsWorkForSmallNumbers Ceiling( BigDecimal_NeedsWorkForSmallNumbers value ) {
 		BigDecimal_NeedsWorkForSmallNumbers result = value.WholeValue;
@@ -274,7 +279,9 @@ public readonly struct BigDecimal_NeedsWorkForSmallNumbers : IComparable, ICompa
 	public static BigDecimal_NeedsWorkForSmallNumbers Concat( String beforeDecimal, String afterDecimal ) =>
 		Parse( $"{beforeDecimal}{BigDecimalNumberFormatInfo.NumberDecimalSeparator}{afterDecimal}" );
 
-	/// <summary>Divides two BigDecimal_NeedsWorkForSmallNumbers values.</summary>
+	/// <summary>
+	///     Divides two BigDecimal_NeedsWorkForSmallNumbers values.
+	/// </summary>
 	public static BigDecimal_NeedsWorkForSmallNumbers Divide( BigDecimal_NeedsWorkForSmallNumbers dividend, BigDecimal_NeedsWorkForSmallNumbers divisor ) {
 		if ( divisor.Equals( Zero ) ) {
 			throw new DivideByZeroException();
@@ -313,10 +320,11 @@ public readonly struct BigDecimal_NeedsWorkForSmallNumbers : IComparable, ICompa
 		return result;
 	}
 
-	public static Boolean Equals( BigDecimal_NeedsWorkForSmallNumbers left, BigDecimal_NeedsWorkForSmallNumbers right ) =>
-		left.Exponent == right.Exponent && left.Mantissa.Equals( right.Mantissa );
+	public static Boolean Equals( BigDecimal_NeedsWorkForSmallNumbers left, BigDecimal_NeedsWorkForSmallNumbers right ) => left.Exponent == right.Exponent && left.Mantissa.Equals( right.Mantissa );
 
-	/// <summary>Returns e raised to the specified power</summary>
+	/// <summary>
+	///     Returns e raised to the specified power
+	/// </summary>
 	public static BigDecimal_NeedsWorkForSmallNumbers Exp( Double exponent ) {
 		var tmp = One;
 		while ( Math.Abs( exponent ) > 100 ) {
@@ -328,7 +336,9 @@ public readonly struct BigDecimal_NeedsWorkForSmallNumbers : IComparable, ICompa
 		return tmp * Math.Exp( exponent );
 	}
 
-	/// <summary>Returns e raised to the specified power</summary>
+	/// <summary>
+	///     Returns e raised to the specified power
+	/// </summary>
 	public static BigDecimal_NeedsWorkForSmallNumbers Exp( BigInteger exponent ) {
 		var tmp = ( BigDecimal_NeedsWorkForSmallNumbers )1;
 		while ( BigInteger.Abs( exponent ) > 100 ) {
@@ -350,11 +360,11 @@ public readonly struct BigDecimal_NeedsWorkForSmallNumbers : IComparable, ICompa
 
 		var length = v.GetDecimalIndex();
 		if ( length > 0 ) {
-			return BigInteger.Parse( mant[ ..length ] );
+			return BigInteger.Parse( mant[..length] );
 		}
 
 		if ( length == 0 ) {
-			var tenthsPlace = Int32.Parse( mant[ 0 ].ToString() );
+			var tenthsPlace = Int32.Parse( mant[0].ToString() );
 			return tenthsPlace >= 5 ? new BigInteger( 1 ) : new BigInteger( 0 );
 		}
 
@@ -401,7 +411,8 @@ public readonly struct BigDecimal_NeedsWorkForSmallNumbers : IComparable, ICompa
 		return mantissa * ( UInt32 )BigInteger.Pow( TenInt, value.Exponent );
 	}
 
-	/// <summary></summary>
+	/// <summary>
+	/// </summary>
 	public static BigDecimal_NeedsWorkForSmallNumbers Floor( BigDecimal_NeedsWorkForSmallNumbers value ) {
 		BigDecimal_NeedsWorkForSmallNumbers result = value.WholeValue;
 
@@ -449,7 +460,9 @@ public readonly struct BigDecimal_NeedsWorkForSmallNumbers : IComparable, ICompa
 		return new BigDecimal_NeedsWorkForSmallNumbers( mantissa, exponent );
 	}
 
-	/// <summary>Divides two BigDecimal_NeedsWorkForSmallNumbers values, returning the remainder and discarding the quotient.</summary>
+	/// <summary>
+	///     Divides two BigDecimal_NeedsWorkForSmallNumbers values, returning the remainder and discarding the quotient.
+	/// </summary>
 	public static BigDecimal_NeedsWorkForSmallNumbers Mod( BigDecimal_NeedsWorkForSmallNumbers value, BigDecimal_NeedsWorkForSmallNumbers mod ) {
 
 		// x – q * y
@@ -458,28 +471,27 @@ public readonly struct BigDecimal_NeedsWorkForSmallNumbers : IComparable, ICompa
 		return Subtract( value, Multiply( floor, mod ) );
 	}
 
-	/// <summary>Multiplies two BigDecimal_NeedsWorkForSmallNumbers values.</summary>
-	public static BigDecimal_NeedsWorkForSmallNumbers Multiply( BigDecimal_NeedsWorkForSmallNumbers left, BigDecimal_NeedsWorkForSmallNumbers right ) =>
-		new( left.Mantissa * right.Mantissa, left.Exponent + right.Exponent );
+	/// <summary>
+	///     Multiplies two BigDecimal_NeedsWorkForSmallNumbers values.
+	/// </summary>
+	public static BigDecimal_NeedsWorkForSmallNumbers Multiply( BigDecimal_NeedsWorkForSmallNumbers left, BigDecimal_NeedsWorkForSmallNumbers right ) => new( left.Mantissa * right.Mantissa, left.Exponent + right.Exponent );
 
-	/// <summary>Returns the result of multiplying a BigDecimal_NeedsWorkForSmallNumbers by negative one.</summary>
+	/// <summary>
+	///     Returns the result of multiplying a BigDecimal_NeedsWorkForSmallNumbers by negative one.
+	/// </summary>
 	public static BigDecimal_NeedsWorkForSmallNumbers Negate( BigDecimal_NeedsWorkForSmallNumbers value ) => new( BigInteger.Negate( value.Mantissa ), value.Exponent );
 
 	public static BigDecimal_NeedsWorkForSmallNumbers operator -( BigDecimal_NeedsWorkForSmallNumbers value ) => Negate( value );
 
-	public static BigDecimal_NeedsWorkForSmallNumbers operator -( BigDecimal_NeedsWorkForSmallNumbers left, BigDecimal_NeedsWorkForSmallNumbers right ) =>
-		Subtract( left, right );
+	public static BigDecimal_NeedsWorkForSmallNumbers operator -( BigDecimal_NeedsWorkForSmallNumbers left, BigDecimal_NeedsWorkForSmallNumbers right ) => Subtract( left, right );
 
 	public static BigDecimal_NeedsWorkForSmallNumbers operator --( BigDecimal_NeedsWorkForSmallNumbers value ) => Subtract( value, 1 );
 
-	public static Boolean operator !=( BigDecimal_NeedsWorkForSmallNumbers left, BigDecimal_NeedsWorkForSmallNumbers right ) =>
-		left.Exponent != right.Exponent || left.Mantissa != right.Mantissa;
+	public static Boolean operator !=( BigDecimal_NeedsWorkForSmallNumbers left, BigDecimal_NeedsWorkForSmallNumbers right ) => left.Exponent != right.Exponent || left.Mantissa != right.Mantissa;
 
-	public static BigDecimal_NeedsWorkForSmallNumbers operator *( BigDecimal_NeedsWorkForSmallNumbers left, BigDecimal_NeedsWorkForSmallNumbers right ) =>
-		Multiply( left, right );
+	public static BigDecimal_NeedsWorkForSmallNumbers operator *( BigDecimal_NeedsWorkForSmallNumbers left, BigDecimal_NeedsWorkForSmallNumbers right ) => Multiply( left, right );
 
-	public static BigDecimal_NeedsWorkForSmallNumbers operator /( BigDecimal_NeedsWorkForSmallNumbers dividend, BigDecimal_NeedsWorkForSmallNumbers divisor ) =>
-		Divide( dividend, divisor );
+	public static BigDecimal_NeedsWorkForSmallNumbers operator /( BigDecimal_NeedsWorkForSmallNumbers dividend, BigDecimal_NeedsWorkForSmallNumbers divisor ) => Divide( dividend, divisor );
 
 	public static BigDecimal_NeedsWorkForSmallNumbers operator +( BigDecimal_NeedsWorkForSmallNumbers value ) => value;
 
@@ -493,8 +505,7 @@ public readonly struct BigDecimal_NeedsWorkForSmallNumbers : IComparable, ICompa
 	public static Boolean operator <=( BigDecimal_NeedsWorkForSmallNumbers left, BigDecimal_NeedsWorkForSmallNumbers right ) =>
 		left.Exponent > right.Exponent ? AlignExponent( left, right ) <= right.Mantissa : left.Mantissa <= AlignExponent( right, left );
 
-	public static Boolean operator ==( BigDecimal_NeedsWorkForSmallNumbers left, BigDecimal_NeedsWorkForSmallNumbers right ) =>
-		left.Exponent == right.Exponent && left.Mantissa == right.Mantissa;
+	public static Boolean operator ==( BigDecimal_NeedsWorkForSmallNumbers left, BigDecimal_NeedsWorkForSmallNumbers right ) => left.Exponent == right.Exponent && left.Mantissa == right.Mantissa;
 
 	public static Boolean operator >( BigDecimal_NeedsWorkForSmallNumbers left, BigDecimal_NeedsWorkForSmallNumbers right ) =>
 		left.Exponent > right.Exponent ? AlignExponent( left, right ) > right.Mantissa : left.Mantissa > AlignExponent( right, left );
@@ -502,14 +513,20 @@ public readonly struct BigDecimal_NeedsWorkForSmallNumbers : IComparable, ICompa
 	public static Boolean operator >=( BigDecimal_NeedsWorkForSmallNumbers left, BigDecimal_NeedsWorkForSmallNumbers right ) =>
 		left.Exponent > right.Exponent ? AlignExponent( left, right ) >= right.Mantissa : left.Mantissa >= AlignExponent( right, left );
 
-	/// <summary>Converts the string representation of a decimal to the BigDecimal_NeedsWorkForSmallNumbers equivalent.</summary>
+	/// <summary>
+	///     Converts the string representation of a decimal to the BigDecimal_NeedsWorkForSmallNumbers equivalent.
+	/// </summary>
 	public static BigDecimal_NeedsWorkForSmallNumbers Parse( Double input ) => Parse( input.ToString( CultureInfo.InvariantCulture ) );
 
-	/// <summary>Converts the string representation of a decimal to the BigDecimal_NeedsWorkForSmallNumbers equivalent.</summary>
+	/// <summary>
+	///     Converts the string representation of a decimal to the BigDecimal_NeedsWorkForSmallNumbers equivalent.
+	/// </summary>
 	public static BigDecimal_NeedsWorkForSmallNumbers Parse( Decimal input ) => Parse( input.ToString( CultureInfo.InvariantCulture ) );
 
-	/// <summary>Converts the string representation of a decimal to the BigDecimal_NeedsWorkForSmallNumbers equivalent.</summary>
-	/// <exception cref="NullException"></exception>
+	/// <summary>
+	///     Converts the string representation of a decimal to the BigDecimal_NeedsWorkForSmallNumbers equivalent.
+	/// </summary>
+	/// <exception cref="ArgumentEmptyException"></exception>
 	public static BigDecimal_NeedsWorkForSmallNumbers Parse( String input ) {
 		if ( String.IsNullOrWhiteSpace( input ) ) {
 			return new BigInteger( 0 );
@@ -539,7 +556,9 @@ public readonly struct BigDecimal_NeedsWorkForSmallNumbers : IComparable, ICompa
 		return new BigDecimal_NeedsWorkForSmallNumbers( mantessa, exponent );
 	}
 
-	/// <summary>Returns a specified number raised to the specified power.</summary>
+	/// <summary>
+	///     Returns a specified number raised to the specified power.
+	/// </summary>
 	public static BigDecimal_NeedsWorkForSmallNumbers Pow( BigDecimal_NeedsWorkForSmallNumbers baseValue, BigInteger exponent ) {
 		if ( exponent.IsZero ) {
 			return One;
@@ -564,7 +583,9 @@ public readonly struct BigDecimal_NeedsWorkForSmallNumbers : IComparable, ICompa
 		return result;
 	}
 
-	/// <summary>Returns a specified number raised to the specified power.</summary>
+	/// <summary>
+	///     Returns a specified number raised to the specified power.
+	/// </summary>
 	public static BigDecimal_NeedsWorkForSmallNumbers Pow( Double basis, Double exponent ) {
 		var tmp = ( BigDecimal_NeedsWorkForSmallNumbers )1;
 		while ( Math.Abs( exponent ) > 100 ) {
@@ -576,12 +597,14 @@ public readonly struct BigDecimal_NeedsWorkForSmallNumbers : IComparable, ICompa
 		return tmp * Math.Pow( basis, exponent );
 	}
 
-	/// <summary>Rounds a BigDecimal_NeedsWorkForSmallNumbers value to the nearest integral value.</summary>
+	/// <summary>
+	///     Rounds a BigDecimal_NeedsWorkForSmallNumbers value to the nearest integral value.
+	/// </summary>
 	public static BigInteger Round( BigDecimal_NeedsWorkForSmallNumbers value ) => Round( value, MidpointRounding.AwayFromZero );
 
 	/// <summary>
-	/// Rounds a BigDecimal_NeedsWorkForSmallNumbers value to the nearest integral value. A parameter specifies how to round
-	/// the value if it is midway between two numbers.
+	///     Rounds a BigDecimal_NeedsWorkForSmallNumbers value to the nearest integral value. A parameter specifies how to round the value if it is
+	///     midway between two numbers.
 	/// </summary>
 	public static BigInteger Round( BigDecimal_NeedsWorkForSmallNumbers value, MidpointRounding mode ) {
 		var wholePart = value.WholeValue;
@@ -607,9 +630,10 @@ public readonly struct BigDecimal_NeedsWorkForSmallNumbers : IComparable, ICompa
 		return wholePart;
 	}
 
-	/// <summary>Subtracts two BigDecimal_NeedsWorkForSmallNumbers values.</summary>
-	public static BigDecimal_NeedsWorkForSmallNumbers Subtract( BigDecimal_NeedsWorkForSmallNumbers left, BigDecimal_NeedsWorkForSmallNumbers right ) =>
-		Add( left, Negate( right ) );
+	/// <summary>
+	///     Subtracts two BigDecimal_NeedsWorkForSmallNumbers values.
+	/// </summary>
+	public static BigDecimal_NeedsWorkForSmallNumbers Subtract( BigDecimal_NeedsWorkForSmallNumbers left, BigDecimal_NeedsWorkForSmallNumbers right ) => Add( left, Negate( right ) );
 
 	public static Boolean TryParse( String input, out BigDecimal_NeedsWorkForSmallNumbers? result ) {
 		try {
@@ -622,10 +646,14 @@ public readonly struct BigDecimal_NeedsWorkForSmallNumbers : IComparable, ICompa
 		}
 	}
 
-	/// <summary>Compares two BigDecimal_NeedsWorkForSmallNumbers values, returning an integer that indicates their relationship.</summary>
-	public Int32 CompareTo( Object? obj ) => obj is BigDecimal_NeedsWorkForSmallNumbers @decimal ? this.CompareTo( @decimal ) : throw new NullException( nameof( obj ) );
+	/// <summary>
+	///     Compares two BigDecimal_NeedsWorkForSmallNumbers values, returning an integer that indicates their relationship.
+	/// </summary>
+	public Int32 CompareTo( Object? obj ) => obj is BigDecimal_NeedsWorkForSmallNumbers @decimal ? this.CompareTo( @decimal ) : throw new ArgumentEmptyException( nameof( obj ) );
 
-	/// <summary>Compares two BigDecimal_NeedsWorkForSmallNumbers values, returning an integer that indicates their relationship.</summary>
+	/// <summary>
+	///     Compares two BigDecimal_NeedsWorkForSmallNumbers values, returning an integer that indicates their relationship.
+	/// </summary>
 	public Int32 CompareTo( BigDecimal_NeedsWorkForSmallNumbers? other ) =>
 		this < other ? -1 :
 		this > other ? 1 : 0;
@@ -646,12 +674,12 @@ public readonly struct BigDecimal_NeedsWorkForSmallNumbers : IComparable, ICompa
 	public override Boolean Equals( Object? obj ) => obj is BigDecimal_NeedsWorkForSmallNumbers other && this.Equals( other );
 
 	/// <summary>
-	/// Returns the zero-based index of the decimal point, if the BigDecimal_NeedsWorkForSmallNumbers were rendered as a string.
+	///     Returns the zero-based index of the decimal point, if the BigDecimal_NeedsWorkForSmallNumbers were rendered as a string.
 	/// </summary>
 	public Int32 GetDecimalIndex() => GetDecimalIndex( this.Mantissa, this.Exponent );
 
 	/// <summary>
-	/// Gets the fractional part of the BigDecimal_NeedsWorkForSmallNumbers, setting everything left of the decimal point to zero.
+	///     Gets the fractional part of the BigDecimal_NeedsWorkForSmallNumbers, setting everything left of the decimal point to zero.
 	/// </summary>
 	public BigDecimal_NeedsWorkForSmallNumbers GetFractionalPart() {
 		var resultString = String.Empty;
@@ -663,7 +691,7 @@ public readonly struct BigDecimal_NeedsWorkForSmallNumbers : IComparable, ICompa
 				return Zero;
 
 			case 2:
-				resultString = valueSplit[ 1 ];
+				resultString = valueSplit[1];
 				break;
 		}
 
@@ -714,8 +742,8 @@ public readonly struct BigDecimal_NeedsWorkForSmallNumbers : IComparable, ICompa
 	//public override Int32 GetHashCode() => ( this.Mantissa, this.Exponent ).GetHashCode();
 
 	/// <summary>
-	/// Returns the whole number integer part of the BigDecimal_NeedsWorkForSmallNumbers, dropping anything right of the
-	/// decimal point. Essentially behaves like Math.Truncate(). For example, GetWholePart() would return 3 for Math.PI.
+	///     Returns the whole number integer part of the BigDecimal_NeedsWorkForSmallNumbers, dropping anything right of the decimal point. Essentially
+	///     behaves like Math.Truncate(). For example, GetWholePart() would return 3 for Math.PI.
 	/// </summary>
 	public BigInteger GetWholePart() {
 		var resultString = String.Empty;
@@ -724,7 +752,7 @@ public readonly struct BigDecimal_NeedsWorkForSmallNumbers : IComparable, ICompa
 			BigDecimalNumberFormatInfo.NumberDecimalSeparator
 		}, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries );
 		if ( valueSplit.Length > 0 ) {
-			resultString = valueSplit[ 0 ];
+			resultString = valueSplit[0];
 		}
 
 		return BigInteger.Parse( resultString ?? throw new InvalidOperationException() );

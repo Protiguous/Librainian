@@ -1,30 +1,32 @@
 ﻿// Copyright © Protiguous. All Rights Reserved.
 //
-// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories,
-// or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
+// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries,
+// repositories, or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
 //
-// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten
-// by formatting. (We try to avoid it from happening, but it does accidentally happen.)
+// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has
+// been overwritten by formatting. (We try to avoid it from happening, but it does accidentally happen.)
 //
-// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to
-// those Authors. If you find your code unattributed in this source code, please let us know so we can properly attribute you
-// and include the proper license and/or copyright(s). If you want to use any of our code in a commercial project, you must
-// contact Protiguous@Protiguous.com for permission, license, and a quote.
+// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to those Authors.
+// If you find your code unattributed in this source code, please let us know so we can properly attribute you and include the proper licenses and/or copyrights.
+// If you want to use any of our code in a commercial project, you must contact Protiguous@Protiguous.com for permission, license, and a quote.
 //
 // Donations, payments, and royalties are accepted via bitcoin: 1Mad8TxTqxKnMiHuZxArFvX8BuFEB9nqX2 and PayPal: Protiguous@Protiguous.com
 //
 // ====================================================================
-// Disclaimer:  Usage of the source code or binaries is AS-IS. No warranties are expressed, implied, or given. We are NOT
-// responsible for Anything You Do With Our Code. We are NOT responsible for Anything You Do With Our Executables. We are NOT
-// responsible for Anything You Do With Your Computer. ====================================================================
+// Disclaimer:  Usage of the source code or binaries is AS-IS.
+// No warranties are expressed, implied, or given.
+// We are NOT responsible for Anything You Do With Our Code.
+// We are NOT responsible for Anything You Do With Our Executables.
+// We are NOT responsible for Anything You Do With Your Computer.
+// ====================================================================
 //
 // Contact us by email if you have any questions, helpful criticism, or if you would like to use our code in your project(s).
-// For business inquiries, please contact me at Protiguous@Protiguous.com. Our software can be found at
-// "https://Protiguous.com/Software/" Our GitHub address is "https://github.com/Protiguous".
+// For business inquiries, please contact me at Protiguous@Protiguous.com.
+// Our software can be found at "https://Protiguous.com/Software/"
+// Our GitHub address is "https://github.com/Protiguous".
 //
-// File "SpanOfTime.cs" last formatted on 2021-11-30 at 7:19 PM by Protiguous.
+// File "SpanOfTime.cs" last formatted on 2022-02-06 at 5:39 AM by Protiguous.
 
-#nullable enable
 
 namespace Librainian.Measurement.Time;
 
@@ -41,9 +43,10 @@ using Newtonsoft.Json;
 using Parsing;
 
 /// <summary>
-/// <para>
-/// <see cref="SpanOfTime" /> represents the smallest <see cref="PlanckTimes" /> to an absurd huge(memory!) duration of time.
-/// </para>
+///     <para>
+///         <see cref="SpanOfTime" /> represents the smallest <see cref="PlanckTimes" /> to an absurd huge(memory!)
+///         duration of time.
+///     </para>
 /// </summary>
 /// <see cref="http://wikipedia.org/wiki/Units_of_time" />
 [DebuggerDisplay( "{" + nameof( ToString ) + "(),nq}" )]
@@ -89,24 +92,31 @@ public record SpanOfTime : IComparable<SpanOfTime>, IComparable<TimeSpan> {
 	}
 
 	/// <summary>
-	/// <para>
-	/// Negative parameters passed to this constructor will interpret as zero instead of throwing an <see
-	/// cref="ArgumentOutOfRangeException" />.
-	/// </para>
+	///     <para>
+	///         Negative parameters passed to this constructor will interpret as zero instead of throwing an
+	///         <see
+	///             cref="ArgumentOutOfRangeException" />
+	///         .
+	///     </para>
 	/// </summary>
 	/// <param name="timeSpan"></param>
 	/// <param name="normalize"></param>
 	public SpanOfTime( TimeSpan timeSpan, Boolean normalize = true ) : this( new Milliseconds( timeSpan.Ticks / TimeSpan.TicksPerMillisecond ) ) { }
 
 	/// <summary>
-	/// <para>
-	/// Negative parameters passed to this constructor will interpret as zero instead of throwing an <see
-	/// cref="ArgumentOutOfRangeException" />.
-	/// </para>
+	///     <para>
+	///         Negative parameters passed to this constructor will interpret as zero instead of throwing an
+	///         <see
+	///             cref="ArgumentOutOfRangeException" />
+	///         .
+	///     </para>
 	/// </summary>
 	/// <param name="femtoseconds"></param>
-	/// <param name="picoseconds"></param>
+	/// <param name="planckTimes"></param>
+	/// <param name="yoctoseconds"></param>
+	/// <param name="zeptoseconds"></param>
 	/// <param name="attoseconds"></param>
+	/// <param name="picoseconds"></param>
 	/// <param name="nanoseconds"></param>
 	/// <param name="microseconds"></param>
 	/// <param name="milliseconds"></param>
@@ -117,9 +127,6 @@ public record SpanOfTime : IComparable<SpanOfTime>, IComparable<TimeSpan> {
 	/// <param name="weeks"></param>
 	/// <param name="months"></param>
 	/// <param name="years"></param>
-	/// <param name="planckTimes"></param>
-	/// <param name="yoctoseconds"></param>
-	/// <param name="zeptoseconds"></param>
 	public SpanOfTime(
 		PlanckTimes? planckTimes = default,
 		Yoctoseconds? yoctoseconds = default,
@@ -224,15 +231,17 @@ public record SpanOfTime : IComparable<SpanOfTime>, IComparable<TimeSpan> {
 	}
 
 	/// <summary>
-	/// <para>
-	/// Negative parameters passed to this constructor will interpret as zero instead of throwing an <see
-	/// cref="ArgumentOutOfRangeException" />.
-	/// </para>
+	///     <para>
+	///         Negative parameters passed to this constructor will interpret as zero instead of throwing an
+	///         <see
+	///             cref="ArgumentOutOfRangeException" />
+	///         .
+	///     </para>
 	/// </summary>
 	/// <summary>TODO untested</summary>
 	/// <param name="seconds"></param>
 	public SpanOfTime( BigDecimal seconds ) {
-		var span = new SpanOfTime( new Seconds( seconds ) );
+		var span = new SpanOfTime( new Seconds( seconds ).ToPlanckTimes().Value );
 
 		this.PlanckTimes = span.PlanckTimes;
 		this.Attoseconds = span.Attoseconds;
@@ -283,8 +292,9 @@ public record SpanOfTime : IComparable<SpanOfTime>, IComparable<TimeSpan> {
 
 	public SpanOfTime( Years value ) : this( years: value ) { }
 
+	/// <summary></summary>
 	/// <summary>
-	/// <para>1 of each measure of time</para>
+	///     <para>1 of each measure of time</para>
 	/// </summary>
 	public static SpanOfTime Identity { get; } = new( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 		1, 1, 1, 1, 1, 1 );
@@ -309,8 +319,8 @@ public record SpanOfTime : IComparable<SpanOfTime>, IComparable<TimeSpan> {
 	public Hours Hours { get; init; }
 
 	/// <summary>
-	/// <para>A microsecond is an SI unit of time equal to one millionth (10−6 or 1/1,000,000) of a second.</para>
-	/// <para>Its symbol is μs.</para>
+	///     <para>A microsecond is an SI unit of time equal to one millionth (10−6 or 1/1,000,000) of a second.</para>
+	///     <para>Its symbol is μs.</para>
 	/// </summary>
 	/// <trivia>One microsecond is to one second as one second is to 11.574 days.</trivia>
 	[JsonProperty]
@@ -366,18 +376,19 @@ public record SpanOfTime : IComparable<SpanOfTime>, IComparable<TimeSpan> {
 	public Int32 CompareTo( TimeSpan other ) => CompareTo( this, new SpanOfTime( other ) );
 
 	/// <summary>
-	/// <para>Given the <paramref name="left" /><see cref="SpanOfTime" />,</para>
-	/// <para>add (+) the <paramref name="right" /><see cref="SpanOfTime" />.</para>
+	///     <para>Given the <paramref name="left" /><see cref="SpanOfTime" />,</para>
+	///     <para>add (+) the <paramref name="right" /><see cref="SpanOfTime" />.</para>
 	/// </summary>
 	/// <param name="left"></param>
 	/// <param name="right"></param>
+	/// <exception cref="ArgumentEmptyException"></exception>
 	public static SpanOfTime Combine( SpanOfTime left, SpanOfTime right ) {
 		if ( left is null ) {
-			throw new NullException( nameof( left ) );
+			throw new ArgumentEmptyException( nameof( left ) );
 		}
 
 		if ( right is null ) {
-			throw new NullException( nameof( right ) );
+			throw new ArgumentEmptyException( nameof( right ) );
 		}
 
 		//TODO do some overflow handling with BigInteger math
@@ -404,17 +415,20 @@ public record SpanOfTime : IComparable<SpanOfTime>, IComparable<TimeSpan> {
 	}
 
 	/// <summary>
-	/// <para>Compares two <see cref="SpanOfTime" /> values, returning an <see cref="Int32" /> that indicates their relationship.</para>
-	/// <para>Returns 1 if <paramref name="left" /> is larger.</para>
-	/// <para>Returns -1 if <paramref name="right" /> is larger.</para>
-	/// <para>Returns 0 if <paramref name="left" /> and <paramref name="right" /> are equal.</para>
-	/// <para>Static comparison function</para>
+	///     <para>
+	///         Compares two <see cref="SpanOfTime" /> values, returning an <see cref="Int32" /> that indicates their
+	///         relationship.
+	///     </para>
+	///     <para>Returns 1 if <paramref name="left" /> is larger.</para>
+	///     <para>Returns -1 if <paramref name="right" /> is larger.</para>
+	///     <para>Returns 0 if <paramref name="left" /> and <paramref name="right" /> are equal.</para>
+	///     <para>Static comparison function</para>
 	/// </summary>
 	/// <param name="left"></param>
 	/// <param name="right"></param>
 	public static Int32 CompareTo( SpanOfTime? left, SpanOfTime? right ) {
 		if ( left is null || right is null ) {
-			return SortOrder.Before;
+			return SortingOrder.Before;
 		}
 
 		var leftPlancks = left.CalcTotalPlanckTimes();
@@ -424,7 +438,7 @@ public record SpanOfTime : IComparable<SpanOfTime>, IComparable<TimeSpan> {
 	}
 
 	/// <summary>
-	/// <para>Static comparison of two <see cref="SpanOfTime" /> values.</para>
+	///     <para>Static comparison of two <see cref="SpanOfTime" /> values.</para>
 	/// </summary>
 	/// <param name="left"></param>
 	/// <param name="right"></param>
@@ -437,7 +451,7 @@ public record SpanOfTime : IComparable<SpanOfTime>, IComparable<TimeSpan> {
 	}
 
 	/// <summary>
-	/// <para>Allow an explicit cast from a <see cref="TimeSpan" /> into a <see cref="SpanOfTime" />.</para>
+	///     <para>Allow an explicit cast from a <see cref="TimeSpan" /> into a <see cref="SpanOfTime" />.</para>
 	/// </summary>
 	/// <param name="span"></param>
 	public static explicit operator SpanOfTime( TimeSpan span ) => new( span );
@@ -449,9 +463,9 @@ public record SpanOfTime : IComparable<SpanOfTime>, IComparable<TimeSpan> {
 			( Int32 )spanOfTime.Milliseconds.Value );
 
 	/// <summary>
-	/// <para>Given the <paramref name="left" /><see cref="SpanOfTime" />,</para>
-	/// <para>subtract (-) the <paramref name="right" /><see cref="SpanOfTime" />.</para>
-	/// <para>And return the resulting span (which will not go below 0).</para>
+	///     <para>Given the <paramref name="left" /><see cref="SpanOfTime" />,</para>
+	///     <para>subtract (-) the <paramref name="right" /><see cref="SpanOfTime" />.</para>
+	///     <para>And return the resulting span (which will not go below 0).</para>
 	/// </summary>
 	/// <param name="left"></param>
 	/// <param name="right"></param>
@@ -465,16 +479,16 @@ public record SpanOfTime : IComparable<SpanOfTime>, IComparable<TimeSpan> {
 	}
 
 	/// <summary>
-	/// <para>Given the <paramref name="left" /><see cref="SpanOfTime" />,</para>
-	/// <para>add (+) the <paramref name="right" /><see cref="SpanOfTime" />.</para>
+	///     <para>Given the <paramref name="left" /><see cref="SpanOfTime" />,</para>
+	///     <para>add (+) the <paramref name="right" /><see cref="SpanOfTime" />.</para>
 	/// </summary>
 	/// <param name="left"></param>
 	/// <param name="right"></param>
 	public static SpanOfTime operator +( SpanOfTime left, SpanOfTime right ) => Add( left, right );
 
 	/// <summary>
-	/// <para>Given the <paramref name="left" /><see cref="SpanOfTime" />,</para>
-	/// <para>add (+) the <paramref name="right" /><see cref="SpanOfTime" />.</para>
+	///     <para>Given the <paramref name="left" /><see cref="SpanOfTime" />,</para>
+	///     <para>add (+) the <paramref name="right" /><see cref="SpanOfTime" />.</para>
 	/// </summary>
 	/// <param name="left"></param>
 	/// <param name="right"></param>
@@ -492,9 +506,13 @@ public record SpanOfTime : IComparable<SpanOfTime>, IComparable<TimeSpan> {
 	/// <param name="text"></param>
 	public static SpanOfTime TryParse( String? text ) {
 		try {
-			text = text?.Trim();
+			if ( text == null ) {
+				return Zero;
+			}
 
-			if ( String.IsNullOrEmpty( text ) ) {
+			text = text.Trim();
+
+			if ( String.IsNullOrWhiteSpace( text ) ) {
 				return Zero;
 			}
 
@@ -546,26 +564,26 @@ public record SpanOfTime : IComparable<SpanOfTime>, IComparable<TimeSpan> {
 			//TODO other combinations
 			//TODO parse for more, even multiple  2 days, 3 hours, and 4 minutes etc...
 		}
-		catch ( NullException ) { }
+		catch ( ArgumentEmptyException ) { }
+		catch ( ArgumentException ) { }
 		catch ( OverflowException ) { }
 
 		return Zero;
 	}
 
-	public PlanckTimes CalcTotalPlanckTimes() {
-		return this._totalPlankTimes ??= this.PlanckTimes.ToPlanckTimes() + this.Yoctoseconds.ToPlanckTimes() + this.Zeptoseconds.ToPlanckTimes() +
-										 this.Attoseconds.ToPlanckTimes() + this.Femtoseconds.ToPlanckTimes() + this.Picoseconds.ToPlanckTimes() +
-										 this.Nanoseconds.ToPlanckTimes() + this.Microseconds.ToPlanckTimes() + this.Milliseconds.ToPlanckTimes() +
-										 this.Seconds.ToPlanckTimes() + this.Minutes.ToPlanckTimes() + this.Hours.ToPlanckTimes() + this.Days.ToPlanckTimes() +
-										 this.Weeks.ToPlanckTimes() + this.Months.ToPlanckTimes() + this.Years.ToPlanckTimes();
-	}
+	public PlanckTimes CalcTotalPlanckTimes() =>
+		this._totalPlankTimes ??= this.PlanckTimes.ToPlanckTimes() + this.Yoctoseconds.ToPlanckTimes() + this.Zeptoseconds.ToPlanckTimes() + this.Attoseconds.ToPlanckTimes() +
+								  this.Femtoseconds.ToPlanckTimes() + this.Picoseconds.ToPlanckTimes() + this.Nanoseconds.ToPlanckTimes() + this.Microseconds.ToPlanckTimes() +
+								  this.Milliseconds.ToPlanckTimes() + this.Seconds.ToPlanckTimes() + this.Minutes.ToPlanckTimes() + this.Hours.ToPlanckTimes() +
+								  this.Days.ToPlanckTimes() + this.Weeks.ToPlanckTimes() + this.Months.ToPlanckTimes() + this.Years.ToPlanckTimes();
 
 	/// <summary>
-	/// <para>Return a <see cref="TimeSpan" />'s worth of <see cref="Milliseconds" />.</para>
-	/// <para>
-	/// <see cref="Days" />+ <see cref="Hours" />+ <see cref="Minutes" />+ <see cref="Seconds" />+ <see cref="Milliseconds" />+
-	/// <see cref="Microseconds" />+ <see cref="Nanoseconds" />
-	/// </para>
+	///     <para>Return a <see cref="TimeSpan" />'s worth of <see cref="Milliseconds" />.</para>
+	///     <para>
+	///         <see cref="Days" />+ <see cref="Hours" />+ <see cref="Minutes" />+ <see cref="Seconds" />+
+	///         <see cref="Milliseconds" />+
+	///         <see cref="Microseconds" />+ <see cref="Nanoseconds" />
+	///     </para>
 	/// </summary>
 	public Double GetApproximateMilliseconds() {
 		var mill = Milliseconds.Zero;
@@ -588,7 +606,7 @@ public record SpanOfTime : IComparable<SpanOfTime>, IComparable<TimeSpan> {
 			this.Minutes, this.Hours, this.Days, this.Weeks, this.Months, this.Years).GetHashCode();
 
 	/// <summary>
-	/// <para>Returns a <see cref="BigInteger" /> of all the whole (integer) years in this <see cref="SpanOfTime" />.</para>
+	///     <para>Returns a <see cref="BigInteger" /> of all the whole (integer) years in this <see cref="SpanOfTime" />.</para>
 	/// </summary>
 	public BigInteger GetWholeYears() {
 		var span = new SpanOfTime( this.CalcTotalPlanckTimes() );

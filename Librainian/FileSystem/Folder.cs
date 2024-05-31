@@ -1,28 +1,31 @@
 // Copyright © Protiguous. All Rights Reserved.
 //
-// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories,
-// or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
+// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries,
+// repositories, or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
 //
-// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten
-// by formatting. (We try to avoid it from happening, but it does accidentally happen.)
+// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has
+// been overwritten by formatting. (We try to avoid it from happening, but it does accidentally happen.)
 //
-// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to
-// those Authors. If you find your code unattributed in this source code, please let us know so we can properly attribute you
-// and include the proper license and/or copyright(s). If you want to use any of our code in a commercial project, you must
-// contact Protiguous@Protiguous.com for permission, license, and a quote.
+// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to those Authors.
+// If you find your code unattributed in this source code, please let us know so we can properly attribute you and include the proper licenses and/or copyrights.
+// If you want to use any of our code in a commercial project, you must contact Protiguous@Protiguous.com for permission, license, and a quote.
 //
 // Donations, payments, and royalties are accepted via bitcoin: 1Mad8TxTqxKnMiHuZxArFvX8BuFEB9nqX2 and PayPal: Protiguous@Protiguous.com
 //
 // ====================================================================
-// Disclaimer:  Usage of the source code or binaries is AS-IS. No warranties are expressed, implied, or given. We are NOT
-// responsible for Anything You Do With Our Code. We are NOT responsible for Anything You Do With Our Executables. We are NOT
-// responsible for Anything You Do With Your Computer. ====================================================================
+// Disclaimer:  Usage of the source code or binaries is AS-IS.
+// No warranties are expressed, implied, or given.
+// We are NOT responsible for Anything You Do With Our Code.
+// We are NOT responsible for Anything You Do With Our Executables.
+// We are NOT responsible for Anything You Do With Your Computer.
+// ====================================================================
 //
 // Contact us by email if you have any questions, helpful criticism, or if you would like to use our code in your project(s).
-// For business inquiries, please contact me at Protiguous@Protiguous.com. Our software can be found at
-// "https://Protiguous.com/Software/" Our GitHub address is "https://github.com/Protiguous".
+// For business inquiries, please contact me at Protiguous@Protiguous.com.
+// Our software can be found at "https://Protiguous.com/Software/"
+// Our GitHub address is "https://github.com/Protiguous".
 //
-// File "Folder.cs" last formatted on 2021-11-30 at 7:17 PM by Protiguous.
+// File "Folder.cs" last formatted on 2022-02-17 at 12:00 PM by Protiguous.
 
 namespace Librainian.FileSystem;
 
@@ -47,102 +50,142 @@ using OperatingSystem;
 using Parsing;
 using PooledAwait;
 using Pri.LongPath;
-using Utilities.Disposables;
-using static System.Environment;
 using Path = System.IO.Path;
 
 [DebuggerDisplay( "{" + nameof( ToString ) + "()}" )]
 [JsonObject]
 [Immutable]
 [Serializable]
-public class Folder : ABetterClassDispose, IFolder {
+public class Folder : IFolder {
 
 	private UInt16? _levelsDeep;
 
+	/// <summary>
+	///     String of invalid characters in a path or filename.
+	/// </summary>
+	private static String InvalidPathCharacters { get; } = new( Path.GetInvalidPathChars() );
+
+	private static Regex RegexForInvalidPathCharacters { get; } = new( $"[{Regex.Escape( InvalidPathCharacters )}]", RegexOptions.Compiled | RegexOptions.IgnoreCase );
+
+	/// <summary>
+	/// </summary>
 	/// <param name="fullPath"></param>
 	/// <exception cref="InvalidOperationException"></exception>
 	/// <exception cref="PathTooLongException"></exception>
-	/// <exception cref="FolderNotFoundException"></exception>
+	/// <exception cref="DirectoryNotFoundException"></exception>
 	/// <exception cref="FileNotFoundException"></exception>
-	public Folder( String fullPath ) : base( ( fullPath = CleanPath( fullPath ) ).ThrowIfBlank() ) {
+	public Folder( String? fullPath ) {
+		if ( String.IsNullOrWhiteSpace( fullPath = CleanPath( fullPath ) ) ) {
+			throw new NullException( nameof( fullPath ) );
+		}
+
+		/*
+        if ( !TryGetFolderFromPath( fullPath, out DirectoryInfo? directoryInfo, out var _ ) ) {
+            throw new InvalidOperationException( $"Unable to parse a valid path from `{fullPath}`" );
+        }
+        */
+
 		var directoryInfo = new DirectoryInfo( fullPath );
 
 		this.Info = directoryInfo ?? throw new InvalidOperationException( $"Unable to parse a valid path from `{fullPath}`" );
 	}
 
+	/// <summary>
+	/// </summary>
+	/// <param name="specialFolder"></param>
 	/// <exception cref="InvalidOperationException"></exception>
 	/// <exception cref="PathTooLongException"></exception>
-	/// <exception cref="FolderNotFoundException"></exception>
+	/// <exception cref="DirectoryNotFoundException"></exception>
 	/// <exception cref="FileNotFoundException"></exception>
-	public Folder( SpecialFolder specialFolder ) : this( GetFolderPath( specialFolder ) ) { }
+	public Folder( Environment.SpecialFolder specialFolder ) : this( Environment.GetFolderPath( specialFolder ) ) { }
 
+	/// <summary>
+	/// </summary>
+	/// <param name="specialFolder"></param>
+	/// <param name="subFolder"></param>
 	/// <exception cref="InvalidOperationException"></exception>
 	/// <exception cref="PathTooLongException"></exception>
-	/// <exception cref="FolderNotFoundException"></exception>
+	/// <exception cref="DirectoryNotFoundException"></exception>
 	/// <exception cref="FileNotFoundException"></exception>
-	public Folder( SpecialFolder specialFolder, String subFolder ) : this( GetFolderPath( specialFolder ).CombinePaths( subFolder ) ) { }
+	public Folder( Environment.SpecialFolder specialFolder, String subFolder ) : this( Environment.GetFolderPath( specialFolder ).CombinePaths( subFolder ) ) { }
 
+	/// <summary>
+	/// </summary>
+	/// <param name="specialFolder"></param>
+	/// <param name="applicationName"></param>
+	/// <param name="subFolder"></param>
 	/// <exception cref="InvalidOperationException"></exception>
 	/// <exception cref="PathTooLongException"></exception>
-	/// <exception cref="FolderNotFoundException"></exception>
+	/// <exception cref="DirectoryNotFoundException"></exception>
 	/// <exception cref="FileNotFoundException"></exception>
-	public Folder( SpecialFolder specialFolder, String? applicationName, String subFolder ) : this( GetFolderPath( specialFolder )
+	public Folder( Environment.SpecialFolder specialFolder, String? applicationName, String subFolder ) : this( Environment.GetFolderPath( specialFolder )
 		.CombinePaths( applicationName ?? AppDomain.CurrentDomain.FriendlyName, subFolder ) ) { }
 
 	/// <summary>
-	/// <para>Pass null to automatically fill in <paramref name="companyName" /> and <paramref name="applicationName" /> .</para>
+	///     <para>Pass null to automatically fill in <paramref name="companyName" /> and <paramref name="applicationName" /> .</para>
 	/// </summary>
-	/// <param name="specialFolder"></param>
-	/// <param name="companyName"></param>
+	/// <param name="specialFolder">  </param>
+	/// <param name="companyName">    </param>
 	/// <param name="applicationName"></param>
 	/// <param name="subFolders"></param>
 	/// <exception cref="InvalidOperationException"></exception>
 	/// <exception cref="PathTooLongException"></exception>
-	/// <exception cref="FolderNotFoundException"></exception>
+	/// <exception cref="DirectoryNotFoundException"></exception>
 	/// <exception cref="FileNotFoundException"></exception>
 	[DebuggerStepThrough]
-	public Folder( SpecialFolder specialFolder, String? companyName, String? applicationName, params String[] subFolders ) : this( GetFolderPath( specialFolder )
+	public Folder( Environment.SpecialFolder specialFolder, String? companyName, String? applicationName, params String[] subFolders ) : this( Environment
+		.GetFolderPath( specialFolder )
 		.CombinePaths( companyName ?? throw new InvalidOperationException( $"Empty {nameof( companyName )}." ),
 			applicationName ?? throw new InvalidOperationException( $"Empty {nameof( applicationName )}." ), subFolders.ToStrings( @"\" ) ) ) { }
 
 	[DebuggerStepThrough]
-	public Folder( SpecialFolder specialFolder, params String[] subFolders ) : this( GetFolderPath( specialFolder )
+	public Folder( Environment.SpecialFolder specialFolder, params String[] subFolders ) : this( Environment.GetFolderPath( specialFolder )
 																											.CombinePaths( subFolders
 																												.Select( fullpath => CleanPath( fullpath ) )
 																												.ToStrings( FolderSeparatorChar ) ) ) { }
 
+	/// <summary>
+	/// </summary>
+	/// <param name="fullPath"></param>
+	/// <param name="subFolder"></param>
 	/// <exception cref="InvalidOperationException"></exception>
 	/// <exception cref="PathTooLongException"></exception>
-	/// <exception cref="FolderNotFoundException"></exception>
+	/// <exception cref="DirectoryNotFoundException"></exception>
 	/// <exception cref="FileNotFoundException"></exception>
 	[DebuggerStepThrough]
 	public Folder( String fullPath, String subFolder ) : this( fullPath.CombinePaths( subFolder ) ) { }
 
+	/// <summary>
+	/// </summary>
+	/// <param name="folder"></param>
+	/// <param name="subFolder"></param>
 	/// <exception cref="InvalidOperationException"></exception>
 	/// <exception cref="PathTooLongException"></exception>
-	/// <exception cref="FolderNotFoundException"></exception>
+	/// <exception cref="DirectoryNotFoundException"></exception>
 	/// <exception cref="FileNotFoundException"></exception>
 	[DebuggerStepThrough]
 	public Folder( IFolder folder, String subFolder ) : this( folder.FullPath.CombinePaths( subFolder ) ) { }
 
+	/// <summary>
+	/// </summary>
+	/// <param name="documentFile"></param>
+	/// <param name="subFolder"></param>
 	/// <exception cref="InvalidOperationException"></exception>
 	/// <exception cref="PathTooLongException"></exception>
-	/// <exception cref="FolderNotFoundException"></exception>
+	/// <exception cref="DirectoryNotFoundException"></exception>
 	/// <exception cref="FileNotFoundException"></exception>
 	[DebuggerStepThrough]
-	public Folder( IDocument document, String subFolder ) : this( document.ContainingingFolder().FullPath.CombinePaths( subFolder ) ) { }
+	public Folder( IDocumentFile documentFile, String subFolder ) : this( documentFile.ContainingingFolder().FullPath.CombinePaths( subFolder ) ) { }
 
+	/// <summary>
+	/// </summary>
+	/// <param name="fileSystemInfo"></param>
 	/// <exception cref="InvalidOperationException"></exception>
 	/// <exception cref="PathTooLongException"></exception>
-	/// <exception cref="FolderNotFoundException"></exception>
+	/// <exception cref="DirectoryNotFoundException"></exception>
 	/// <exception cref="FileNotFoundException"></exception>
 	[DebuggerStepThrough]
 	public Folder( FileSystemInfo fileSystemInfo ) : this( fileSystemInfo.FullName ) { }
-
-	/// <summary>String of invalid characters in a path or filename.</summary>
-	private static String InvalidPathCharacters { get; } = new( Path.GetInvalidPathChars() );
-
-	private static Regex RegexForInvalidPathCharacters { get; } = new( $"[{Regex.Escape( InvalidPathCharacters )}]", RegexOptions.Compiled | RegexOptions.IgnoreCase );
 
 	//BUG Will the '\0' create a partially null-string?
 	/// <summary>"/"</summary>
@@ -150,9 +193,6 @@ public class Folder : ABetterClassDispose, IFolder {
 	public static String FolderAltSeparator { get; } = new( new[] {
 		Path.AltDirectorySeparatorChar
 	} );
-
-	[JsonIgnore]
-	public static Char FolderAltSeparatorChar { get; } = Path.AltDirectorySeparatorChar;
 
 	/// <summary>"\"</summary>
 	[JsonIgnore]
@@ -194,10 +234,10 @@ public class Folder : ABetterClassDispose, IFolder {
 	}
 
 	/// <summary>
-	/// Returns the path with any invalid characters replaced with <paramref name="replacement" /> and then <see
-	/// cref="String.Trim()" /> the result.
-	/// <para>Passing in a null string will return <see cref="String.Empty" /></para>
-	/// <para>Defaults to <see cref="String.Empty" /> /&gt;.</para>
+	///     Returns the path with any invalid characters replaced with <paramref name="replacement" /> and then
+	///     <see cref="String.Trim()" /> the result.
+	///     <para>Passing in a null string will return <see cref="String.Empty" /></para>
+	///     <para>Defaults to <see cref="String.Empty" /> />.</para>
 	/// </summary>
 	/// <param name="fullpath"></param>
 	/// <param name="replacement"></param>
@@ -209,11 +249,17 @@ public class Folder : ABetterClassDispose, IFolder {
 
 		var path = RegexForInvalidPathCharacters.Replace( fullpath, replacement ?? String.Empty ).Trim();
 
-		while ( path.EndsWith( FolderSeparatorChar ) || path.EndsWith( FolderAltSeparatorChar ) ) {
-			path = path.RemoveLastCharacter().TrimEnd();
+		CouldBeMore:
+		while ( path.EndsWith( FolderSeparator, StringComparison.OrdinalIgnoreCase ) ) {
+			path = path.RemoveLastCharacter();
 		}
 
-		return path.Trim() + FolderSeparatorChar;
+		if ( path.EndsWith( FolderAltSeparator, StringComparison.OrdinalIgnoreCase ) ) {
+			path = path.RemoveLastCharacter();
+			goto CouldBeMore;
+		}
+
+		return path.Trim();
 	}
 
 	///// <summary>
@@ -242,13 +288,15 @@ public class Folder : ABetterClassDispose, IFolder {
 	//public Folder( Environment.SpecialFolder specialFolder, String companyName, String applicationName, String subFolder ) : this( Path.Combine( Environment.GetFolderPath( specialFolder ), companyName ?? Application.CompanyName, applicationName ?? Application.ProductName ?? AppDomain.CurrentDomain.FriendlyName, subFolder ) ) {
 	//}
 	/// <summary>
-	/// <para>Static comparison of the folder names (case sensitive) for equality.</para>
-	/// <para>
-	/// To compare the path of two <see cref="IFolder" /> use <param name="left">todo: describe left parameter on
-	/// Equals</param><param name="right">todo: describe right parameter on Equals</param><seealso /> .
-	/// </para>
+	///     <para>Static comparison of the folder names (case sensitive) for equality.</para>
+	///     <para>
+	///         To compare the path of two <see cref="IFolder" /> use
+	///         <param name="left">todo: describe left parameter on Equals</param>
+	///         <param name="right">todo: describe right parameter on Equals</param>
+	///         <seealso /> .
+	///     </para>
 	/// </summary>
-	/// <param name="left"></param>
+	/// <param name="left"> </param>
 	/// <param name="right"></param>
 	public static Boolean Equals( IFolder? left, IFolder? right ) {
 		if ( ReferenceEquals( left, right ) ) {
@@ -263,23 +311,19 @@ public class Folder : ABetterClassDispose, IFolder {
 	}
 
 	/// <summary>Throws Exception if unable to obtain the Temp path.</summary>
-	/// <returns></returns>
-	/// <exception cref="InvalidOperationException"></exception>
-	/// <exception cref="PathTooLongException"></exception>
-	/// <exception cref="FolderNotFoundException"></exception>
-	/// <exception cref="FileNotFoundException"></exception>
-	/// <exception cref="SecurityException"></exception>
 	public static IFolder GetTempFolder() => new Folder( Path.GetTempPath() );
 
 	public static implicit operator DirectoryInfo( Folder folder ) => folder.Info;
 
 	/// <summary>Opens a folder in file explorer.</summary>
+	/// <param name="folder"></param>
+	/// <exception cref="ArgumentEmptyException"></exception>
 	public static void OpenWithExplorer( IFolder? folder ) {
 		if ( folder is null ) {
-			throw new NullException( nameof( folder ) );
+			throw new ArgumentEmptyException( nameof( folder ) );
 		}
 
-		var windowsFolder = GetFolderPath( SpecialFolder.Windows );
+		var windowsFolder = Environment.GetFolderPath( Environment.SpecialFolder.Windows );
 
 		Process.Start( $@"{windowsFolder}\explorer.exe", $"/e,\"{folder.FullPath}\"" );
 	}
@@ -308,7 +352,7 @@ public class Folder : ABetterClassDispose, IFolder {
 
 			return true;
 		}
-		catch ( NullException ) { }
+		catch ( ArgumentException ) { }
 		catch ( UriFormatException ) { }
 		catch ( SecurityException ) { }
 		catch ( PathTooLongException ) { }
@@ -345,7 +389,7 @@ public class Folder : ABetterClassDispose, IFolder {
 
 			return true;
 		}
-		catch ( NullException ) { }
+		catch ( ArgumentException ) { }
 		catch ( UriFormatException ) { }
 		catch ( SecurityException ) { }
 		catch ( PathTooLongException ) { }
@@ -355,8 +399,9 @@ public class Folder : ABetterClassDispose, IFolder {
 	}
 
 	/// <summary>
-	/// <para>Returns True if the folder exists.</para>
+	///     <para>Returns True if the folder exists.</para>
 	/// </summary>
+	/// <param name="cancellationToken"></param>
 	/// See also:
 	/// <see cref="Delete"></see>
 	public async PooledValueTask<Boolean> Create( CancellationToken cancellationToken ) {
@@ -366,13 +411,10 @@ public class Folder : ABetterClassDispose, IFolder {
 			}
 
 			try {
-				var infoParent = this.Info.Parent;
-				if ( infoParent != null ) {
-					var parent = new Folder( infoParent.FullName );
+				var parent = new Folder( this.Info.Parent.FullName );
 
-					if ( !await parent.Exists( cancellationToken ).ConfigureAwait( false ) ) {
-						await parent.Create( cancellationToken ).ConfigureAwait( false );
-					}
+				if ( !await parent.Exists( cancellationToken ).ConfigureAwait( false ) ) {
+					await parent.Create( cancellationToken ).ConfigureAwait( false );
 				}
 			}
 			catch ( Exception exception ) {
@@ -380,19 +422,22 @@ public class Folder : ABetterClassDispose, IFolder {
 			}
 
 			this.Info.Create();
-		}
-		catch ( IOException ) { }
 
-		return await this.Exists( cancellationToken ).ConfigureAwait( false );
+			return await this.Exists( cancellationToken ).ConfigureAwait( false );
+		}
+		catch ( IOException ) {
+			return false;
+		}
 	}
 
 	/// <summary>
-	/// <para>Returns True if the folder no longer exists.</para>
+	///     <para>Returns True if the folder no longer exists.</para>
 	/// </summary>
+	/// <param name="cancellationToken"></param>
 	/// <see cref="Create"></see>
 	public async PooledValueTask<Boolean> Delete( CancellationToken cancellationToken ) {
 		try {
-			if ( await this.IsFolderEmpty( cancellationToken ).ConfigureAwait( false ) ) {
+			if ( await this.IsEmpty( cancellationToken ).ConfigureAwait( false ) ) {
 				this.Info.Delete();
 			}
 
@@ -404,11 +449,11 @@ public class Folder : ABetterClassDispose, IFolder {
 	}
 
 	/// <summary>
-	/// <para>Returns an enumerable collection of <see cref="Document" /> in the current directory.</para>
+	///     <para>Returns an enumerable collection of <see cref="DocumentFile" /> in the current directory.</para>
 	/// </summary>
 	/// <param name="searchPattern"></param>
 	/// <param name="cancellationToken"></param>
-	public async IAsyncEnumerable<Document> EnumerateDocuments( String? searchPattern, [EnumeratorCancellation] CancellationToken cancellationToken ) {
+	public async IAsyncEnumerable<DocumentFile> EnumerateDocuments( String? searchPattern, [EnumeratorCancellation] CancellationToken cancellationToken ) {
 		searchPattern = searchPattern.NullIfEmptyOrWhiteSpace() ?? "*.*";
 
 		var searchPath = this.FullPath.CombinePaths( searchPattern );
@@ -432,7 +477,6 @@ public class Folder : ABetterClassDispose, IFolder {
 			}
 
 			if ( hFindFile?.IsInvalid != false ) {
-
 				//BUG or == true ?
 				break;
 			}
@@ -442,7 +486,7 @@ public class Folder : ABetterClassDispose, IFolder {
 			}
 
 			if ( findData.cFileName != null ) {
-				yield return new Document( this, findData.cFileName );
+				yield return new DocumentFile( this, findData.cFileName );
 			}
 
 			try {
@@ -454,21 +498,22 @@ public class Folder : ABetterClassDispose, IFolder {
 		} while ( more );
 	}
 
-	public async IAsyncEnumerable<Document> EnumerateDocuments( IEnumerable<String> searchPatterns, [EnumeratorCancellation] CancellationToken cancelToken ) {
+	public async IAsyncEnumerable<DocumentFile> EnumerateDocuments( IEnumerable<String> searchPatterns, [EnumeratorCancellation] CancellationToken cancellationToken ) {
 		foreach ( var searchPattern in searchPatterns ) {
-			await foreach ( var document in this.EnumerateDocuments( searchPattern, cancelToken ).ConfigureAwait( false ) ) {
+			await foreach ( var document in this.EnumerateDocuments( searchPattern, cancellationToken ).ConfigureAwait( false ) ) {
 				yield return document;
 			}
 		}
 	}
 
 	/// <summary>
-	/// No guarantee of return order. Also, because of the way the operating system works, a <see cref="Folder" /> can be
-	/// created or deleted after a search.
+	///     No guarantee of return order. Also, because of the way the operating system works, a <see cref="Folder" /> can
+	///     be created or deleted after a search.
 	/// </summary>
 	/// <param name="searchPattern"></param>
-	/// <param name="searchOption">Defaults to <see cref="SearchOption.AllDirectories" /></param>
+	/// <param name="searchOption"> Defaults to <see cref="SearchOption.AllDirectories" /></param>
 	/// <param name="cancellationToken"></param>
+	/// <exception cref="ArgumentOutOfRangeException"></exception>
 	public async IAsyncEnumerable<Folder> EnumerateFolders( String? searchPattern, SearchOption searchOption, [EnumeratorCancellation] CancellationToken cancellationToken ) {
 		searchPattern ??= "*";
 
@@ -493,27 +538,24 @@ public class Folder : ABetterClassDispose, IFolder {
 			}
 
 			if ( hFindFile?.IsInvalid != false ) {
-
 				//BUG or == true ?
 				break;
 			}
 
-			if ( findData.IsDirectory() && !findData.IsParentOrCurrent() && !findData.IsReparsePoint() && !findData.IsIgnoreFolder() ) {
-				if ( findData.cFileName != null ) {
+			if ( findData.IsDirectory() && !findData.IsParentOrCurrent() && !findData.IsReparsePoint() && !findData.IsIgnoreFolder() && ( findData.cFileName != null ) ) {
+				// Fix with @"\\?\" +System.IO.PathTooLongException?
+				if ( findData.cFileName.Length > PriNativeMethods.MAX_PATH ) {
+					$"Found subfolder with length longer than {PriNativeMethods.MAX_PATH}. Debug and see if it works.".Break( "poor man's debug" );
 
-					// Fix with @"\\?\" +System.IO.PathTooLongException?
-					if ( findData.cFileName.Length > PriNativeMethods.MAX_PATH ) {
-						$"Found subfolder with length longer than {PriNativeMethods.MAX_PATH}. Debug and see if it works.".Break( "poor man's debug" );
+					//continue; //BUG Needs unit tested for long paths.
+				}
 
-						//continue; //BUG Needs unit tested for long paths.
-					}
+				var subFolder = new Folder( this, findData.cFileName );
 
-					var subFolder = new Folder( this, findData.cFileName );
+				yield return subFolder;
 
-					yield return subFolder;
-
-					switch ( searchOption ) {
-						case SearchOption.AllDirectories: {
+				switch ( searchOption ) {
+					case SearchOption.AllDirectories: {
 							await foreach ( var info in subFolder.EnumerateFolders( searchPattern, searchOption, cancellationToken ).ConfigureAwait( false ) ) {
 								yield return info;
 							}
@@ -521,13 +563,12 @@ public class Folder : ABetterClassDispose, IFolder {
 							break;
 						}
 
-						case SearchOption.TopDirectoryOnly: {
+					case SearchOption.TopDirectoryOnly: {
 							break;
 						}
-						default: {
+					default: {
 							throw new ArgumentOutOfRangeException( nameof( searchOption ), searchOption, null );
 						}
-					}
 				}
 			}
 
@@ -543,6 +584,7 @@ public class Folder : ABetterClassDispose, IFolder {
 	public Boolean Equals( IFolder? other ) => Equals( this, other );
 
 	/// <summary>Returns true if the <see cref="IFolder" /> currently exists.</summary>
+	/// <param name="cancellationToken"></param>
 	/// <exception cref="IOException"></exception>
 	/// <exception cref="SecurityException"></exception>
 	/// <exception cref="PathTooLongException"></exception>
@@ -569,7 +611,9 @@ public class Folder : ABetterClassDispose, IFolder {
 
 	public Disk GetDrive() => new( this.Info.Root.FullName );
 
-	/// <summary>Synchronous version.</summary>
+	/// <summary>
+	///     Synchronous version.
+	/// </summary>
 	public Boolean GetExists() {
 		this.Info.Refresh();
 		return this.Info.Exists;
@@ -580,13 +624,16 @@ public class Folder : ABetterClassDispose, IFolder {
 	public IFolder GetParent() => new Folder( this.Info.Parent ?? throw new NullException( nameof( this.Info.Parent ) ) );
 
 	/// <summary>
-	/// <para>Check if this <see cref="Folder" /> contains any <see cref="Folder" /> or any <see cref="Document" /> .</para>
+	///     <para>Check if this <see cref="Folder" /> contains any <see cref="Folder" /> or any <see cref="DocumentFile" /> .</para>
 	/// </summary>
-	public async PooledValueTask<Boolean> IsFolderEmpty( CancellationToken cancellationToken ) =>
+	/// <param name="cancellationToken"></param>
+	public async PooledValueTask<Boolean> IsEmpty( CancellationToken cancellationToken ) =>
 		!await this.EnumerateFolders( "*.*", SearchOption.TopDirectoryOnly, cancellationToken ).AnyAsync( cancellationToken ).ConfigureAwait( false ) &&
 		!await this.EnumerateDocuments( "*.*", cancellationToken ).AnyAsync( cancellationToken ).ConfigureAwait( false );
 
-	/// <summary>Return how many [sub]folders are in this folder's path.</summary>
+	/// <summary>
+	///     Return how many [sub]folders are in this folder's path.
+	/// </summary>
 	public UInt16 LevelsDeep() {
 		this._levelsDeep ??= ( UInt16? )this.FullPath.Count( c => c == FolderSeparatorChar );
 
@@ -611,7 +658,7 @@ public class Folder : ABetterClassDispose, IFolder {
 	}
 
 	/// <summary>
-	/// <para>Shorten the full path with "..."</para>
+	///     <para>Shorten the full path with "..."</para>
 	/// </summary>
 	public String ToCompactFormat() {
 		var length = this.FullPath.Length;
@@ -622,7 +669,9 @@ public class Folder : ABetterClassDispose, IFolder {
 		return sb.ToString();
 	}
 
-	/// <summary><see cref="op_Implicit" /></summary>
+	/// <summary>
+	///     <see cref="op_Implicit" />
+	/// </summary>
 	public DirectoryInfo ToDirectoryInfo() => this;
 
 	/// <summary>Returns a String that represents the current object.</summary>

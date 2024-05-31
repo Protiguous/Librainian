@@ -1,30 +1,32 @@
 ﻿// Copyright © Protiguous. All Rights Reserved.
 //
-// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories,
-// or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
+// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries,
+// repositories, or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
 //
-// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten
-// by formatting. (We try to avoid it from happening, but it does accidentally happen.)
+// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has
+// been overwritten by formatting. (We try to avoid it from happening, but it does accidentally happen.)
 //
-// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to
-// those Authors. If you find your code unattributed in this source code, please let us know so we can properly attribute you
-// and include the proper license and/or copyright(s). If you want to use any of our code in a commercial project, you must
-// contact Protiguous@Protiguous.com for permission, license, and a quote.
+// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to those Authors.
+// If you find your code unattributed in this source code, please let us know so we can properly attribute you and include the proper licenses and/or copyrights.
+// If you want to use any of our code in a commercial project, you must contact Protiguous@Protiguous.com for permission, license, and a quote.
 //
 // Donations, payments, and royalties are accepted via bitcoin: 1Mad8TxTqxKnMiHuZxArFvX8BuFEB9nqX2 and PayPal: Protiguous@Protiguous.com
 //
 // ====================================================================
-// Disclaimer:  Usage of the source code or binaries is AS-IS. No warranties are expressed, implied, or given. We are NOT
-// responsible for Anything You Do With Our Code. We are NOT responsible for Anything You Do With Our Executables. We are NOT
-// responsible for Anything You Do With Your Computer. ====================================================================
+// Disclaimer:  Usage of the source code or binaries is AS-IS.
+// No warranties are expressed, implied, or given.
+// We are NOT responsible for Anything You Do With Our Code.
+// We are NOT responsible for Anything You Do With Our Executables.
+// We are NOT responsible for Anything You Do With Your Computer.
+// ====================================================================
 //
 // Contact us by email if you have any questions, helpful criticism, or if you would like to use our code in your project(s).
-// For business inquiries, please contact me at Protiguous@Protiguous.com. Our software can be found at
-// "https://Protiguous.com/Software/" Our GitHub address is "https://github.com/Protiguous".
+// For business inquiries, please contact me at Protiguous@Protiguous.com.
+// Our software can be found at "https://Protiguous.com/Software/"
+// Our GitHub address is "https://github.com/Protiguous".
 //
-// File "ABetterRecordDispose.cs" last formatted on 2021-11-30 at 7:23 PM by Protiguous.
+// File "ABetterRecordDispose.cs" last formatted on 2022-02-06 at 6:18 AM by Protiguous.
 
-#nullable enable
 
 namespace Librainian.Utilities.Disposables;
 
@@ -34,16 +36,17 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 
 /// <summary>
-/// <para>A record for easier implementation the proper <see cref="IDisposable" /> pattern.</para>
-/// <para>Implement overrides on <see cref="DisposeManaged" />, and <see cref="DisposeNative" /> as needed.</para>
-/// <code></code>
+///     <para>A record for easier implementation the proper <see cref="IDisposable" /> pattern.</para>
+///     <para>Implement overrides on <see cref="DisposeManaged" />, and <see cref="DisposeNative" /> as needed.</para>
+///     <code></code>
 /// </summary>
+/// <param name="DisposeHint"></param>
 /// <remarks>ABRD.</remarks>
 /// <remarks>This is purely experimental. I've just started learning records.</remarks>
 /// <copyright>
 ///     Created by Protiguous.
 /// </copyright>
-public abstract record ABetterRecordDispose : IABetterClassDispose {
+public abstract record ABetterRecordDispose( String? DisposeHint = null ) : IABetterClassDispose {
 	private Int32 _hasDisposedManaged;
 
 	private Int32 _hasDisposedNative;
@@ -102,10 +105,11 @@ public abstract record ABetterRecordDispose : IABetterClassDispose {
 	public Boolean IsDisposed => this.HasDisposedManaged && this.HasDisposedNative;
 
 	/// <summary>
-	/// <para>
-	/// Disposes of managed resources, then unmanaged resources, and then calls <see cref="GC.SuppressFinalize" /> for this object.
-	/// </para>
-	/// <para>Note: Calling <see cref="Dispose()" /> multiple times has no effect beyond the first call.</para>
+	///     <para>
+	///         Disposes of managed resources, then unmanaged resources, and then calls <see cref="GC.SuppressFinalize" /> for
+	///         this object.
+	///     </para>
+	///     <para>Note: Calling <see cref="Dispose()" /> multiple times has no effect beyond the first call.</para>
 	/// </summary>
 	[DebuggerStepThrough]
 	public void Dispose() {
@@ -147,19 +151,15 @@ public abstract record ABetterRecordDispose : IABetterClassDispose {
 	}
 
 	/// <summary>
-	/// Just calls <see cref="Dispose()" />. The parameter <paramref name="dispose" /> has no effect with this design.
+	///     Just calls <see cref="Dispose()" />. The parameter <paramref name="dispose" /> has no effect with this design.
 	/// </summary>
 	/// <param name="dispose"></param>
 	[DebuggerStepThrough]
-
-	// ReSharper disable once UnusedParameter.Global
-#pragma warning disable IDE0060 // Remove unused parameter
 	public void Dispose( Boolean dispose ) => this.Dispose();
-#pragma warning restore IDE0060 // Remove unused parameter
 
 	/// <summary>Override this method to dispose of any <see cref="IDisposable" /> managed fields or properties.</summary>
 	/// <example>
-	/// <code>using var bob = new DisposableType();</code>
+	///     <c>using var bob = new DisposableType();</c>
 	/// </example>
 	[DebuggerStepThrough]
 	public virtual void DisposeManaged() { }
@@ -170,22 +170,5 @@ public abstract record ABetterRecordDispose : IABetterClassDispose {
 		/*make this virtual so it is optional*/
 		this.HasDisposedNative = true;
 
-	~ABetterRecordDispose() {
-		this.Dispose();
-	}
-
-	/*
-
-    /// <summary>Set via <see cref="SetDisposeHint" /> to help find if an object has not been disposed of properly.</summary>
-    [CanBeNull]
-    private String? DisposeHint { get; set; }
-    */
-
-	/*
-
-    /// <summary>Call at any time to set a debugging hint as to the creator of this disposable.</summary>
-    /// <param name="hint"></param>
-    [Conditional( "DEBUG" )]
-    public void SetDisposeHint( [CanBeNull] String? hint ) => this.DisposeHint = hint;
-    */
+	~ABetterRecordDispose() => this.Dispose();
 }

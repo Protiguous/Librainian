@@ -1,28 +1,31 @@
 // Copyright © Protiguous. All Rights Reserved.
 //
-// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories,
-// or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
+// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries,
+// repositories, or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
 //
-// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten
-// by formatting. (We try to avoid it from happening, but it does accidentally happen.)
+// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has
+// been overwritten by formatting. (We try to avoid it from happening, but it does accidentally happen.)
 //
-// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to
-// those Authors. If you find your code unattributed in this source code, please let us know so we can properly attribute you
-// and include the proper license and/or copyright(s). If you want to use any of our code in a commercial project, you must
-// contact Protiguous@Protiguous.com for permission, license, and a quote.
+// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to those Authors.
+// If you find your code unattributed in this source code, please let us know so we can properly attribute you and include the proper licenses and/or copyrights.
+// If you want to use any of our code in a commercial project, you must contact Protiguous@Protiguous.com for permission, license, and a quote.
 //
 // Donations, payments, and royalties are accepted via bitcoin: 1Mad8TxTqxKnMiHuZxArFvX8BuFEB9nqX2 and PayPal: Protiguous@Protiguous.com
 //
 // ====================================================================
-// Disclaimer:  Usage of the source code or binaries is AS-IS. No warranties are expressed, implied, or given. We are NOT
-// responsible for Anything You Do With Our Code. We are NOT responsible for Anything You Do With Our Executables. We are NOT
-// responsible for Anything You Do With Your Computer. ====================================================================
+// Disclaimer:  Usage of the source code or binaries is AS-IS.
+// No warranties are expressed, implied, or given.
+// We are NOT responsible for Anything You Do With Our Code.
+// We are NOT responsible for Anything You Do With Our Executables.
+// We are NOT responsible for Anything You Do With Your Computer.
+// ====================================================================
 //
 // Contact us by email if you have any questions, helpful criticism, or if you would like to use our code in your project(s).
-// For business inquiries, please contact me at Protiguous@Protiguous.com. Our software can be found at
-// "https://Protiguous.com/Software/" Our GitHub address is "https://github.com/Protiguous".
+// For business inquiries, please contact me at Protiguous@Protiguous.com.
+// Our software can be found at "https://Protiguous.com/Software/"
+// Our GitHub address is "https://github.com/Protiguous".
 //
-// File "PronounceablePasswordCreator.cs" last formatted on 2021-11-30 at 7:22 PM by Protiguous.
+// File "PronounceablePasswordCreator.cs" last formatted on 2022-02-16 at 2:27 PM by Protiguous.
 
 namespace Librainian.Security;
 
@@ -43,10 +46,11 @@ using Parsing;
 // Richard Hazrrison : http://chateau-logic.com http://zaretto.com
 /// <summary>Random Password Generator, see http://www.multicians.org/thvv/gpw.html</summary>
 public static class PronounceablePasswordCreator {
+	public static String EnglishAlphabetLowercase => "abcdefghijklmnopqrstuvwxyz";
 
 	/// <summary>create a prounouncable word of the required length using third-order approximation.</summary>
 	/// <param name="requiredLength"></param>
-	public static String GeneratePassword( this Int32 requiredLength ) {
+	public static String Generate( Int32 requiredLength ) {
 		Int32 c1;
 		Int32 c2;
 		Int32 c3;
@@ -57,15 +61,13 @@ public static class PronounceablePasswordCreator {
 
 		var finished = false;
 
-		for ( c1 = 0; c1 < 26 && !finished; c1++ ) {
-			for ( c2 = 0; c2 < 26 && !finished; c2++ ) {
-				for ( c3 = 0; c3 < 26 && !finished; c3++ ) {
+		for ( c1 = 0; ( c1 < 26 ) && !finished; c1++ ) {
+			for ( c2 = 0; ( c2 < 26 ) && !finished; c2++ ) {
+				for ( c3 = 0; ( c3 < 26 ) && !finished; c3++ ) {
 					sum += GpwData.Get( c1, c2, c3 );
 
 					if ( sum > weightedRandom ) {
-						password.Append( ParsingConstants.English.Alphabet.Lowercase[ c1 ] );
-						password.Append( ParsingConstants.English.Alphabet.Lowercase[ c2 ] );
-						password.Append( ParsingConstants.English.Alphabet.Lowercase[ c3 ] );
+						password.Append( EnglishAlphabetLowercase[c1] ).Append( EnglishAlphabetLowercase[c2] ).Append( EnglishAlphabetLowercase[c3] );
 						finished = true;
 					}
 				}
@@ -73,11 +75,9 @@ public static class PronounceablePasswordCreator {
 		}
 
 		// Now do a random walk - starting at the 4th position as just done 3 above.
-		var nchar = 3;
-
-		while ( nchar < requiredLength ) {
-			c1 = ParsingConstants.English.Alphabet.Lowercase.IndexOf( password[ nchar - 2 ] );
-			c2 = ParsingConstants.English.Alphabet.Lowercase.IndexOf( password[ nchar - 1 ] );
+		for ( var nchar = 3; nchar < requiredLength; nchar++ ) {
+			c1 = EnglishAlphabetLowercase.IndexOf( password[nchar - 2] );
+			c2 = EnglishAlphabetLowercase.IndexOf( password[nchar - 1] );
 
 			sum = 0;
 
@@ -100,12 +100,10 @@ public static class PronounceablePasswordCreator {
 					continue;
 				}
 
-				password.Append( ParsingConstants.English.Alphabet.Lowercase[ c3 ] );
+				password.Append( EnglishAlphabetLowercase[c3] );
 
 				break;
 			}
-
-			nchar++;
 		}
 
 		return password.ToString();
@@ -115,17 +113,17 @@ public static class PronounceablePasswordCreator {
 	/// <param name="minLength"></param>
 	/// <param name="minWordLength"></param>
 	/// <param name="maxWordLength"></param>
-	public static String GeneratePasswordPhrase( Int32 minLength, Int32 minWordLength = 5, Int32 maxWordLength = 11 ) {
+	public static String GeneratePhrase( Int32 minLength, Int32 minWordLength = 5, Int32 maxWordLength = 11 ) {
 		var words = new List<String>();
 		var passwordLength = 0;
 
 		while ( passwordLength < minLength ) {
-			var length = ( maxWordLength - minWordLength + 1 ).Next() + minWordLength;
-			var word = length.GeneratePassword();
+			var length = ( ( maxWordLength - minWordLength ) + 1 ).Next() + minWordLength;
+			var word = Generate( length );
 			passwordLength += word.Length;
 			words.Add( word );
 		}
 
-		return String.Join( ParsingConstants.Chars.Space, words );
+		return String.Join( ParsingConstants.Spaces.Space, words.ToArray() );
 	}
 }

@@ -1,30 +1,32 @@
-// Copyright Â© Protiguous. All Rights Reserved.
+// Copyright © Protiguous. All Rights Reserved.
 //
-// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries, repositories,
-// or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
+// This entire copyright notice and license must be retained and must be kept visible in any binaries, libraries,
+// repositories, or source code (directly or derived) from our binaries, libraries, projects, solutions, or applications.
 //
-// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has been overwritten
-// by formatting. (We try to avoid it from happening, but it does accidentally happen.)
+// All source code belongs to Protiguous@Protiguous.com unless otherwise specified or the original license has
+// been overwritten by formatting. (We try to avoid it from happening, but it does accidentally happen.)
 //
-// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to
-// those Authors. If you find your code unattributed in this source code, please let us know so we can properly attribute you
-// and include the proper license and/or copyright(s). If you want to use any of our code in a commercial project, you must
-// contact Protiguous@Protiguous.com for permission, license, and a quote.
+// Any unmodified portions of source code gleaned from other sources still retain their original license and our thanks goes to those Authors.
+// If you find your code unattributed in this source code, please let us know so we can properly attribute you and include the proper licenses and/or copyrights.
+// If you want to use any of our code in a commercial project, you must contact Protiguous@Protiguous.com for permission, license, and a quote.
 //
 // Donations, payments, and royalties are accepted via bitcoin: 1Mad8TxTqxKnMiHuZxArFvX8BuFEB9nqX2 and PayPal: Protiguous@Protiguous.com
 //
 // ====================================================================
-// Disclaimer:  Usage of the source code or binaries is AS-IS. No warranties are expressed, implied, or given. We are NOT
-// responsible for Anything You Do With Our Code. We are NOT responsible for Anything You Do With Our Executables. We are NOT
-// responsible for Anything You Do With Your Computer. ====================================================================
+// Disclaimer:  Usage of the source code or binaries is AS-IS.
+// No warranties are expressed, implied, or given.
+// We are NOT responsible for Anything You Do With Our Code.
+// We are NOT responsible for Anything You Do With Our Executables.
+// We are NOT responsible for Anything You Do With Your Computer.
+// ====================================================================
 //
 // Contact us by email if you have any questions, helpful criticism, or if you would like to use our code in your project(s).
-// For business inquiries, please contact me at Protiguous@Protiguous.com. Our software can be found at
-// "https://Protiguous.com/Software/" Our GitHub address is "https://github.com/Protiguous".
+// For business inquiries, please contact me at Protiguous@Protiguous.com.
+// Our software can be found at "https://Protiguous.com/Software/"
+// Our GitHub address is "https://github.com/Protiguous".
 //
-// File "Section.cs" last formatted on 2021-11-30 at 7:22 PM by Protiguous.
+// File "Section.cs" last formatted on 2022-02-16 at 2:27 PM by Protiguous.
 
-#nullable enable
 
 namespace Librainian.Persistence.InIFiles;
 
@@ -37,18 +39,18 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Exceptions;
-using JetBrains.Annotations;
 using Logging;
 using Newtonsoft.Json;
 using Parsing;
+using Utilities;
 using DataType = System.Collections.Concurrent.ConcurrentDictionary<System.String, System.String?>;
 
 /// <summary>
-/// <para>
-/// This just wraps a <see cref="ConcurrentDictionary{TKey,TValue}" /> so we can index the <see cref="Data" /> without throwing
-/// exceptions on missing or null keys.
-/// </para>
-/// <para>Does not throw <see cref="NullException" /> on null keys passed to the indexer.</para>
+///     <para>
+///         This just wraps a <see cref="ConcurrentDictionary{TKey,TValue}" /> so we can index the <see cref="Data" />
+///         without throwing exceptions on missing or null keys.
+///     </para>
+///     <para>Does not throw <see cref="ArgumentEmptyException" /> on null keys passed to the indexer.</para>
 /// </summary>
 [DebuggerDisplay( "{" + nameof( ToString ) + "(),nq}" )]
 [JsonObject]
@@ -68,8 +70,8 @@ public class Section : IEquatable<Section> {
 	public IReadOnlyList<String> Values => ( IReadOnlyList<String> )this.Data.Values;
 
 	[JsonIgnore]
-	public String? this[ String? key ] {
-		[CanBeNull]
+	public String? this[String? key] {
+		[NeedsTesting]
 		get {
 			if ( key is null ) {
 				return default( String );
@@ -87,13 +89,13 @@ public class Section : IEquatable<Section> {
 				this.Data.TryRemove( key, out var _ ); //a little cleanup
 			}
 			else {
-				this.Data[ key ] = value;
+				this.Data[key] = value;
 			}
 		}
 	}
 
 	/// <summary>Static comparison. Checks references and then keys and then values.</summary>
-	/// <param name="left"></param>
+	/// <param name="left"> </param>
 	/// <param name="right"></param>
 	public static Boolean Equals( Section? left, Section? right ) {
 		if ( ReferenceEquals( left, right ) ) {
@@ -116,9 +118,9 @@ public class Section : IEquatable<Section> {
 	public static Boolean operator ==( Section? left, Section? right ) => Equals( left, right );
 
 	/// <summary>Remove any key where there is no value.</summary>
+	/// <param name="cancellationToken"></param>
 	public Task CleanupAsync( CancellationToken cancellationToken ) =>
 		Task.Run( () => {
-
 			//TODO Unit test this.
 			foreach ( var key in this.Keys ) {
 				if ( cancellationToken.IsCancellationRequested ) {
@@ -126,7 +128,7 @@ public class Section : IEquatable<Section> {
 				}
 
 				if ( this.Data.TryRemove( key, out var value ) && !String.IsNullOrEmpty( value ) ) {
-					this[ key ] = value; //whoops, re-add value. Cause: other threads.
+					this[key] = value; //whoops, re-add value. Cause: other threads.
 				}
 			}
 		}, cancellationToken );
@@ -139,18 +141,20 @@ public class Section : IEquatable<Section> {
 
 	/// <summary>Merges (adds keys and overwrites values) <see cref="Data" /> into <see cref="this" />.</summary>
 	/// <param name="reader"></param>
+	/// <param name="cancellationToken"></param>
+	/// <exception cref="ArgumentEmptyException"></exception>
 	public async Task<Boolean> ReadAsync( TextReader reader, CancellationToken cancellationToken ) {
 		if ( reader is null ) {
-			throw new NullException( nameof( reader ) );
+			throw new ArgumentEmptyException( nameof( reader ) );
 		}
 
 		try {
 			var that = await reader.ReadLineAsync().ConfigureAwait( false );
 
-			if ( that != null && JsonConvert.DeserializeObject( that, this.Data.GetType() ) is DataType other ) {
+			if ( ( that != null ) && JsonConvert.DeserializeObject( that, this.Data.GetType() ) is DataType other ) {
 				Parallel.ForEach( other.TakeWhile( _ => !cancellationToken.IsCancellationRequested ), pair => {
 					(var key, var value) = pair;
-					this[ key ] = value;
+					this[key] = value;
 				} );
 
 				return true;
@@ -169,9 +173,10 @@ public class Section : IEquatable<Section> {
 
 	/// <summary>Write this <see cref="Section" /> to the <paramref name="writer" />.</summary>
 	/// <param name="writer"></param>
+	/// <exception cref="ArgumentEmptyException"></exception>
 	public Task Write( TextWriter writer ) {
 		if ( writer is null ) {
-			throw new NullException( nameof( writer ) );
+			throw new ArgumentEmptyException( nameof( writer ) );
 		}
 
 		try {
